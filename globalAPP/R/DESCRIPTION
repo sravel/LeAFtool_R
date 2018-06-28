@@ -1,0 +1,14 @@
+Package: countLesionTools
+Type: Package
+Title: Count Lesion Tools: Tools for analysis and count lesion on images
+Version: 1.0.0
+Author: Sebastien RAVEL
+Maintainer: Sebastien RAVEL <sebastien.ravel@cirad.fr>
+Description: Main interface of Count Lesion Tools.
+Depends: R (>= 3.4.0), shiny, shinydashboard, shinyBS
+Imports: Biobase, DT, shinyFiles, MASS
+License: GPL-3
+Encoding: UTF-8
+RoxygenNote: 6.0.1
+LazyData: true
+biocViews: Software
