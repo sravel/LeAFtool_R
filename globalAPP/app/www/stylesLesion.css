@@ -40,6 +40,12 @@
 	font-family: "Times New Roman", Times, serif;
 }
 
+.infoDiv {
+	text-align: left;
+	font-size: medium;
+	font-family: "Times New Roman", Times, serif;
+}
+
 .home {
 	text-align: justify;
 	font-size: medium;
@@ -73,13 +79,17 @@
 }
 
 #loading-content {
-position: absolute;
-background: #000000;
-opacity: 0.9;
-z-index: 100;
-left: 0;
-right: 0;
-height: 100%;
-text-align: center;
-color: #FFFFFF;
+	position: absolute;
+	background: #000000;
+	opacity: 0.9;
+	z-index: 100;
+	left: 0;
+	right: 0;
+	height: 100%;
+	text-align: center;
+	color: #FFFFFF;
+}
+
+.spaceRow {
+	margin-bottom: 15px;
 }

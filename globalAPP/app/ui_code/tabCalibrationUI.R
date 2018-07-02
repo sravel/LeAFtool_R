@@ -30,7 +30,7 @@ tabItem(
   tabName = "tabCalibration",
   fluidRow(
     box(
-      title = "Calibration Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
+      title = "Calibration Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 6,
       column(4,
              tags$div(class = "calibrationTXT", "Calibration input directory must include sub-folders:",  tags$br(),
                       tags$ul(
@@ -41,13 +41,16 @@ tabItem(
              )
       ),
       column(8,
-             shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-info"),
-             bsPopover(id = "dirCalibration", "Select Input folder", "the input folder must have sub-folders", trigger="hover", options = NULL),
-#             conditionalPanel(
-#               condition = "output.codeAna == 0", br(),
-               verbatimTextOutput("dirCalibration", placeholder = FALSE),
-               actionButton("runButton", "run calibration!")
-#             )
+        fluidRow( class = "spaceRow",
+             shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "dirCalibration")
+#                      bsPopover(id = "dirCalibration", "Select Input folder", "the input folder must have sub-folders", trigger="hover", options = NULL),
+        ),
+        fluidRow(
+               verbatimTextOutput("dirCalibration", placeholder = FALSE)
+        )
       )
     )
   ),
@@ -56,31 +59,36 @@ tabItem(
       condition = "output.codeAna == 0",br(),
       box(
         title = "ERROR", status = "danger",solidHeader = TRUE,
-        uiOutput("err"),
-        verbatimTextOutput("codeAna")
+        uiOutput("err")
       )
     )
   ),
   fluidRow(
-#    conditionalPanel(
-#      condition = "output.codeAna == 1",
+    conditionalPanel(
+      condition = "output.codeAna == 1",
       box(
         title = "Calibration output", status = "success",solidHeader = TRUE, width = 12,
 
-        fluidRow(
-          column(4,
+        fluidRow( class = "spaceRow",
+          column(8,
+                tags$div(class = "infoDiv", "File Rdata build and mandatory for analysis images:",
                  verbatimTextOutput("mess",placeholder = FALSE)
+                )
           )
         ),
-        fluidRow(
+        fluidRow( class = "spaceRow",
           column(4,
+            tags$div(class = "infoDiv","ACP build with pixel calibration:",
                  plotOutput("img")
+            )
           ),
           column(8,
+            tags$div(class = "infoDiv","Table ...?:",
                  tableOutput("table")
+            )
           )
         )
       )
-#    )
+    )
   )
 )

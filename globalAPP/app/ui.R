@@ -51,6 +51,18 @@ library(shinyBS)
 library(DT)
 library(shinyjs)
 library(shinyFeedback)
+library(shinyhelper)
+library(colourpicker)
+
+# calibration
+library(EBImage)
+library(lattice)
+library(MASS)
+
+# analysis
+library(foreach)
+library(future)
+library(doSNOW)
 
 set_wd <- function() {
   library(rstudioapi) # make sure you have it installed
@@ -66,12 +78,12 @@ unlink(logfilename)
 cat(as.character(Sys.time()), '\n', file = logfilename,
     append = TRUE)
 
-#Load functions scripts
-for(file in list.files(paste(currentFilePath,"R_code",sep = .Platform$file.sep),
-                       pattern="\\.(r|R)$",
-                       full.names = TRUE)) {
-  source(file)
-}
+##Load functions scripts
+#for(file in list.files(paste(currentFilePath,"R_code",sep = .Platform$file.sep),
+#                       pattern="\\.(r|R)$",
+#                       full.names = TRUE)) {
+#  source(file)
+#}
 
 ############################################
 ## Shiny dashboard start
@@ -93,7 +105,7 @@ sidebar <- dashboardSidebar(
 
 # Boby page
 body <- dashboardBody(
-  includeCSS('www/styles.css'),
+  includeCSS('www/stylesLesion.css'),
   useShinyjs(),
   useShinyFeedback(),
 

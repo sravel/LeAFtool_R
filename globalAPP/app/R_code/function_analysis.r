@@ -28,9 +28,9 @@
 ## packages nécessaires
 library(EBImage)
 library(MASS)
-library(parallel)
+#library(parallel)
 library(foreach)
-# library(doParallel)
+
 library(future)
 
 library(doSNOW)

@@ -33,12 +33,42 @@
 ## Global functions
 ############################################
 
-rv <<- reactiveValues(exitStatusCal=-1, messCal = "NULL", errCal = "NULL",
-                      exitStatusAna=-1, messAna = "NULL", errAna = "NULL")
+# Calculate the number of cores
+# no_cores <- max(1, detectCores() - 1)
+no_cores <- 8
+
+rv <<- reactiveValues(
+                        # for calibration
+                        exitStatusCal = -1, messCal = NULL, errCal = NULL,
+                        dirCalibration = NULL, outCalibrationTable = NULL,
+                        outCalibrationCSV = NULL, plotFileCalibration = NULL,
+                        # for analysis
+                        fileRData = "/media/sebastien/Bayer/00_exemples/exemple1/learning/learning.RData",
+                        dirSamples = "/media/sebastien/Bayer/00_exemples/exemple1/samples/",
+                        dirSamplesOut = "/media/sebastien/Bayer/00_exemples/exemple1/results/",
+
+
+                        exitStatusAna = 1, messAna = NULL, errAna = NULL,
+#                        dirSamples = NULL, dirSamplesOut = NULL,
+                        codeValidationInt = 1,
+                        rmScanLine = FALSE,
+
+                        leaf_min_size = 1000,
+                        leaf_border_size = 3,
+                        lesion_min_size = 10,
+                        lesion_max_size = 1000000,
+                        lesion_border_size = 3,
+                        lesion_color_boundaries = "red",
+                        lesion_color_bodies = "red",
+
+
+                        # both
+#                        fileRData= NULL,
+                        no_cores = no_cores
+                        )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS
-getOwnVolume <- function (exclude=NULL)
-{
+getOwnVolume <- function (exclude=NULL){
   osSystem <- Sys.info()["sysname"]
   if (osSystem == "Darwin") {
     # disk <- list.files("/Volumes/", full.names = T)
@@ -80,8 +110,6 @@ getOwnVolume <- function (exclude=NULL)
 # list of volumes acces to load data
 allVolumesAvail <<- getOwnVolume()
 
-listFilesRun <- c()
-
 # function to test if directory pass contain sub-directory limb, background lesion
 existDirCalibration <- function(dirCalibration){
   list(
@@ -90,11 +118,15 @@ existDirCalibration <- function(dirCalibration){
     dirLesion = file.exists(paste(dirCalibration,"/lesion", sep = .Platform$file.sep))
   )
 }
+
+
 ############################################
 ## writing server function
 ############################################
 
 shinyServer(function(input, output, session) {
+
+  observe_helpers()
 
   fileReaderData <- reactiveFileReader(500, session,
                                        logfilename, readLines)

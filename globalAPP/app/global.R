@@ -29,8 +29,12 @@
 
 
 fileRdata = "/media/sebastien/JJC2018/test_visilog/calibration/calibration.RData"
-pathResult = "/media/sebastien/JJC2018/test_visilog/result"
-pathImages = "//media/sebastien/JJC2018/test_visilog/sample"
+rdirSamples = "/media/sebastien/JJC2018/test_visilog/result"
+dirSamplesOut = "//media/sebastien/JJC2018/test_visilog/sample"
+
+fileRdata = "/media/sebastien/Bayer/00_exemples/exemple1/learning/learning.RData"
+dirSamples = "/media/sebastien/Bayer/00_exemples/exemple1/results"
+dirSamplesOut = "/media/sebastien/Bayer/00_exemples/exemple1/samples"
 
 fileRdata = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData"
 pathResult = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result"
@@ -45,8 +49,9 @@ colorLesion = 0
 rm(list = ls())
 gc()
 
+
+
 runCountLesion <- function(port=NULL) {
   if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)
   runApp(appDir = getwd(),launch.browser = TRUE)
 }
-

@@ -31,45 +31,51 @@ tabItem(
   fluidRow(
     box(
       title = "Analysis Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
-      column(width = 4,
-             fluidRow(
-               shinyDirButton(id = 'dirIn', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-info"),
-               conditionalPanel(
-                 condition = "input.dirIn", br(),
-                 verbatimTextOutput("dirInAnalysis", placeholder = TRUE)
-               )
-             ),
-             fluidRow(
-               shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-info"),
-               conditionalPanel(
-                 condition = "input.dirOut", br(),
-                 verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
-               )
-             ),
-             fluidRow(
-               shinyFilesButton('files', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-info"),
-               verbatimTextOutput('fileRdata', placeholder = FALSE),
+      column(width = 5,
+             fluidRow( class = "spaceRow",
+               shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-info"),
+               verbatimTextOutput("dirSamples", placeholder = TRUE)
 
-               conditionalPanel(
-                 condition = "input.dirIn && output.fileRdata && output.codeValidationInt == 1", br(),
-                 actionButton("runButtonAnalysis", "run Analysis!")
-               )
+             ),
+             fluidRow( class = "spaceRow",
+               shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-info"),
+               verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
+             ),
+             fluidRow( class = "spaceRow",
+               shinyFilesButton('files', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-info"),
+               verbatimTextOutput('fileRData', placeholder = TRUE),
+
+#               conditionalPanel(
+#                 condition = "input.dirSamples && input.dirOut && input.fileRData && output.codeValidationInt == 1", br(),
+                 actionButton("runButtonAnalysis", "Run Analysis!")
+#               )
              )
       ),
-      column(width = 4,
+      column(width = 2,
              h4("Leaf parameters:"),
-             numericInput("leaf_min_size", "Leaf min size:", value = 1000, width = "150px"),
-             numericInput("leaf_border_size", "Leaf border size:", value = 3, width = "150px")
+             numericInput("leaf_min_size", "Leaf min size:", value = 1000, min=1,  width = "150px"),
+             numericInput("leaf_border_size", "Leaf border size:", value = 3, min=1, width = "150px")
              # verbatimTextOutput("value")
 
       ),
-      column(width = 4,
+      column(width = 2,offset = 0,
              h4("Lesion parameters:"),
-             numericInput("lesion_min_size", "Lesion min size:", value = 10, width = "150px"),
-             numericInput("lesion_border_size", "Lesion border size:", value = 3, width = "150px"),
-             selectInput("lesion_color", label = p("Lesion color output"),
-                         choices = list("Black" = 0, "White" = 1),
-                         selected = 0, width = "150px")
+             numericInput("lesion_min_size", "Lesion min size:", value = 10, min=1, width = "150px"),
+             numericInput("lesion_max_size", "Lesion max size:", value = 1000, min=1000, width = "150px"),
+             numericInput("lesion_border_size", "Lesion border size:", value = 3, min=1, width = "150px"),
+#             selectInput("lesion_color_boundaries", label = p("Lesions color boundaries"),
+#                         choices = colors(),
+#                         selected = 0, width = "100px"),
+#             selectInput("lesion_color_bodies", label = p("Lesions color bodies"),
+#                         choices = colors(),
+#                         selected = 0, width = "100px"),
+            colourInput("lesion_color_boundaries",  label = p("Lesions color boundaries"), value = "green",
+                        palette = "limited", allowedCols = NULL,
+                        allowTransparent = FALSE, returnName = TRUE),
+
+            colourInput("lesion_color_bodies",  label = p("Lesions color bodies"), value = "red",
+                        palette = "limited", allowedCols = NULL,
+                        allowTransparent = FALSE, returnName = TRUE)
       )
     )
   ),
@@ -88,7 +94,7 @@ tabItem(
       box(
         title = "Analysis output", status = "success",solidHeader = TRUE, width = 12,
         verbatimTextOutput("analysisFinish",placeholder = FALSE),
-        DT::dataTableOutput("table2")
+        DT::dataTableOutput("contents")
       )
     )
   )
