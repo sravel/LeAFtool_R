@@ -27,7 +27,7 @@
 
 # list of packages required
 list.of.packages <- c("shiny","shinythemes","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
-                      "parallel","foreach","doParallel","future")
+                      "parallel","foreach","future","shinyFeedback","colourpicker","shinyhelper")
 
 
 #checking missing packages from list
@@ -62,6 +62,7 @@ library(MASS)
 # analysis
 library(foreach)
 library(future)
+library(parallel)
 library(doSNOW)
 
 set_wd <- function() {

@@ -76,6 +76,14 @@ tabItem(
             colourInput("lesion_color_bodies",  label = p("Lesions color bodies"), value = "red",
                         palette = "limited", allowedCols = NULL,
                         allowTransparent = FALSE, returnName = TRUE)
+      ),
+      column(width = 2, offset = 0,
+             h4("Running Mode"),
+             checkboxInput("parallelMode", "Active Parallel mode", value = FALSE, width = "150px"),
+             conditionalPanel(
+               condition = "input.parallelMode",
+               numericInput("parallelThreadsNum","Number of Threads", value = 8, min = 1, max = 10, width = "150px")
+             )
       )
     )
   ),
@@ -93,7 +101,7 @@ tabItem(
       condition = "output.analysisFinish==1",
       box(
         title = "Analysis output", status = "success",solidHeader = TRUE, width = 12,
-        verbatimTextOutput("analysisFinish",placeholder = FALSE),
+        #verbatimTextOutput("analysisFinish",placeholder = FALSE),
         DT::dataTableOutput("contents")
       )
     )

@@ -447,29 +447,29 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   progress <- shiny::Progress$new()
   on.exit(progress$close())
   progress$set(message = 'Making Analysis, please wait\n', value = 0)
-  progress$inc(c/nbfiles, detail = paste("start parallel analysis with ", rv$no_cores, " cores"))
-
-#  updateProgress <- function(c) progress$inc(c/nbfiles, detail = paste("Image", c))
 
 
+  if (rv$parallelMode == TRUE){
+    print("parelelMode")
 #  # Start parallel session
-#  plan(multiprocess, .cleanup = TRUE)
-#  cl <- makeCluster(no_cores, outfile = logfilename)
-#  registerDoSNOW(cl)
-#  clusterExport(cl, c("nbfiles")) # Export max number of iteration to workers
+  progress$inc(c/nbfiles, detail = paste("start parallel analysis with ", rv$parallelThreadsNum, " cores"))
+  plan(multiprocess, .cleanup = TRUE)
+  cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename)
+  registerDoSNOW(cl)
+  #clusterExport(cl, c("nbfiles")) # Export max number of iteration to workers
+  updateProgress <- function(c) progress$inc(c/nbfiles, detail = paste("Image", c))
+  opts <- list(progress=updateProgress)
 
-#  opts <- list(progress=updateProgress)
-
-#  foreach(imageFile = listFiles,
-#          .options.snow=opts,
-#          .combine = c)  %dopar%
-#          {
-#            tryCatch({
-#              # incProgress(c / nbfiles, detail = paste("analysis leaf ", c, "/", nbfiles))
-#              analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageFile)
-#              gc()
-#            }, error = function(e){return(paste0("The file '", imageFile, "'"," caused the error: '", e, "'"))},
-#            warning = function(e){return(paste0("The file '", imageFile, "'"," caused warning: '", e, "'"))}
+  foreach(imageFile = listFiles,
+          .options.snow=opts,
+          .combine = c)  %dopar%
+          {
+            tryCatch({
+              # incProgress(c / nbfiles, detail = paste("analysis leaf ", c, "/", nbfiles))
+              analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageFile)
+              print(imageFile)
+            }, error = function(e){return(paste0("The file '", imageFile, "'"," caused the error: '", e, "'"))},
+            warning = function(e){return(paste0("The file '", imageFile, "'"," caused warning: '", e, "'"))}
 #            # finally = {
 #            # print(image)
 #            # addLog(image)
@@ -477,21 +477,21 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 #            # stopCluster(cl)
 #            # registerDoSEQ()
 #            # }
-#            )
-
-#          }
+            )
+          }
 #  # Close cluster mode
-#  stopCluster(cl)
-#  closeAllConnections();
-#  registerDoSEQ()
-
-  # if not cluster mode do sample by sample on one core
-   for (imageFile in listFiles){
+  stopCluster(cl)
+  closeAllConnections();
+  registerDoSEQ()
+  }else{
+    # if not cluster mode do sample by sample on one core
+    progress$inc(c/nbfiles, detail = paste("start one sample analysis with 1 cores"))
+    for (imageFile in listFiles){
       progress$inc(c / nbfiles, detail = paste("analysis leaf ", c, "/", nbfiles))
-     analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageFile)
-     c <- c + 1
-#     break
-   }
+      analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageFile)
+      c <- c + 1
+    }
+  }
 
   tmpCmd  <- paste0("awk '{if($1 == \"fichier\"){} else{ print $0}}'  ", rv$dirSamplesOut, "/*_2.txt | sort -k1 |sort -k1,1 -k2n,2n > ",rv$dirSamplesOut,"/merge_output_2.txt")
   returnvalue  <- system(tmpCmd, intern = TRUE)
@@ -522,6 +522,8 @@ output$contents <- DT::renderDataTable({
 #  # resultAnalysis()
 #   rv$dirSamples <- "~/Bayer/AnalyseImagesV4/Exemple1/Images/"
 #   rv$dirSamplesOut <- "~/Bayer/AnalyseImagesV4/Exemple1/"
+  addResourcePath("Original",rv$dirSamples) # Images are located outside shiny App
+  addResourcePath("LesionColor",rv$dirSamplesOut) # Images are located outside shiny App
 
   LeafNames <- list.files(rv$dirSamples, full.names=FALSE)
   LeafNames2 <- list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg")
@@ -538,7 +540,7 @@ output$contents <- DT::renderDataTable({
                                  options = list(
                                    paging=TRUE,searching = TRUE,ordering=TRUE,scrollY = 750,scrollCollapse=TRUE,server = FALSE
                                  ))
-  return(rv$displayableData)
+  ifelse(!is.null(rv$displayableData),return(rv$displayableData),return(NULL))
 
 })
 
@@ -548,7 +550,8 @@ output$plotcurrentImage <- renderPlot({
   nx <- dim(rv$plotcurrentImage)[1]
   ny <- dim(rv$plotcurrentImage)[2]
   plot(rv$plotcurrentImage)
-  color <- if (rv$loadCSVcurrentImage$keepLesion == "keep") "green" else "red"
+
+  color <- ifelse(rv$loadCSVcurrentImage$keepLesion == "keep", "green", "red")
   points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=2, col=color)
 })
 
@@ -562,9 +565,9 @@ currentImage <- reactive({
     #Load image for plot
     lesionImg <- strsplit(rv$responseDataFilter2[imIndex,"LeafNames"], ".", fixed = TRUE)[[1]][1]
     rv$plotcurrentImage <- readImage(paste0(rv$dirSamplesOut,lesionImg,"_lesion.jpeg"))
-    rv$loadCSVcurrentImage <- read.csv(paste0(rv$dirSamplesOut,lesionImg,"_All_lesions.csv"))
+    rv$loadCSVcurrentImage <- read.csv(paste0(rv$dirSamplesOut,lesionImg,"_All_lesions.csv"),header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
-
+    print(rv$loadCSVcurrentImage$keepLesion)
 
     rv$responseDataFilter2[imIndex,"LeafNames"]
 
@@ -581,7 +584,7 @@ observeEvent(input$contents_rows_selected,{
       easyClose = TRUE,
       fade = FALSE,
       actionButton("actionPrevious", "", icon = icon("backward"), width = "50px"),
-        img(src= paste0("Original/",currentImage()),width='44%',height='44%'),
+        #img(src= paste0("Original/",currentImage()),width='44%',height='44%'),
         imageOutput("plotcurrentImage",click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"),
 #        img(src= paste0("LesionColor/",lesionImg,"_lesion.jpeg"),width='44%',height='44%'),
       actionButton("actionNext", "", icon = icon("forward"), width = "50px")
@@ -589,30 +592,42 @@ observeEvent(input$contents_rows_selected,{
   )
 })
 
-  observeEvent(input$actionNext,{
-    rowSelected <- input$contents_rows_selected
-    nbImage <- nrow(rv$responseDataFilter2)
-    if(!is.null(rowSelected) && rowSelected < nbImage)
-      newRow <- rowSelected + 1
-    else newRow <- 1
+observeEvent(input$actionNext,{
+  rowSelected <- input$contents_rows_selected
+  nbImage <- nrow(rv$responseDataFilter2)
+  if(!is.null(rowSelected) && rowSelected < nbImage)
+    newRow <- rowSelected + 1
+  else newRow <- 1
 
-    dataTableProxy("contents") %>%
-      selectRows(newRow)
-  })
+  dataTableProxy("contents") %>%
+    selectRows(newRow)
+})
 
-  observeEvent(input$actionPrevious,{
-    rowSelected <- input$contents_rows_selected
-    nbImage <- nrow(rv$responseDataFilter2)
-    if (!is.null(rowSelected) && rowSelected == 1){
-      newRow <- nbImage
-    }
-    else if(!is.null(rowSelected)){
-      newRow <- rowSelected - 1
-    }
-    dataTableProxy("contents") %>%
-      selectRows(newRow)
-  })
+observeEvent(input$actionPrevious,{
+  rowSelected <- input$contents_rows_selected
+  nbImage <- nrow(rv$responseDataFilter2)
+  if (!is.null(rowSelected) && rowSelected == 1){
+    newRow <- nbImage
+  }
+  else if(!is.null(rowSelected)){
+    newRow <- rowSelected - 1
+  }
+  dataTableProxy("contents") %>%
+  selectRows(newRow)
+})
+
+######### parallel mode
+observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
+  no_cores <- max(1, detectCores() - 2)
+  updateNumericInput(session,"parallelThreadsNum", max = no_cores)
+  rv$parallelMode <- input$parallelMode
+  rv$parallelThreadsNum <- input$parallelThreadsNum
+})
+
 
 outputOptions(output, 'codeValidationInt', suspendWhenHidden = FALSE)
 outputOptions(output, 'analysisFinish', suspendWhenHidden = FALSE)
 outputOptions(output, 'warning', suspendWhenHidden = FALSE)
+outputOptions(output, 'contents', suspendWhenHidden = FALSE)
+
+

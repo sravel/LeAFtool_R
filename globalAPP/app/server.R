@@ -33,19 +33,15 @@
 ## Global functions
 ############################################
 
-# Calculate the number of cores
-# no_cores <- max(1, detectCores() - 1)
-no_cores <- 8
-
 rv <<- reactiveValues(
                         # for calibration
                         exitStatusCal = -1, messCal = NULL, errCal = NULL,
                         dirCalibration = NULL, outCalibrationTable = NULL,
                         outCalibrationCSV = NULL, plotFileCalibration = NULL,
                         # for analysis
-                        fileRData = "/media/sebastien/Bayer/00_exemples/exemple1/learning/learning.RData",
-                        dirSamples = "/media/sebastien/Bayer/00_exemples/exemple1/samples/",
-                        dirSamplesOut = "/media/sebastien/Bayer/00_exemples/exemple1/results/",
+                        fileRData = "/Users/054-h163/Documents/images/exemples/exemple1/learning/learning.RData",
+                        dirSamples = "/Users/054-h163/Documents/images/exemples/exemple1/samples/",
+                        dirSamplesOut = "/Users/054-h163/Documents/images/exemples/exemple1/results/",
 
 
                         exitStatusAna = 1, messAna = NULL, errAna = NULL,
@@ -64,7 +60,9 @@ rv <<- reactiveValues(
 
                         # both
 #                        fileRData= NULL,
-                        no_cores = no_cores
+                        parallelMode = FALSE,
+                        parallelThreadsNum = 8,
+                        parallelMode = FALSE
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS
