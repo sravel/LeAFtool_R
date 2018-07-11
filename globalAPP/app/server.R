@@ -39,30 +39,36 @@ rv <<- reactiveValues(
                         dirCalibration = NULL, outCalibrationTable = NULL,
                         outCalibrationCSV = NULL, plotFileCalibration = NULL,
                         # for analysis
-                        fileRData = "/Users/054-h163/Documents/images/exemples/exemple1/learning/learning.RData",
-                        dirSamples = "/Users/054-h163/Documents/images/exemples/exemple1/samples/",
-                        dirSamplesOut = "/Users/054-h163/Documents/images/exemples/exemple1/results/",
+#                        fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
+#                        dirSamples = paste0(currentFilePath,"/../../exemples/musa/samples/"),
+#                        dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/results/"),
+                        fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
+                        dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
+                        dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
+#                        fileRData = NULL,
+#                        dirSamples = NULL,
+#                        dirSamplesOut = NULL,
 
 
-                        exitStatusAna = 1, messAna = NULL, errAna = NULL,
+                        exitStatusAna = -1, messAna = NULL, errAna = NULL,
 #                        dirSamples = NULL, dirSamplesOut = NULL,
                         codeValidationInt = 1,
                         rmScanLine = FALSE,
 
-                        leaf_min_size = 1000,
+                        leaf_min_size = 10,
                         leaf_border_size = 3,
                         lesion_min_size = 10,
                         lesion_max_size = 1000000,
                         lesion_border_size = 3,
-                        lesion_color_boundaries = "red",
+                        lesion_color_border = "green",
                         lesion_color_bodies = "red",
+                        rmEdge = FALSE,
 
 
                         # both
 #                        fileRData= NULL,
                         parallelMode = FALSE,
-                        parallelThreadsNum = 8,
-                        parallelMode = FALSE
+                        parallelThreadsNum = 8
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS
@@ -106,7 +112,7 @@ getOwnVolume <- function (exclude=NULL){
 }
 
 # list of volumes acces to load data
-allVolumesAvail <<- getOwnVolume()
+allVolumesAvail <- getOwnVolume()
 
 # function to test if directory pass contain sub-directory limb, background lesion
 existDirCalibration <- function(dirCalibration){

@@ -1,0 +1,2 @@
+fichier	leaf	surfaceLeaf	nbLesions	surfaceLesions	pourcent.lesions
+00-border	1	302500	10	1991	0.658181818181818

@@ -4,15 +4,22 @@ library(MASS)
 
 
 
-pathData <- "/Users/054-h163/Documents/images/exemples/musa/sample"
-fileRdata = "/Users/054-h163/Documents/images/exemples/musa/calibration.RData"
+# pathData <- "/Users/054-h163/Documents/images/exemples/musa/sample"
+# fileRdata = "/Users/054-h163/Documents/images/exemples/musa/calibration.RData"
+
+# fileRdata = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData"
+# pathData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/"
+
+pathData <- "/media/sebastien/Bayer/ScriptsSEB/images/exemples/musa/samples"
+fileRdata = "/media/sebastien/Bayer/ScriptsSEB/images/exemples/musa/learning/learning.RData"
 onefileImage = NA
 leafMinSize = 1000
 leafBorderSize = 3
 lesionBorderSize = 3
 lesionMinSize = 3
-lesionMaxSize = 2000
+lesionMaxSize = 200000
 colorLesion = 1
+rmBorder <- TRUE
 
 ###############################################################
 #################################################################
@@ -26,18 +33,21 @@ range.na <- function(x, object) {
 }
 
 bounding.rectangle <- function(mask, object) {
-  m <- imageData(mask)
+  m <<- imageData(mask)
   range.x <- range(apply(m, 1, range.na, object), na.rm = TRUE)
   range.y <- range(apply(m, 2, range.na, object), na.rm = TRUE)
   list(x = range.x[1]:range.x[2], y = range.y[1]:range.y[2])
 }
 
 extrait.leaf <- function(i, mask, image.fond.noir) {
-  b <- bounding.rectangle(mask, i)
+  b <<- bounding.rectangle(mask, i)
   leaf <- image.fond.noir[b$y, b$x,]
   mask.leaf <- mask[b$y, b$x]
   leaf[mask.leaf != i] <- 0
-  list(b = b, leaf = leaf)
+  xCoord <- list(min = min(b$x),max = max(b$x))
+  yCoord <- list(min = min(b$y),max = max(b$y))
+  XYcoord <- list(x = xCoord, y = yCoord)
+  list(b = b, leaf = leaf, XYcoord = XYcoord)
 }
 
 
@@ -52,7 +62,7 @@ ui <- fluidPage(
 
   # Sidebar with a select input for the image
   sidebarLayout(
-    sidebarPanel(
+    sidebarPanel(width = 2, 
       selectInput("image", "Sample image:", list.files(pathData)),
       actionButton("brightness", "brightness")
     ),
@@ -60,7 +70,7 @@ ui <- fluidPage(
     # Show a plot of the generated distribution
     mainPanel(
       tabsetPanel(
-        tabPanel("Static raster",
+        tabPanel("Static raster", width = 10,
           fluidRow(
             column(4,
                  plotOutput("raster")
@@ -99,17 +109,18 @@ server <- function(input, output) {
 
   output$widget <- renderDisplay({
     display(rv$imgBlack)
+    # display(img(), all=TRUE)
     # rv$position <- locator()
   })
 
   output$raster <- renderPlot({
-    plot(img())
+    plot(img(), all=TRUE)
   })
   output$raster2 <- renderPlot({
     if ( is.null(rv$imgBlack)) return(NULL)
     nx <- dim(rv$imgBlack)[1]
     ny <- dim(rv$imgBlack)[2]
-    plot(rv$imgBlack)
+    plot(rv$imgBlack, all=TRUE)
     points(rv$sortie$m.cx, rv$sortie$m.cy, pch='+', cex=2, col=rv$sortie$couleur)
   })
 
@@ -129,7 +140,6 @@ server <- function(input, output) {
     })
 
   observeEvent(input$image,{
-    print("toto")
 
     load(fileRdata)
     background <- names(lda1$prior)[1]
@@ -142,7 +152,6 @@ server <- function(input, output) {
     heightSize = dim(img())[2]
 
     ## prédiction sur l'image (non floutée)
-    print("predict")
     df5 <-
       data.frame(
         red = as.numeric(imageData(img())[, , 1]),
@@ -152,29 +161,27 @@ server <- function(input, output) {
     df5$predict <- predict(lda1, df5)$class
 
     ## création des identificateurs des taches et des leafs
-    print("identifie")
     df5$tache <- as.numeric(df5$predict == lesion)
     df5$leaf <- as.numeric(df5$predict != background)
 
     ## masque des leafs
-    print("masque leafs")
     mask <- channel(img(), "gray")
     leaf <- matrix(df5$leaf, nrow = nrow(imageData(mask)))
     imageData(mask) <- leaf
+
+    toto <<- imageData(mask)
 
     ## suppression des vides
     mask <- fillHull(mask)
 
     ## suppression de la bordure par érosion
     ## remarque : les tests et les calculs sont effectués sur les objets érodés
-    print("supression")
     brush <- makeBrush(leafBorderSize,  shape = 'disc')
     ## ligne suivante ajoutée pour supprimer les lignes parasites dues au scan (supprimer pour scan normal)
     ## brush2 <- makeBrush(leafBorderSize*2+1,  shape = 'disc') ; mask <- dilate(mask, brush2) ; mask <- erode(mask,  brush2)
     mask <- erode(mask,  brush)
 
     ## segmentation
-    print("decoupe")
     mask <- bwlabel(mask)
     features <- data.frame(computeFeatures.shape(mask))
 
@@ -186,23 +193,21 @@ server <- function(input, output) {
     }
 
     ## suppression du fond
-    print("fond")
-    image.fond.noir <<- img()
+    image.fond.noir <- img()
     image.fond.noir[mask == 0] <- 0
 
     ## séparation des leafs
-    print("split leafs")
     li <<- lapply(as.numeric(row.names(features)), extrait.leaf, mask, image.fond.noir)
 
     ## analyse des leafs
-    print("analyse leaf")
     analyse.li <<- lapply(li,  analyse.leaf,  lda1,  lesion)
 
 
     filename <- strsplit(input$image, ".", fixed = TRUE)[[1]][1]
     ## sortie des résultats et coloration des lésions
-    print("do result")
     result <- NULL
+    resultLesion <- NULL
+    imageLesionColor <- image
     for (i in 1:length(li)) {
       result <-
         rbind(
@@ -217,18 +222,37 @@ server <- function(input, output) {
               analyse.li[[i]]$features[, "s.area"]
           )
         )
-      ## la ligne suivante a été remplacée par 3 lignes suite à une erreur apparue sur certaines versions de R
-      ## image[li[[i]]$b$y,li[[i]]$b$x,][analyse.li[[i]]$mask>0] <- colorLesion
-      print("build img")
-      tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
-      tmpimage[analyse.li[[i]]$mask > 0] <- colorLesion
+      # rename leaf number
+      analyse.li[[i]][["leafLesionDT"]]$image <- paste(filename, "leaf",i,sep = "_")
+      
+      resultLesion <-
+        rbind(
+          resultLesion,
+          analyse.li[[i]][["leafLesionDT"]]
+        )
 
-      # image[li[[i]]$b$y, li[[i]]$b$x,] <- tmpimage
+        # tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
+        # tmpimage[analyse.li[[i]]$mask > 0] <- colorLesion
+        # image[li[[i]]$b$y, li[[i]]$b$x,] <- tmpimage
+        
+        maskLesion <<- analyse.li[[i]][["maskLesion"]]
+        analyse.li[[i]][["leafLesionDT"]]$image <- paste(filename,i,sep = "_")
+        initialImage <- image[li[[i]]$b$y, li[[i]]$b$x,]
+        initialImage <- paintObjects(maskLesion  ,initialImage, thick=TRUE, col=c(rv$lesion_color_border, rv$lesion_color_bodies), opac=c(1, 1))
+        ## combine images horizontally
+        if (is.null(imageLesionColor)){
+          print("toto")
+          imageLesionColor <- initialImage
+        }
+        # }else{
+        #   imageLesionColor <- combine(imageLesionColor, initialImage)
+        # }
+        ## stack images one on top of the other
+        # z = abind(x, x, along=2)
+
     }
-
-    tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c("green", "red"), opac=c(1, 1))
-
-    rv$imgBlack <- tmpimage
+    rv$sortie <<-resultLesion
+    rv$imgBlack <-  imageLesionColor
 
     ag.count <-
       aggregate(result$surfaceLesion, result[c("fichier", "leaf", "surfaceLeaf")], length)
@@ -239,9 +263,8 @@ server <- function(input, output) {
     ag <- merge(ag.count, ag.surface)
     ag$pourcent.lesions <- ag$surfaceLesions / ag$surfaceLeaf * 100
     ag$nbLesions[ag$surfaceLesions == 0] <- 0
-    print(paste0("DEBUG6"))
 
-    datas <<- as.data.frame(ag[order(ag$leaf),])
+    datas <- as.data.frame(ag[order(ag$leaf),])
 
     rv$results <- as.data.frame(ag[order(ag$leaf),])
 
@@ -257,14 +280,12 @@ server <- function(input, output) {
     click <- c(input$plot_click$x, input$plot_click$y)
 
 
-    idmin <<- nearPoints(rv$sortie, input$plot_click, xvar = "m.cx", yvar = "m.cy", threshold = 10, maxpoints = 1)
-    print(idmin$object)
+    idmin <- nearPoints(rv$sortie, input$plot_click, xvar = "m.cx", yvar = "m.cy", threshold = 10, maxpoints = 1)
     if(length(idmin$object) != 0){
 
       rv$sortie$couleur[rv$sortie$object == idmin$object] <- if (rv$sortie$couleur[rv$sortie$object == idmin$object]=="blue") "red" else "blue"
-      maskLesionRed <<- maskLesion
-      w1 <<-  rv$sortie$object[ rv$sortie$couleur=="red"]
-      print(w1)
+      maskLesionRed <- maskLesion
+      w1 <-  rv$sortie$object[ rv$sortie$couleur=="red"]
       maskLesion[maskLesion %in% w1] <- 0 ## suppression dans mask des objets rouges
       maskLesionRed[!(maskLesionRed %in% w1)] <- 0 ## suppression dans mask2 des objets non rouges
 
@@ -283,12 +304,10 @@ server <- function(input, output) {
     res <- brushedPoints(rv$sortie, input$plot_brush, xvar = "m.cx", yvar = "m.cy")
     if (nrow(res) == 0)
       return()
-    print(res$object)
     for (i in res$object) {
-      print(i)
       rv$sortie$couleur[rv$sortie$object == i] <- if (rv$sortie$couleur[rv$sortie$object == i]=="blue") "red" else "blue"
-      maskLesionRed <<- maskLesion
-      w1 <<-  rv$sortie$object[ rv$sortie$couleur=="red"]
+      maskLesionRed <- maskLesion
+      w1 <-  rv$sortie$object[ rv$sortie$couleur=="red"]
     }
 
   })
@@ -303,6 +322,7 @@ server <- function(input, output) {
   ## analyse d'une leaf
   analyse.leaf <- function(x, lda1, lesion) {
     f <- x$leaf
+    XYcoord = x$XYcoord
     df6 <-
       data.frame(
         red = as.numeric(imageData(f)[, , 1]),
@@ -345,8 +365,8 @@ server <- function(input, output) {
     w.bord <- unique(c(haut, gauche, bas, droite))
 
 
-    rmBorder <- TRUE
-    if (rmBorder ==TRUE){
+
+    if (rmBorder == TRUE){
       w <- unique(c(w.petit, w.bord, w.grand)) ## valeurs des objets à supprimer
     }else{
       w <- unique(c(w.petit, w.grand)) ## valeurs des objets à supprimer
@@ -356,21 +376,25 @@ server <- function(input, output) {
 
 
     ## renumérote les objets
-    featuresLesion <<- computeFeatures.shape(mask)
+    featuresLesion <- computeFeatures.shape(mask)
     list(featuresLesion = featuresLesion, mask = mask)
 
-    featuresLesion.surfmin <<- as.data.frame(featuresLesion[-w,]) ## suppression des objets dans le tableau
-    featuresLesion.surfmin$object <<- as.numeric(row.names(featuresLesion.surfmin))
-    moments <<- as.data.frame(computeFeatures.moment(mask))
-    moments$object <<- as.numeric(row.names(moments))
-    featuresLesion.surfmin <<- merge(featuresLesion.surfmin, moments)
+    featuresLesion.surfmin <- as.data.frame(featuresLesion[-w,]) ## suppression des objets dans le tableau
+    featuresLesion.surfmin$object <- as.numeric(row.names(featuresLesion.surfmin))
+    moments <- as.data.frame(computeFeatures.moment(mask))
+    moments$object <- as.numeric(row.names(moments))
+    featuresLesion.surfmin <- merge(featuresLesion.surfmin, moments)
 
-    w1 <- as.numeric(featuresLesion.surfmin$object[featuresLesion.surfmin[,"s.area"]<=100000]) ## valeurs des objets plus petits que  surfmax
+    w1 <- as.numeric(featuresLesion.surfmin$object[featuresLesion.surfmin[,"s.area"]<=100000000]) ## valeurs des objets plus petits que  surfmax
     couleur <- ifelse(featuresLesion.surfmin$object %in% w1, "blue", "red")
 
 
 
-    rv$sortie <<- data.frame(image="toto", couleur=couleur, featuresLesion.surfmin, stringsAsFactors=FALSE)
+    leafLesionDT <- data.frame(image="toto", couleur=couleur, featuresLesion.surfmin, stringsAsFactors=FALSE)
+    
+    # print(XYcoord)
+    
+    list(features = featuresLesion, maskLesion = maskLesion, leafLesionDT = leafLesionDT)
   }
 
 

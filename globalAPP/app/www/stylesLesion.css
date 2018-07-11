@@ -93,3 +93,12 @@
 .spaceRow {
 	margin-bottom: 15px;
 }
+
+.colorRow {
+	margin-left: -30px;
+}
+
+.colourpicker{
+	width: 40px;
+	display:inline-block;
+}

@@ -1,6 +1,8 @@
-### helpfiles/img.md - Under Development
+## plot pixel
 
 ***
 
-This helpfile is under not finished yet
+TODO
 
+***
+**Info**  

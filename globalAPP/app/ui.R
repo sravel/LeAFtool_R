@@ -61,9 +61,10 @@ library(MASS)
 
 # analysis
 library(foreach)
-library(future)
+#library(future)
 library(parallel)
-library(doSNOW)
+library(doParallel)
+#library(doSNOW)
 
 set_wd <- function() {
   library(rstudioapi) # make sure you have it installed
@@ -75,9 +76,6 @@ set_wd()
 
 logfilename <<- paste0(currentFilePath,"/debug.txt")
 unlink(logfilename)
-# Add an entry to the log file
-cat(as.character(Sys.time()), '\n', file = logfilename,
-    append = TRUE)
 
 ##Load functions scripts
 #for(file in list.files(paste(currentFilePath,"R_code",sep = .Platform$file.sep),

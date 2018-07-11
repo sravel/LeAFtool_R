@@ -33,16 +33,25 @@ tabItem(
       title = "Analysis Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
       column(width = 5,
              fluidRow( class = "spaceRow",
-               shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-info"),
+               shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "dirInSamples"),
                verbatimTextOutput("dirSamples", placeholder = TRUE)
 
              ),
              fluidRow( class = "spaceRow",
-               shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-info"),
+               shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "dirOut"),
                verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
              ),
              fluidRow( class = "spaceRow",
-               shinyFilesButton('files', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-info"),
+               shinyFilesButton('fileRDataIn', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-info") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "fileRDataIn"),
                verbatimTextOutput('fileRData', placeholder = TRUE),
 
 #               conditionalPanel(
@@ -53,36 +62,85 @@ tabItem(
       ),
       column(width = 2,
              h4("Leaf parameters:"),
-             numericInput("leaf_min_size", "Leaf min size:", value = 1000, min=1,  width = "150px"),
-             numericInput("leaf_border_size", "Leaf border size:", value = 3, min=1, width = "150px")
-             # verbatimTextOutput("value")
+             numericInput("leaf_min_size", "Leaf min size:", value = 10, min=1,  width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "leaf_min_size"),
 
+             numericInput("leaf_border_size", "Leaf border size:", value = 3, min=1, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "leaf_border_size"),
+
+             checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "rmScanLine")
       ),
       column(width = 2,offset = 0,
              h4("Lesion parameters:"),
-             numericInput("lesion_min_size", "Lesion min size:", value = 10, min=1, width = "150px"),
-             numericInput("lesion_max_size", "Lesion max size:", value = 1000, min=1000, width = "150px"),
-             numericInput("lesion_border_size", "Lesion border size:", value = 3, min=1, width = "150px"),
-#             selectInput("lesion_color_boundaries", label = p("Lesions color boundaries"),
-#                         choices = colors(),
-#                         selected = 0, width = "100px"),
-#             selectInput("lesion_color_bodies", label = p("Lesions color bodies"),
-#                         choices = colors(),
-#                         selected = 0, width = "100px"),
-            colourInput("lesion_color_boundaries",  label = p("Lesions color boundaries"), value = "green",
-                        palette = "limited", allowedCols = NULL,
-                        allowTransparent = FALSE, returnName = TRUE),
+             checkboxInput("rmEdge", "Remove edge lesions", value = FALSE, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "rmEdge"),
 
-            colourInput("lesion_color_bodies",  label = p("Lesions color bodies"), value = "red",
-                        palette = "limited", allowedCols = NULL,
-                        allowTransparent = FALSE, returnName = TRUE)
+             numericInput("lesion_min_size", "Lesion min size:", value = 10, min=1, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_min_size"),
+
+             numericInput("lesion_max_size", "Lesion max size:", value = 1000000, min=1, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_max_size"),
+
+             numericInput("lesion_border_size", "Lesion border size:", value = 3, min=1, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_border_size"),
+
+            column(width = 12, offset = 0,
+              fluidRow(
+                tags$label("Lesions color")
+              ),
+              fluidRow( class = "colorRow",
+                column(width = 6, offset = 0,
+                  tags$label("border"),
+                  colourInput("lesion_color_border",  label = "", value = "green",
+                              palette = "limited", allowedCols = NULL,
+                              allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_color_border")
+
+                ),
+                column(width = 6, offset = 0,
+                  tags$label("bodies"),
+                  colourInput("lesion_color_bodies",  label = "", value = "red",
+                              palette = "limited", allowedCols = NULL,
+                              allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_color_bodies")
+
+                )
+              )
+            )
+
       ),
       column(width = 2, offset = 0,
              h4("Running Mode"),
-             checkboxInput("parallelMode", "Active Parallel mode", value = FALSE, width = "150px"),
+             checkboxInput("parallelMode", "Active Parallel mode", value = FALSE, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "parallelMode"),
+
              conditionalPanel(
                condition = "input.parallelMode",
-               numericInput("parallelThreadsNum","Number of Threads", value = 8, min = 1, max = 10, width = "150px")
+               numericInput("parallelThreadsNum","Number of Threads", value = 8, min = 1, max = 10, width = "150px")  %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "parallelThreadsNum")
              )
       )
     )
