@@ -44,17 +44,26 @@ boundingRectangle <<- function(mask, object) {
   list(x = range.x[1]:range.x[2], y = range.y[1]:range.y[2])
 }
 
-extractLeaf <<- function(i, mask, imageBackgroundBlack) {
+extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
   b <- boundingRectangle(mask, i)
   leaf <- imageBackgroundBlack[b$y, b$x,]
   mask.leaf <- mask[b$y, b$x]
   leaf[mask.leaf != i] <- 0
-  list(b = b, leaf = leaf)
+  xCoord <- list(min = min(b$x),max = max(b$x))
+  yCoord <- list(min = min(b$y),max = max(b$y))
+  XYcoord <- list(x = xCoord, y = yCoord)
+  list(b = b, XYcoord = XYcoord, leaf = leaf, leaf.surface = surfaceLeaves[i,], leafNum = i)
 }
 
 ## analysis lesion for one leaf
-analyseLeaf <<- function(x, lda1, lesion, csvLesionFile, filename) {
-  f <- x$leaf
+analyseLeaf <<- function(x, lda1, lesion, filename) {
+
+  if (rv$blur_value == 0){
+    f <- x$leaf
+  }else{
+    f <- gblur(x$leaf,rv$blur_value)
+  }
+
   df6 <-
     data.frame(
       red = as.numeric(imageData(f)[, , 1]),
@@ -84,9 +93,9 @@ analyseLeaf <<- function(x, lda1, lesion, csvLesionFile, filename) {
   featuresLesion <- computeFeatures.shape(mask)
 
   ## search for small objects
-  w.small <- which(featuresLesion[,"s.area"] < rv$lesion_min_size)
+  w.small <- which(featuresLesion[,"s.area"] <= rv$lesion_min_size)
   ## search for great objects
-  w.great <- which(featuresLesion[,"s.area"] > rv$lesion_max_size)
+  w.great <- which(featuresLesion[,"s.area"] >= rv$lesion_max_size)
 
   if (rv$rmEdge == TRUE){
     ## search objets on the edge of the image
@@ -102,54 +111,50 @@ analyseLeaf <<- function(x, lda1, lesion, csvLesionFile, filename) {
   }
   # apply to maskLesion
   maskLesion <- rmObjects(mask, w)
-
-
   ## renumber objects
-  featuresLesion <- computeFeatures.shape(mask)
-  list(featuresLesion = featuresLesion, mask = mask)
+  featuresLesion <- computeFeatures.shape(maskLesion)
 
-  featuresLesion.surfmin <- as.data.frame(featuresLesion[-w,]) # delete objects in the table
-  featuresLesion.surfmin$object <- as.numeric(row.names(featuresLesion.surfmin))
-  moments <- as.data.frame(computeFeatures.moment(mask))
-  moments$object <- as.numeric(row.names(moments))
-  featuresLesion.surfmin <- merge(featuresLesion.surfmin, moments)
+  featuresLesionClean <- as.data.frame(featuresLesion)
 
-  w1 <- as.numeric(featuresLesion.surfmin$object[featuresLesion.surfmin[,"s.area"]<=100000000]) ## values of objects smaller than surfmax
+  featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
 
-  keepLesion <- ifelse(featuresLesion.surfmin$object %in% w1, "keep", "remove")
+  featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
 
-  outputDF <- data.frame(image=filename, keepLesion=keepLesion, featuresLesion.surfmin, stringsAsFactors=FALSE)
+  colnames(featuresLesionClean)[which(colnames(featuresLesionClean) %in%
+      c("s.area", "s.perimeter", "s.radius.mean", "s.radius.sd", "s.radius.min", "s.radius.max") )] <-
+      c("lesion.surface", "lesion.perimeter", "lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max")
 
-  write.table(
-    outputDF,
-    file = csvLesionFile,
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
+  moments <- as.data.frame(computeFeatures.moment(maskLesion))
+#  print(moments)
+#  print(x$XYcoord$x$min)
+#  print(x$XYcoord$x$max)
+#  print(x$XYcoord$y$min)
+#  print(x$XYcoord$y$max)
+  moments$m.cx <- moments$m.cx + x$XYcoord$x$min - 1
+  moments$m.cy <- moments$m.cy + x$XYcoord$y$min - 1
 
 
-  list(features = featuresLesion, maskLesion = maskLesion)
+  moments$lesion.number <- as.numeric(row.names(moments))
+  featuresLesionCleanPos <- merge(featuresLesionClean, moments)
+
+  outputDF <- data.frame(image=filename,leaf.number = x$leafNum, lesion.status="keep", featuresLesionCleanPos, stringsAsFactors=FALSE)
+
+  list(featuresLesion = featuresLesion, maskLesion = maskLesion, outputDF = outputDF)
 }
 
 # analysis One scan image
 analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
 
   print("RUNNING")
-  filename <- strsplit(imageFile, ".", fixed = TRUE)[[1]][1]
-  jpegname <- paste(filename, "_both.jpeg", sep = '')
-  jpegnameOnly <- paste(filename, "_lesion.jpeg", sep = '')
-  csvLeafsCountFileName <- paste(filename, "_LeafCount.csv", sep = '')
-  csvResumeCountName <- paste(filename, "_ResumeCount.csv", sep = '')
-  csvLesionName <- paste(filename, "_All_lesions.csv", sep = '')
   if (!file.exists(pathResult))
     dir.create(pathResult)
-  jpegfile <- paste(pathResult, '/', jpegname, sep = '')
-  jpegfileOnly <- paste(pathResult, '/', jpegnameOnly, sep = '')
-  csvLeafsCountFile <- paste(pathResult, '/', csvLeafsCountFileName, sep = '')
-  csvResumeCountFile <- paste(pathResult, '/', csvResumeCountName, sep = '')
-  csvLesionFile <- paste(pathResult, '/', csvLesionName, sep = '')
 
+  filename <- strsplit(imageFile, ".", fixed = TRUE)[[1]][1]
+  jpegfile <- paste(pathResult, '/', filename, "_both.jpeg", sep = '')
+  jpegfileOnly <- paste(pathResult, '/', filename, "_lesion.jpeg", sep = '')
+
+  csv_Merge_lesionsFile <- paste(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
+  csv_All_lesionsFile <- paste(pathResult, '/', filename, "_All_lesions.csv", sep = '')
 
 
   background <- names(lda1$prior)[1]
@@ -176,42 +181,45 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   df5$leaf <- as.numeric(df5$predict != background)
 
   ## mask of leafs
-  mask <- channel(image, "gray")
-  leaf <- matrix(df5$leaf, nrow = nrow(imageData(mask)))
-  imageData(mask) <- leaf
+  maskLeaf <- channel(image, "gray")
+  leaf <- matrix(df5$leaf, nrow = nrow(imageData(maskLeaf)))
+  imageData(maskLeaf) <- leaf
 
   ## empty fill
-  mask <- fillHull(mask)
+  maskLeaf <- fillHull(maskLeaf)
 
   ## erosion border removal
   ## note: tests and calculations are performed on eroded objects
   brush <- makeBrush(rv$leaf_border_size,  shape = 'disc')
   ## next line added to remove parasitic lines due to scan (delete for normal scan)
 #  if (rv$rmScanLine == TRUE){
-#    brush2 <- makeBrush(rv$leaf_border_size*2+1,  shape = 'disc') ; mask <- dilate(mask, brush2) ; mask <- erode(mask,  brush2)
+#    brush2 <- makeBrush(rv$leaf_border_size*2+1,  shape = 'disc') ; maskLeaf <- dilate(maskLeaf, brush2) ; maskLeaf <- erode(maskLeaf,  brush2)
 #  }
-  mask <- erode(mask,  brush)
+  maskLeaf <- erode(maskLeaf,  brush)
 
   ## segmentation
-  mask <- bwlabel(mask)
-  features <- data.frame(computeFeatures.shape(mask))
+  maskLeaf <- bwlabel(maskLeaf)
+  featuresLeaf <- data.frame(computeFeatures.shape(maskLeaf))
 
   ## removing objects smaller than the minimum area of a leaf
-  w <- which(features[, "s.area"] < rv$leaf_min_size)
+  w <- which(featuresLeaf[, "s.area"] < rv$leaf_min_size)
   if (length(w) > 0) {
-    mask[mask %in% w] <- 0
-    features <- features[-w, ]
+    maskLeaf[maskLeaf %in% w] <- 0
+    featuresLeaf <- featuresLeaf[-w, ]
   }
+  # size of leafs
+  surfaceLeaves <- featuresLeaf["s.area"]
+
 
   ## removal of the background
   imageBackgroundBlack <- image
-  imageBackgroundBlack[mask == 0] <- 0
+  imageBackgroundBlack[maskLeaf == 0] <- 0
 
   ## separation of leafs
-  li <- lapply(as.numeric(row.names(features)), extractLeaf, mask, imageBackgroundBlack)
+  li <- lapply(as.numeric(row.names(featuresLeaf)), extractLeaf, maskLeaf, imageBackgroundBlack, surfaceLeaves)
 
   ## analyse des leafs
-  analyse.li <- lapply(li,  analyseLeaf,  lda1 = lda1,  lesion = lesion, csvLesionFile = csvLesionFile, filename = filename)
+  analyse.li <- lapply(li,  analyseLeaf,  lda1 = lda1,  lesion = lesion, filename = filename)
 
   # print both sample and lesion images
   jpeg(jpegfile,
@@ -222,31 +230,29 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   display(image, method="raster")
 
   ## sortie des résultats et coloration des lésions
-  result <- NULL
-  for (i in 1:length(li)) {
-    result <-
-      rbind(
-        result,
-        data.frame(
-          file = filename,
-          leaf = i,
-          surfaceLeaf = features[i, "s.area"],
-          surfaceLesion = if (is.null(analyse.li[[i]]$features))
-            0
-          else
-            analyse.li[[i]]$features[, "s.area"]
-        )
-      )
+
+  for (i in 1:length(li)){
+    if (i == 1){
+      result <- analyse.li[[i]]$outputDF
+    }else{
+      result <- rbind( result, analyse.li[[i]]$outputDF )
+    }
+
     ## la ligne suivante a été remplacée par 3 lignes suite à une erreur apparue sur certaines versions de R
-    ## image[li[[i]]$b$y,li[[i]]$b$x,][analyse.li[[i]]$mask>0] <- colorLesion
-    maskLesion <- analyse.li[[1]][["maskLesion"]]
-    initialImage <<- image[li[[i]]$b$y, li[[i]]$b$x,]
-    imageLesionColor <- image[li[[i]]$b$y, li[[i]]$b$x,]
-    imageLesionColor <- paintObjects(maskLesion  ,imageLesionColor, thick=TRUE, col=c(rv$lesion_color_border, rv$lesion_color_bodies), opac=c(1, 1))
+    ## image[li[[i]]$b$y,li[[i]]$b$x,][analyse.li[[i]]$maskLesion>0] <- colorLesion
+
+#    tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
+#    tmpimage[analyse.li[[i]]$mask > 0] <- colorLesion
+#    image[li[[i]]$b$y, li[[i]]$b$x,] <- tmpimage
+
+    maskLesion <- analyse.li[[i]][["maskLesion"]]
+    tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
+    tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_border, rv$lesion_color_bodies), opac=c(1, 1))
+    image[li[[i]]$b$y, li[[i]]$b$x,] <- tmpimage
+
   }
 
-  row.names(result) <- NULL
-  display(imageLesionColor, method = "raster")
+  display(image, method = "raster")
   dev.off()
 
   # print only output file image with lesion
@@ -255,30 +261,33 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
        height = heightSize,
        units = "px")
   par( mfrow = c(1,1) )
-  display(imageLesionColor, method = "raster")
+  display(image, method = "raster")
   dev.off()
 
   write.table(
     result,
-    file = csvLeafsCountFile,
+    file = csv_All_lesionsFile,
     quote = FALSE,
     row.names = FALSE,
     sep = '\t'
   )
 
-  ag.count <-
-    aggregate(result$surfaceLesion, result[c("file", "leaf", "surfaceLeaf")], length)
-  names(ag.count)[4] <- "nbLesions"
-  ag.surface <-
-    aggregate(result$surfaceLesion, result[c("file", "leaf", "surfaceLeaf")], sum)
-  names(ag.surface)[4] <- "surfaceLesions"
-  ag <- merge(ag.count, ag.surface)
-  ag$pourcent.lesions <- ag$surfaceLesions / ag$surfaceLeaf * 100
-  ag$nbLesions[ag$surfaceLesions == 0] <- 0
+  ag.count <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], length)
+  names(ag.count)[4] <- "lesion.nb"
+#  print(ag.count)
+
+  ag.surface <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], sum)
+  names(ag.surface)[4] <- "lesion.surface"
+#  print(ag.surface)
+
+ ag <- merge(ag.count, ag.surface)
+  ag$pourcent.lesions <- ag$lesion.surface / ag$leaf.surface * 100
+  ag$nbLesions[ag$lesion.surface == 0] <- 0
+#  print(ag)
 
   write.table(
-    ag[order(ag$leaf),],
-    file = csvResumeCountFile,
+    ag[order(ag$leaf.number),],
+    file = csv_Merge_lesionsFile,
     quote = FALSE,
     row.names = FALSE,
     sep = '\t'
@@ -364,7 +373,7 @@ observe({
 ## Validate value for options
 ############################################
 
-validate_INT <- function(inputValue,name,reactiveVal) {
+validate_INT <- function(inputValue,name) {
   if(!is.numeric(inputValue) || (inputValue <= 0) || is.null(inputValue)){
     rv$codeValidationInt <- 0
     rv$warning <- HTML(paste0("Please input a number >= 0 for <b>",name,"</b> !"))
@@ -375,7 +384,6 @@ validate_INT <- function(inputValue,name,reactiveVal) {
     )
   }else{
     rv$codeValidationInt <- 1
-    rv$name <- as.numeric(inputValue)
   }
   feedbackDanger(
       inputId = name,
@@ -383,32 +391,43 @@ validate_INT <- function(inputValue,name,reactiveVal) {
       text = "Danger please enter number"
     )
 }
+######## Image
+###### Blur image
+observeEvent(input$blur_value,{
+  rv$blur_value <- as.numeric(input$blur_value)
+})
+
 
 ######## LEAF
 ###### leaf_min_size
 observeEvent(input$leaf_min_size,{
-  validate_INT(input$leaf_min_size, "leaf_min_size",rv$leaf_min_size)
+  validate_INT(input$leaf_min_size, "leaf_min_size")
+  rv$leaf_min_size <- as.numeric(input$leaf_min_size)
 })
 
 ###### leaf_border_size
 observeEvent(input$leaf_border_size,{
-  validate_INT(input$leaf_border_size, "leaf_border_size",rv$leaf_border_size)
+  validate_INT(input$leaf_border_size, "leaf_border_size")
+  rv$leaf_border_size <- as.numeric(input$leaf_border_size)
 })
 
 ######## LESIONS
 ###### lesion_min_size
 observeEvent(input$lesion_min_size,{
-  validate_INT(input$lesion_min_size, "lesion_min_size",rv$lesion_min_size)
+  validate_INT(input$lesion_min_size, "lesion_min_size")
+  rv$lesion_min_size <- as.numeric(input$lesion_min_size)
 })
 
 ###### lesion_max_size
 observeEvent(input$lesion_max_size,{
-  validate_INT(input$lesion_max_size, "lesion_max_size",rv$lesion_max_size)
+  validate_INT(input$lesion_max_size, "lesion_max_size")
+  rv$lesion_max_size <- as.numeric(input$lesion_max_size)
 })
 
 ###### lesion_border_size
 observeEvent(input$lesion_border_size,{
-  validate_INT(input$lesion_border_size, "lesion_border_size",rv$lesion_border_size)
+  validate_INT(input$lesion_border_size, "lesion_border_size")
+  rv$lesion_border_size <- as.numeric(input$lesion_border_size)
 })
 
 
@@ -432,6 +451,7 @@ output$warning <- renderUI({
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   ## load values and add loading frame
 #  show("loading-content")
+  rv$exitStatusAna <- 0
   rv$lesion_color_border <- input$lesion_color_border
   rv$lesion_color_bodies <- input$lesion_color_bodies
 
@@ -488,7 +508,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     }
   }
 
-  tmpCmd  <- paste0("awk '{if($1 == \"file\"){} else{ print $0}}'  ", rv$dirSamplesOut, "/*_ResumeCount.csv | sort -k1 |sort -k1,1 -k2n,2n > ",rv$dirSamplesOut,"/merge_ResumeCount.csv")
+  tmpCmd  <- paste0("awk '{if($1 == \"image\"){} else{ print $0}}'  ", rv$dirSamplesOut, "/*_Merge_lesions.csv | sort -k1 |sort -k1,1 -k2n,2n > ",rv$dirSamplesOut,"/merge_ResumeCount.csv")
   returnvalue  <- system(tmpCmd, intern = TRUE)
   rv$exitStatusAna <- 1
 
@@ -573,13 +593,12 @@ observeEvent(input$contents_rows_selected,{
         column(width = 1, offset = 0,
           actionButton("actionPrevious", "", icon = icon("backward"), width = "50px")
         ),
-#        column(width = 5, offset = 0,
-#          img(src= paste0("Original/",currentImage()),width='100%',height='100%')
-#        ),
-        column(width = 10, offset = 0,
-#          nx <- dim(rv$plotcurrentImage)[1],
-#          ny <- dim(rv$plotcurrentImage)[2],
-          plotOutput("plotcurrentImage",click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush")
+       column(width = 5, offset = 0,
+         img(src= paste0("Original/",currentImage()),width='100%',height='100%')
+       ),
+        column(width = 5, offset = 0,
+          img(src= paste0("LesionColor/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
+#          plotOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
         ),
         column(width = 1, offset = 0,
           actionButton("actionNext", "", icon = icon("forward"), width = "50px")

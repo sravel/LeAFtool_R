@@ -39,12 +39,12 @@ rv <<- reactiveValues(
                         dirCalibration = NULL, outCalibrationTable = NULL,
                         outCalibrationCSV = NULL, plotFileCalibration = NULL,
                         # for analysis
-#                        fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
-#                        dirSamples = paste0(currentFilePath,"/../../exemples/musa/samples/"),
-#                        dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/results/"),
-                        fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
-                        dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
-                        dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
+#                       fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
+#                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/samples3/"),
+#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/results/"),
+                         fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
+                         dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
+                         dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
 #                        fileRData = NULL,
 #                        dirSamples = NULL,
 #                        dirSamplesOut = NULL,
@@ -58,7 +58,7 @@ rv <<- reactiveValues(
                         leaf_min_size = 10,
                         leaf_border_size = 3,
                         lesion_min_size = 10,
-                        lesion_max_size = 1000000,
+                        lesion_max_size = 10000,
                         lesion_border_size = 3,
                         lesion_color_border = "green",
                         lesion_color_bodies = "red",
@@ -68,7 +68,8 @@ rv <<- reactiveValues(
                         # both
 #                        fileRData= NULL,
                         parallelMode = FALSE,
-                        parallelThreadsNum = 8
+                        parallelThreadsNum = 8,
+                        blur_value = 0.1
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS

@@ -61,6 +61,12 @@ tabItem(
              )
       ),
       column(width = 2,
+            h4("Image parameters:"),
+              numericInput("blur_value", "Blur image:", value = 0 , min = 0, max = 5, step = 0.1, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "blur_value"),
+
              h4("Leaf parameters:"),
              numericInput("leaf_min_size", "Leaf min size:", value = 10, min=1,  width = "150px") %>%
                helper(icon = "question",
@@ -89,7 +95,7 @@ tabItem(
                       type = "markdown",
                       content = "lesion_min_size"),
 
-             numericInput("lesion_max_size", "Lesion max size:", value = 1000000, min=1, width = "150px") %>%
+             numericInput("lesion_max_size", "Lesion max size:", value = 10000, min=1, width = "150px") %>%
                helper(icon = "question",
                       type = "markdown",
                       content = "lesion_max_size"),
@@ -122,11 +128,9 @@ tabItem(
                helper(icon = "question",
                       type = "markdown",
                       content = "lesion_color_bodies")
-
                 )
               )
             )
-
       ),
       column(width = 2, offset = 0,
              h4("Running Mode"),
