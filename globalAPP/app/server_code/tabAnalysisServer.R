@@ -238,9 +238,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   for (i in 1:length(li)){
     if (i == 1){
       result <- analyse.li[[i]]$outputDF
-      print(result)
     }else{
-      print(analyse.li[[i]]$outputDF)
       result <- rbind( result, analyse.li[[i]]$outputDF )
     }
 
@@ -497,6 +495,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   closeAllConnections();
   registerDoSEQ()
   }else{
+    c <- 1
     # if not cluster mode do sample by sample on one core
     progress$inc(c/nbfiles, detail = paste("start one sample analysis with 1 cores"))
     for (imageFile in listFiles){
@@ -633,10 +632,17 @@ observeEvent(input$actionPrevious,{
 
 ######### parallel mode
 observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
-  no_cores <- max(1, detectCores() - 2)
-  updateNumericInput(session,"parallelThreadsNum", max = no_cores)
   rv$parallelMode <- input$parallelMode
-  rv$parallelThreadsNum <- input$parallelThreadsNum
+  max_no_cores <- as.numeric(max(1, detectCores() - 2))
+  if (as.numeric(input$parallelThreadsNum) > max_no_cores){
+    updateNumericInput(session,"parallelThreadsNum", value = max_no_cores, max = max_no_cores)
+    rv$parallelThreadsNum <- max_no_cores
+  }else if (as.numeric(input$parallelThreadsNum) < 1){
+    updateNumericInput(session,"parallelThreadsNum", value = 1, max = max_no_cores)
+    rv$parallelThreadsNum <- 1
+  }else{
+    rv$parallelThreadsNum <- as.numeric(input$parallelThreadsNum)
+  }
 })
 
 ######### rm edge lesion
