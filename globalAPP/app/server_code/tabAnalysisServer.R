@@ -137,6 +137,10 @@ analyseLeaf <<- function(x, lda1, lesion, filename) {
   moments$lesion.number <- as.numeric(row.names(moments))
   featuresLesionCleanPos <- merge(featuresLesionClean, moments)
 
+  if (nrow(featuresLesionCleanPos) == 0){
+    featuresLesionCleanPos <- data.frame("lesion.number" = NA, "lesion.surface"= NA, "lesion.perimeter"= NA, "lesion.radius.mean"= NA, "lesion.radius.sd"= NA, "lesion.radius.min"= NA, "lesion.radius.max"= NA, "leaf.surface"= NA, "m.cx"= NA, "m.cy"= NA, "m.majoraxis"= NA, "m.eccentricity"= NA, "m.theta"= NA)
+  }
+
   outputDF <- data.frame(image=filename,leaf.number = x$leafNum, lesion.status="keep", featuresLesionCleanPos, stringsAsFactors=FALSE)
 
   list(featuresLesion = featuresLesion, maskLesion = maskLesion, outputDF = outputDF)
@@ -234,16 +238,11 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   for (i in 1:length(li)){
     if (i == 1){
       result <- analyse.li[[i]]$outputDF
+      print(result)
     }else{
+      print(analyse.li[[i]]$outputDF)
       result <- rbind( result, analyse.li[[i]]$outputDF )
     }
-
-    ## la ligne suivante a été remplacée par 3 lignes suite à une erreur apparue sur certaines versions de R
-    ## image[li[[i]]$b$y,li[[i]]$b$x,][analyse.li[[i]]$maskLesion>0] <- colorLesion
-
-#    tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
-#    tmpimage[analyse.li[[i]]$mask > 0] <- colorLesion
-#    image[li[[i]]$b$y, li[[i]]$b$x,] <- tmpimage
 
     maskLesion <- analyse.li[[i]][["maskLesion"]]
     tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
