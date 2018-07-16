@@ -61,12 +61,17 @@ tabItem(
              )
       ),
       column(width = 2,
+      ### Image parameters
             h4("Image parameters:"),
               numericInput("blur_value", "Blur image:", value = 0 , min = 0, max = 5, step = 0.1, width = "150px") %>%
                helper(icon = "question",
                       type = "markdown",
                       content = "blur_value"),
-
+              checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "rmScanLine"),
+      ### Leaf parameters
              h4("Leaf parameters:"),
              numericInput("leaf_min_size", "Leaf min size:", value = 10, min=1,  width = "150px") %>%
                helper(icon = "question",
@@ -76,19 +81,27 @@ tabItem(
              numericInput("leaf_border_size", "Leaf border size:", value = 3, min=1, width = "150px") %>%
                helper(icon = "question",
                       type = "markdown",
-                      content = "leaf_border_size"),
-
-             checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "rmScanLine")
+                      content = "leaf_border_size")
       ),
       column(width = 2,offset = 0,
+      ### Lesion parameters
              h4("Lesion parameters:"),
              checkboxInput("rmEdge", "Remove edge lesions", value = FALSE, width = "150px") %>%
                helper(icon = "question",
                       type = "markdown",
                       content = "rmEdge"),
+
+             checkboxInput("rmEccentric", "Remove eccentric", value = FALSE, width = "150px") %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_eccentric"),
+             conditionalPanel(
+               condition = "input.rmEccentric",
+               numericInput("lesion_eccentric","Eccentric size", value = 0.99, min = 0.01, max = 1, step = 0.01, width = "150px")  %>%
+               helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_eccentric")
+             ),
 
              numericInput("lesion_min_size", "Lesion min size:", value = 10, min=1, width = "150px") %>%
                helper(icon = "question",
@@ -133,6 +146,7 @@ tabItem(
             )
       ),
       column(width = 2, offset = 0,
+      ### running parameters
              h4("Running Mode"),
              checkboxInput("parallelMode", "Active Parallel mode", value = FALSE, width = "150px") %>%
                helper(icon = "question",
@@ -141,7 +155,7 @@ tabItem(
 
              conditionalPanel(
                condition = "input.parallelMode",
-               numericInput("parallelThreadsNum","Number of Threads", value = 8, min = 1, max = 10, width = "150px")  %>%
+               numericInput("parallelThreadsNum","Number of Threads", value = max_no_cores, min = 1, max = max_no_cores, width = "150px")  %>%
                helper(icon = "question",
                       type = "markdown",
                       content = "parallelThreadsNum")

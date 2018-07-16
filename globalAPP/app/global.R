@@ -27,29 +27,8 @@
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################
 
-
-fileRdata = "/media/sebastien/JJC2018/test_visilog/calibration/calibration.RData"
-rdirSamples = "/media/sebastien/JJC2018/test_visilog/result"
-dirSamplesOut = "//media/sebastien/JJC2018/test_visilog/sample"
-
-fileRdata = "/media/sebastien/Bayer/00_exemples/exemple1/learning/learning.RData"
-dirSamples = "/media/sebastien/Bayer/00_exemples/exemple1/results"
-dirSamplesOut = "/media/sebastien/Bayer/00_exemples/exemple1/samples"
-
-fileRdata = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData"
-pathResult = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result"
-pathImages = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1"
-onefileImage = NA
-leafMinSize = 1000
-leafBorderSize = 3
-lesionBorderSize = 3
-lesionMinSize = 10
-colorLesion = 0
-
-rm(list = ls())
-gc()
-
-
+library(parallel)
+max_no_cores <- as.numeric(max(1, detectCores() - 2))
 
 runCountLesion <- function(port=NULL) {
   if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)

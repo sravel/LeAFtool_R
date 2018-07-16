@@ -39,12 +39,15 @@ rv <<- reactiveValues(
                         dirCalibration = NULL, outCalibrationTable = NULL,
                         outCalibrationCSV = NULL, plotFileCalibration = NULL,
                         # for analysis
+                       fileRData = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning.RData"),
+                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple2/samples/"),
+                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
 #                       fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/samples3/"),
+#                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/test_size/"),
 #                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/results/"),
-                         fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
-                         dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
-                         dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
+#                         fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
+#                         dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
+#                         dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
 #                        fileRData = NULL,
 #                        dirSamples = NULL,
 #                        dirSamplesOut = NULL,
@@ -63,13 +66,16 @@ rv <<- reactiveValues(
                         lesion_color_border = "green",
                         lesion_color_bodies = "red",
                         rmEdge = FALSE,
+                        rmEccentric = FALSE,
+                        lesion_eccentric = 0.99,
+
 
 
                         # both
 #                        fileRData= NULL,
                         parallelMode = FALSE,
-                        parallelThreadsNum = 8,
-                        blur_value = 0.1
+                        parallelThreadsNum = max_no_cores,
+                        blur_value = 0
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS

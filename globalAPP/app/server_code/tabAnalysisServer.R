@@ -56,14 +56,10 @@ extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
 }
 
 ## analysis lesion for one leaf
-analyseLeaf <<- function(x, lda1, lesion, filename) {
+analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
-  if (rv$blur_value == 0){
-    f <- x$leaf
-  }else{
-    f <- gblur(x$leaf,rv$blur_value)
-  }
-
+  f <- x$leaf
+  # replacement of the background by limb
   df6 <-
     data.frame(
       red = as.numeric(imageData(f)[, , 1]),
@@ -71,10 +67,27 @@ analyseLeaf <<- function(x, lda1, lesion, filename) {
       blue = as.numeric(imageData(f)[, , 3])
     )
   df6$predict <- predict(lda1, df6)$class
-  df6$tache <- as.numeric(df6$predict == lesion)
-  df6$tache[df6$red + df6$green + df6$blue == 0] <- 0
+  df.limb <- df6[df6$predict==limb,]
+  black.background <- df6$red+df6$green+df6$blue==0
+  mean.limb <- apply(df.limb[1:3],2,mean)
+  df6[black.background,1] <- mean.limb[1]
+  df6[black.background,2] <- mean.limb[2]
+  df6[black.background,3] <- mean.limb[3]
+  imageData(f)[,,1] <- df6$red
+  imageData(f)[,,2] <- df6$green
+  imageData(f)[,,3] <- df6$blue
+
+  # blur image or not
+  if (rv$blur_value != 0){
+    f <- gblur(f,rv$blur_value)
+  }
+
+  # analysis
+  df6 <- data.frame(red=as.numeric(imageData(f)[,,1]), green=as.numeric(imageData(f)[,,2]), blue=as.numeric(imageData(f)[,,3]))
+  df6$predict <- predict(lda1, df6)$class
+  df6$tache <- as.numeric(df6$predict==lesion)
   mask <- channel(f, "gray")
-  tache <- matrix(df6$tache, nrow = nrow(imageData(mask)))
+  tache <- matrix(df6$tache, nrow=nrow(imageData(mask)))
   imageData(mask) <- tache
 
   ## dilation
@@ -91,6 +104,10 @@ analyseLeaf <<- function(x, lda1, lesion, filename) {
   mask[mask < 0] <- 0
   mask <- bwlabel(mask)
   featuresLesion <- computeFeatures.shape(mask)
+  momentsLesion <- computeFeatures.moment(mask)
+
+  ## Remove objects
+  w.small <- w.great <- w.eccentric <- w.edge <- NULL
 
   ## search for small objects
   w.small <- which(featuresLesion[,"s.area"] <= rv$lesion_min_size)
@@ -104,13 +121,16 @@ analyseLeaf <<- function(x, lda1, lesion, filename) {
     bottom <- unique(imageData(mask)[dim(mask)[1],])
     right <- unique(imageData(mask)[,dim(mask)[2]])
     w.edge <- unique(c(top, left, bottom, right))
+  }
 
-    w <- unique(c(w.small, w.edge, w.great)) ## values of objects to delete
-  }else{
-    w <- unique(c(w.small, w.great)) ## values of objects to delete
+  # remove eccentric lesions
+  if (rv$rmEccentric == TRUE){
+    w.eccentric <- which(momentsLesion[,"m.eccentricity"] > rv$lesion_eccentric)
   }
   # apply to maskLesion
-  maskLesion <- rmObjects(mask, w)
+  mask[mask %in% c(w.small, w.great, w.edge, w.eccentric)] <- 0
+  maskLesion <- mask
+
   ## renumber objects
   featuresLesion <- computeFeatures.shape(maskLesion)
 
@@ -124,21 +144,17 @@ analyseLeaf <<- function(x, lda1, lesion, filename) {
       c("s.area", "s.perimeter", "s.radius.mean", "s.radius.sd", "s.radius.min", "s.radius.max") )] <-
       c("lesion.surface", "lesion.perimeter", "lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max")
 
+  # correct coord if multi leaves to edit lesion
   moments <- as.data.frame(computeFeatures.moment(maskLesion))
-#  print(moments)
-#  print(x$XYcoord$x$min)
-#  print(x$XYcoord$x$max)
-#  print(x$XYcoord$y$min)
-#  print(x$XYcoord$y$max)
-  moments$m.cx <- moments$m.cx + x$XYcoord$x$min - 1
-  moments$m.cy <- moments$m.cy + x$XYcoord$y$min - 1
+  moments$m.cy <- moments$m.cy + x$XYcoord$x$min - 1
+  moments$m.cx <- moments$m.cx + x$XYcoord$y$min - 1
 
 
   moments$lesion.number <- as.numeric(row.names(moments))
   featuresLesionCleanPos <- merge(featuresLesionClean, moments)
 
   if (nrow(featuresLesionCleanPos) == 0){
-    featuresLesionCleanPos <- data.frame("lesion.number" = NA, "lesion.surface"= NA, "lesion.perimeter"= NA, "lesion.radius.mean"= NA, "lesion.radius.sd"= NA, "lesion.radius.min"= NA, "lesion.radius.max"= NA, "leaf.surface"= NA, "m.cx"= NA, "m.cy"= NA, "m.majoraxis"= NA, "m.eccentricity"= NA, "m.theta"= NA)
+    featuresLesionCleanPos <- data.frame("lesion.number" = 0, "lesion.surface"= 0, "lesion.perimeter"= 0, "lesion.radius.mean"= 0, "lesion.radius.sd"= 0, "lesion.radius.min"= 0, "lesion.radius.max"= 0, "leaf.surface"= 0, "m.cx"= 0, "m.cy"= 0, "m.majoraxis"= 0, "m.eccentricity"= 0, "m.theta"= 0)
   }
 
   outputDF <- data.frame(image=filename,leaf.number = x$leafNum, lesion.status="keep", featuresLesionCleanPos, stringsAsFactors=FALSE)
@@ -196,10 +212,12 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   ## note: tests and calculations are performed on eroded objects
   brush <- makeBrush(rv$leaf_border_size,  shape = 'disc')
   ## next line added to remove parasitic lines due to scan (delete for normal scan)
-#  if (rv$rmScanLine == TRUE){
-#    brush2 <- makeBrush(rv$leaf_border_size*2+1,  shape = 'disc') ; maskLeaf <- dilate(maskLeaf, brush2) ; maskLeaf <- erode(maskLeaf,  brush2)
-#  }
-  maskLeaf <- erode(maskLeaf,  brush)
+  if (rv$rmScanLine == TRUE){
+    brush2 <- makeBrush(rv$leaf_border_size*2+1,  shape = 'disc')
+    maskLeaf <- dilate(maskLeaf, brush2) ; maskLeaf <- erode(maskLeaf,  brush2)
+  }else{
+    maskLeaf <- erode(maskLeaf,  brush)
+  }
 
   ## segmentation
   maskLeaf <- bwlabel(maskLeaf)
@@ -223,7 +241,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   li <- lapply(as.numeric(row.names(featuresLeaf)), extractLeaf, maskLeaf, imageBackgroundBlack, surfaceLeaves)
 
   ## analyse des leafs
-  analyse.li <- lapply(li,  analyseLeaf,  lda1 = lda1,  lesion = lesion, filename = filename)
+  analyse.li <- lapply(li,  analyseLeaf,  lda1 = lda1,  lesion = lesion, limb = limb, filename = filename)
 
   # print both sample and lesion images
   jpeg(jpegfile,
@@ -258,7 +276,9 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
        height = heightSize,
        units = "px")
   par( mfrow = c(1,1) )
-  display(image, method = "raster")
+  plot(image, method = "raster")
+#  points(result$m.cx, result$m.cy, pch='+', cex=2, col="blue")
+
   dev.off()
 
   write.table(
@@ -371,7 +391,7 @@ observe({
 ############################################
 
 validate_INT <- function(inputValue,name) {
-  if(!is.numeric(inputValue) || (inputValue <= 0) || is.null(inputValue)){
+  if(!is.numeric(inputValue) || (inputValue <= 0) || is.na(inputValue)){
     rv$codeValidationInt <- 0
     rv$warning <- HTML(paste0("Please input a number >= 0 for <b>",name,"</b> !"))
     feedbackWarning(
@@ -379,6 +399,7 @@ validate_INT <- function(inputValue,name) {
       condition = inputValue < 0,
       text = "Warning please enter 0 < value"
     )
+    updateNumericInput(session,name, value = 1)
   }else{
     rv$codeValidationInt <- 1
   }
@@ -418,7 +439,10 @@ observeEvent(input$lesion_min_size,{
 ###### lesion_max_size
 observeEvent(input$lesion_max_size,{
   validate_INT(input$lesion_max_size, "lesion_max_size")
-  rv$lesion_max_size <- as.numeric(input$lesion_max_size)
+  if (!is.na(input$lesion_min_size) && (is.na(input$lesion_max_size) || input$lesion_min_size > input$lesion_max_size)){
+    updateNumericInput(session,"lesion_max_size", value = as.numeric(input$lesion_min_size)+1)
+    rv$lesion_max_size <- as.numeric(input$lesion_min_size)+1
+  }
 })
 
 ###### lesion_border_size
@@ -435,11 +459,69 @@ output$warning <- renderUI({
   rv$warning
 })
 
-#output$value <- renderPrint({
-#  values = values()
-#  values()
-#})
 
+######### parallel mode
+observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
+  rv$parallelMode <- input$parallelMode
+  max_no_cores <- as.numeric(max(1, detectCores() - 2))
+
+  if (is.na(input$parallelThreadsNum)){
+    updateNumericInput(session,"parallelThreadsNum", value = max_no_cores)
+    rv$parallelThreadsNum <- max_no_cores
+  }else if (as.numeric(input$parallelThreadsNum) > max_no_cores){
+    updateNumericInput(session,"parallelThreadsNum", value = max_no_cores)
+    rv$parallelThreadsNum <- max_no_cores
+  }else if (as.numeric(input$parallelThreadsNum) < 1){
+    updateNumericInput(session,"parallelThreadsNum", value = 1)
+    rv$parallelThreadsNum <- 1
+  }else{
+    rv$parallelThreadsNum <- as.numeric(input$parallelThreadsNum)
+  }
+})
+
+######### Blur
+observeEvent(input$blur_value,{
+
+  if (is.na(input$blur_value)){
+    updateNumericInput(session,"blur_value", value = 0)
+    rv$blur_value <- 0
+  }else if (as.numeric(input$blur_value) > 5){
+    updateNumericInput(session,"blur_value", value = 5)
+    rv$blur_value <- 5
+  }else if (as.numeric(input$blur_value) < 0){
+    updateNumericInput(session,"blur_value", value = 0)
+    rv$blur_value <- 0
+  }else{
+    rv$blur_value <- as.numeric(input$blur_value)
+  }
+})
+
+######### rm edge lesion
+observeEvent(input$rmEdge,{
+  rv$rmEdge <- input$rmEdge
+})
+######### rm Scan Line
+observeEvent(input$rmScanLine,{
+  rv$rmScanLine <- input$rmScanLine
+})
+
+
+######### Eccentricity
+observeEvent(c(input$rmEccentric,input$lesion_eccentric),{
+  rv$rmEccentric <- input$rmEccentric
+  if (is.na(input$lesion_eccentric)){
+    updateNumericInput(session,"lesion_eccentric", value = 0.99,)
+    rv$lesion_eccentric <- 0.99
+  }else if (as.numeric(input$lesion_eccentric) > 1){
+    updateNumericInput(session,"lesion_eccentric", value = 1,)
+    rv$lesion_eccentric <- 1
+  }else if (as.numeric(input$lesion_eccentric) < 0.1){
+    updateNumericInput(session,"lesion_eccentric", value = 0.1)
+    rv$lesion_eccentric <- 0.1
+  }else{
+    rv$lesion_eccentric <- as.numeric(input$lesion_eccentric)
+  }
+})
 
 ############################################
 ## run analysis
@@ -463,13 +545,13 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
   progress <<- shiny::Progress$new()
   on.exit(progress$close())
-  progress$set(message = 'Making Analysis, please wait\n', value = 0)
+  progress$set(message = 'Analysis start, please wait', value = 0)
 
 
   if (rv$parallelMode == TRUE){
 
   # Start parallel session
-  progress$inc(c/nbfiles, detail = paste("start parallel analysis with ", rv$parallelThreadsNum, " cores"))
+  progress$inc(c/nbfiles, detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
 
   cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK")
   registerDoParallel(cl)
@@ -499,7 +581,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     # if not cluster mode do sample by sample on one core
     progress$inc(c/nbfiles, detail = paste("start one sample analysis with 1 cores"))
     for (imageFile in listFiles){
-      progress$inc(c / nbfiles, detail = paste("analysis leaf ", c, "/", nbfiles))
+      progress$inc(c/nbfiles, detail = paste("analysis leaf ", c, "/", nbfiles))
       c <- c + 1
       analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageFile)
 
@@ -555,9 +637,9 @@ output$contents <- DT::renderDataTable({
 })
 
 
-output$plotcurrentImage <- renderPlot({
+output$plotcurrentImage <- renderDisplay({
   if ( is.null(rv$plotcurrentImage)) return(NULL)
-  plot(rv$plotcurrentImage)
+  display(rv$plotcurrentImage)
 #  color <- ifelse(rv$loadCSVcurrentImage$keepLesion == "keep", "green", "red")
 #  points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=2, col=color)
 })
@@ -591,12 +673,12 @@ observeEvent(input$contents_rows_selected,{
         column(width = 1, offset = 0,
           actionButton("actionPrevious", "", icon = icon("backward"), width = "50px")
         ),
-       column(width = 5, offset = 0,
-         img(src= paste0("Original/",currentImage()),width='100%',height='100%')
-       ),
-        column(width = 5, offset = 0,
-          img(src= paste0("LesionColor/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
-#          plotOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
+#       column(width = 5, offset = 0,
+#         img(src= paste0("Original/",currentImage()),width='100%',height='100%')
+#       ),
+        column(width = 10, offset = 0,
+#          img(src= paste0("LesionColor/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
+          displayOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
         ),
         column(width = 1, offset = 0,
           actionButton("actionNext", "", icon = icon("forward"), width = "50px")
@@ -628,30 +710,6 @@ observeEvent(input$actionPrevious,{
   }
   dataTableProxy("contents") %>%
   selectRows(newRow)
-})
-
-######### parallel mode
-observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
-  rv$parallelMode <- input$parallelMode
-  max_no_cores <- as.numeric(max(1, detectCores() - 2))
-  if (as.numeric(input$parallelThreadsNum) > max_no_cores){
-    updateNumericInput(session,"parallelThreadsNum", value = max_no_cores, max = max_no_cores)
-    rv$parallelThreadsNum <- max_no_cores
-  }else if (as.numeric(input$parallelThreadsNum) < 1){
-    updateNumericInput(session,"parallelThreadsNum", value = 1, max = max_no_cores)
-    rv$parallelThreadsNum <- 1
-  }else{
-    rv$parallelThreadsNum <- as.numeric(input$parallelThreadsNum)
-  }
-})
-
-######### rm edge lesion
-observeEvent(input$rmEdge,{
-  rv$rmEdge <- input$rmEdge
-})
-######### rm Scan Line
-observeEvent(input$rmScanLine,{
-  rv$rmScanLine <- input$rmScanLine
 })
 
 
