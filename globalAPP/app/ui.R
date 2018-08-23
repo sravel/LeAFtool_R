@@ -27,7 +27,7 @@
 
 # list of packages required
 list.of.packages <- c("shiny","shinythemes","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
-                      "parallel","foreach","future","shinyFeedback","colourpicker","shinyhelper")
+                      "parallel","foreach","future","shinyFeedback","colourpicker","shinyhelper", "shinyjqui")
 
 
 #checking missing packages from list
@@ -66,6 +66,14 @@ library(parallel)
 library(doParallel)
 #library(doSNOW)
 
+
+library(ggplot2)
+library("jpeg")
+library("grid")
+library(Cairo)   # For nicer ggplot2 output when deployed on Linux
+
+library(shinyjqui)
+
 set_wd <- function() {
   library(rstudioapi) # make sure you have it installed
   current_path <- getActiveDocumentContext()$path
@@ -97,6 +105,7 @@ sidebar <- dashboardSidebar(
     menuItem("Home", tabName = "tabHome", icon = icon("home")),
     menuItem("Calibration", tabName = "tabCalibration", icon = icon("balance-scale")),
     menuItem("Analysis", tabName = "tabAnalysis", icon = icon("pagelines")),
+    menuItem("Edit", tabName = "tabEdit", icon = icon("edit")),
     menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard"))
   )
   # actionButton('close', "Close", class = "btn btn-danger",onclick = "setTimeout(function(){window.close();},500);")
@@ -125,6 +134,9 @@ body <- dashboardBody(
 
     # add tab for analysis
     source(file.path("ui_code", "tabAnalysisUI.R"), local = TRUE, chdir = TRUE)$value,
+
+    # add tab for edit
+    source(file.path("ui_code", "tabEditUI.R"), local = TRUE, chdir = TRUE)$value,
 
     # other tab
     tabItem(

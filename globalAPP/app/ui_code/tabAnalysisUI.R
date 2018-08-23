@@ -135,7 +135,7 @@ tabItem(
                 ),
                 column(width = 6, offset = 0,
                   tags$label("bodies"),
-                  colourInput("lesion_color_bodies",  label = "", value = "red",
+                  colourInput("lesion_color_bodies",  label = "", value = "white",
                               palette = "limited", allowedCols = NULL,
                               allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
                helper(icon = "question",

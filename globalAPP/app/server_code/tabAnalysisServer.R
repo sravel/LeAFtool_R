@@ -60,22 +60,22 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
   f <- x$leaf
   # replacement of the background by limb
-  df6 <-
-    data.frame(
-      red = as.numeric(imageData(f)[, , 1]),
-      green = as.numeric(imageData(f)[, , 2]),
-      blue = as.numeric(imageData(f)[, , 3])
-    )
-  df6$predict <- predict(lda1, df6)$class
-  df.limb <- df6[df6$predict==limb,]
-  black.background <- df6$red+df6$green+df6$blue==0
-  mean.limb <- apply(df.limb[1:3],2,mean)
-  df6[black.background,1] <- mean.limb[1]
-  df6[black.background,2] <- mean.limb[2]
-  df6[black.background,3] <- mean.limb[3]
-  imageData(f)[,,1] <- df6$red
-  imageData(f)[,,2] <- df6$green
-  imageData(f)[,,3] <- df6$blue
+#  df6 <-
+#    data.frame(
+#      red = as.numeric(imageData(f)[, , 1]),
+#      green = as.numeric(imageData(f)[, , 2]),
+#      blue = as.numeric(imageData(f)[, , 3])
+#    )
+#  df6$predict <- predict(lda1, df6)$class
+#  df.limb <- df6[df6$predict==limb,]
+#  black.background <- df6$red+df6$green+df6$blue==0
+#  mean.limb <- apply(df.limb[1:3],2,mean)
+#  df6[black.background,1] <- mean.limb[1]
+#  df6[black.background,2] <- mean.limb[2]
+#  df6[black.background,3] <- mean.limb[3]
+#  imageData(f)[,,1] <- df6$red
+#  imageData(f)[,,2] <- df6$green
+#  imageData(f)[,,3] <- df6$blue
 
   # blur image or not
   if (rv$blur_value != 0){
@@ -136,6 +136,9 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
   featuresLesionClean <- as.data.frame(featuresLesion)
 
+#  print(paste(x$leafNum, x$leaf.surface, sep = "   "))
+  if (is.na(x$leaf.surface)) x$leaf.surface <- 0
+
   featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
 
   featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
@@ -168,6 +171,11 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   print("RUNNING")
   if (!file.exists(pathResult))
     dir.create(pathResult)
+
+  filename <- strsplit(imageFile, ".", fixed = TRUE)[[1]][1]
+  print(filename)
+
+  fileRData <- paste(pathResult, '/', filename, ".RData", sep = '')
 
   filename <- strsplit(imageFile, ".", fixed = TRUE)[[1]][1]
   jpegfile <- paste(pathResult, '/', filename, "_both.jpeg", sep = '')
@@ -231,6 +239,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   }
   # size of leafs
   surfaceLeaves <- featuresLeaf["s.area"]
+#  print(paste("surface leaves: ", surfaceLeaves))
 
 
   ## removal of the background
@@ -251,8 +260,10 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   par( mfrow = c(2,1) )
   display(image, method="raster")
 
-  ## sortie des résultats et coloration des lésions
+  # save Analysis to RData file
+  save(analyse.li,li ,file=fileRData)
 
+  ## sortie des résultats et coloration des lésions
   for (i in 1:length(li)){
     if (i == 1){
       result <- analyse.li[[i]]$outputDF
@@ -276,7 +287,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
        height = heightSize,
        units = "px")
   par( mfrow = c(1,1) )
-  plot(image, method = "raster")
+  display(image, method = "raster")
 #  points(result$m.cx, result$m.cy, pch='+', cex=2, col="blue")
 
   dev.off()
@@ -299,7 +310,8 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
 
  ag <- merge(ag.count, ag.surface)
   ag$pourcent.lesions <- ag$lesion.surface / ag$leaf.surface * 100
-  ag$nbLesions[ag$lesion.surface == 0] <- 0
+  ag$lesion.nb[ag$lesion.surface == 0] <- 0
+  ag$lesion.surface[ag$lesion.surface == 0] <- 0
 #  print(ag)
 
   write.table(
@@ -396,7 +408,10 @@ validate_INT <- function(inputValue,name) {
     rv$warning <- HTML(paste0("Please input a number >= 0 for <b>",name,"</b> !"))
     feedbackWarning(
       inputId = name,
-      condition = inputValue < 0,
+      condition = all(c(
+        inputValue <= 0,
+        inputValue  %% 1 == 0
+      )),
       text = "Warning please enter 0 < value"
     )
     updateNumericInput(session,name, value = 1)
@@ -533,6 +548,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   rv$exitStatusAna <- 0
   rv$lesion_color_border <- input$lesion_color_border
   rv$lesion_color_bodies <- input$lesion_color_bodies
+  rv$displayableData <- DT::datatable(data = NULL)
 
 
   ############################ RUN ANALYSIS
@@ -605,6 +621,13 @@ output$analysisFinish <- renderText({
   rv$exitStatusAna
 })
 
+img_uri <- function(x) {
+  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
+#  sprintf("<img src='%s' height='60'></img>", x)
+}
+
+
+
 output$contents <- DT::renderDataTable({
 #  # resultAnalysis()
 #   rv$dirSamples <- "~/Bayer/AnalyseImagesV4/Exemple1/Images/"
@@ -612,37 +635,45 @@ output$contents <- DT::renderDataTable({
   if (rv$exitStatusAna == 1){
 
     LeafNames <- list.files(rv$dirSamples, full.names=FALSE)
+
+    rv$LeafNamesFull <-  unlist(lapply(list.files(rv$dirSamples, full.names=TRUE),img_uri), use.names=FALSE)
+#    print(rv$LeafNamesFull)
+#    print(class(rv$LeafNamesFull))
     LeafNames2 <- list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg")
+    rv$LeafNames2Full <-  unlist(lapply(list.files(rv$dirSamplesOut, full.names=TRUE, pattern = "*_lesion.jpeg"),img_uri), use.names=FALSE)
+
 
     if (LeafNames != '' && LeafNames2 != '' && length(LeafNames) == length(LeafNames2)){
-      addResourcePath("Original",rv$dirSamples) # Images are located outside shiny App
-      addResourcePath("LesionColor",rv$dirSamplesOut) # Images are located outside shiny App
-      LeafTable <- data.frame(LeafNames,LeafNames2,stringsAsFactors = FALSE)
-      LeafTable <- within(LeafTable, thumbnail <- paste0("<img src='","Original/",LeafTable$LeafNames,"' height='60'></img>"))
-      LeafTable <- within(LeafTable, thumbnail2 <- paste0("<img src='","LesionColor/",LeafTable$LeafNames2 ,"' height='60'></img>"))
+#      addResourcePath("Original",rv$dirSamples) # Images are located outside shiny App
+#      addResourcePath("LesionColor",rv$dirSamplesOut) # Images are located outside shiny App
 
-      rv$responseDataFilter2 <- LeafTable[,c(1,3,4)]
+      rv$responseDataFilter <- data.frame(LeafNames = LeafNames,
+                              Original = rv$LeafNamesFull,
+                              LesionColor = rv$LeafNames2Full,stringsAsFactors = FALSE)
+#      print(rv$responseDataFilter)
 
-      rv$displayableData<-DT::datatable(data = as.data.frame(rv$responseDataFilter2, stringAsFactors = FALSE, row.names = NULL),
+
+      displayableData<-DT::datatable(data = as.data.frame(rv$responseDataFilter, stringAsFactors = FALSE, row.names = NULL),
 
                                      escape=FALSE,selection="single",rownames=FALSE,colnames=c("FileName","Original","LesionColor"),
                                      style = "bootstrap",
                                      options = list(
                                        paging=TRUE,searching = TRUE,ordering=TRUE,scrollY = 750,scrollCollapse=TRUE,server = FALSE
                                      ))
-      ifelse(!is.null(rv$displayableData),return(rv$displayableData),return(NULL))
+
+    ifelse (!is.null(displayableData),return(displayableData),return(NULL))
     }
   }
 
 })
 
 
-output$plotcurrentImage <- renderDisplay({
-  if ( is.null(rv$plotcurrentImage)) return(NULL)
-  display(rv$plotcurrentImage)
+#output$plotcurrentImage <- renderDisplay({
+#  if ( is.null(rv$plotcurrentImage)) return(NULL)
+#  display(rv$plotcurrentImage)
 #  color <- ifelse(rv$loadCSVcurrentImage$keepLesion == "keep", "green", "red")
 #  points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=2, col=color)
-})
+#})
 
 
 currentImage <- reactive({
@@ -652,16 +683,18 @@ currentImage <- reactive({
       return("")
 
     #Load image for plot
-    lesionImg <- strsplit(rv$responseDataFilter2[imIndex,"LeafNames"], ".", fixed = TRUE)[[1]][1]
-    rv$plotcurrentImage <- readImage(paste0(rv$dirSamplesOut,"/",lesionImg,"_lesion.jpeg"))
-    rv$loadCSVcurrentImage <- read.csv(paste0(rv$dirSamplesOut, "/",lesionImg,"_All_lesions.csv"),header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-    rv$responseDataFilter2[imIndex,"LeafNames"]
+#    lesionImg <- strsplit(rv$responseDataFilter[imIndex,"LeafNames"], ".", fixed = TRUE)[[1]][1]
+    lesionImgPath <- strsplit(rv$responseDataFilter[imIndex,"LeafNames"], ".", fixed = TRUE)[[1]][1]
+#    rv$plotcurrentImage <- readImage(paste0(rv$dirSamplesOut,"/",lesionImg,"_lesion.jpeg"))
+#    rv$loadCSVcurrentImage <- read.csv(paste0(rv$dirSamplesOut, "/",lesionImg,"_All_lesions.csv"),header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+    rv$responseDataFilter[imIndex,"LeafNames"]
 
 
 })
 
 observeEvent(input$contents_rows_selected,{
   lesionImg <- strsplit(currentImage(), ".", fixed = TRUE)[[1]][1]
+  imIndex <- input$contents_rows_selected
 
   showModal(      # Information Dialog Box
     modalDialog(
@@ -673,12 +706,14 @@ observeEvent(input$contents_rows_selected,{
         column(width = 1, offset = 0,
           actionButton("actionPrevious", "", icon = icon("backward"), width = "50px")
         ),
-#       column(width = 5, offset = 0,
-#         img(src= paste0("Original/",currentImage()),width='100%',height='100%')
-#       ),
-        column(width = 10, offset = 0,
-#          img(src= paste0("LesionColor/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
-          displayOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
+       column(width = 5, offset = 0,
+          HTML(gsub("height='60'","width='100%'",rv$responseDataFilter[imIndex,"Original"]))
+#         img(src= paste0(rv$dirSamples,"/",currentImage()),width='100%',height='100%')
+       ),
+        column(width = 5, offset = 0,
+           HTML(gsub("height='60'","width='100%'",rv$responseDataFilter[imIndex,"LesionColor"]))
+#          img(src= paste0(rv$dirSamplesOut,"/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
+#          displayOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
         ),
         column(width = 1, offset = 0,
           actionButton("actionNext", "", icon = icon("forward"), width = "50px")
@@ -690,7 +725,7 @@ observeEvent(input$contents_rows_selected,{
 
 observeEvent(input$actionNext,{
   rowSelected <- input$contents_rows_selected
-  nbImage <- nrow(rv$responseDataFilter2)
+  nbImage <- nrow(rv$responseDataFilter)
   if(!is.null(rowSelected) && rowSelected < nbImage)
     newRow <- rowSelected + 1
   else newRow <- 1
@@ -701,7 +736,7 @@ observeEvent(input$actionNext,{
 
 observeEvent(input$actionPrevious,{
   rowSelected <- input$contents_rows_selected
-  nbImage <- nrow(rv$responseDataFilter2)
+  nbImage <- nrow(rv$responseDataFilter)
   if (!is.null(rowSelected) && rowSelected == 1){
     newRow <- nbImage
   }

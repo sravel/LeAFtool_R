@@ -39,12 +39,18 @@ rv <<- reactiveValues(
                         dirCalibration = NULL, outCalibrationTable = NULL,
                         outCalibrationCSV = NULL, plotFileCalibration = NULL,
                         # for analysis
-                       fileRData = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning.RData"),
-                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple2/samples/"),
-                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
+#                       fileRData = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning.RData"),
+#                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple2/samples/"),
+#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
+#                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/learning/learning.RData"),
+#                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/samples/"),
+#                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/results/"),
+                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/learning/learning.RData"),
+                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/samples/"),
+                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/results/"),
 #                       fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/test_size/"),
-#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/results/"),
+#                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/sample4/"),
+#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
 #                         fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
 #                         dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
 #                         dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
@@ -64,18 +70,21 @@ rv <<- reactiveValues(
                         lesion_max_size = 10000,
                         lesion_border_size = 3,
                         lesion_color_border = "green",
-                        lesion_color_bodies = "red",
+                        lesion_color_bodies = "white",
                         rmEdge = FALSE,
                         rmEccentric = FALSE,
                         lesion_eccentric = 0.99,
 
-
-
                         # both
-#                        fileRData= NULL,
+#                       fileRData= NULL,
                         parallelMode = FALSE,
                         parallelThreadsNum = max_no_cores,
-                        blur_value = 0
+                        blur_value = 0,
+
+                        # edit
+#                        dirInResult = NULL
+                        dirInResult = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
+                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/exemple2/results/"), full.names=FALSE, pattern = "*_lesion.jpeg")
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS
@@ -159,6 +168,11 @@ shinyServer(function(input, output, session) {
 
   # Load functions for tab Home
     source(file.path("server_code", "tabHomeServer.R"), local = TRUE)$value
+
+  # Load functions for tab Edit
+    source(file.path("server_code", "tabEditServer.R"), local = TRUE)$value
+
+
   # output$debug <- renderPrint({
   #   sessionInfo()
   # })

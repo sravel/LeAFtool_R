@@ -102,3 +102,8 @@
 	width: 40px;
 	display:inline-block;
 }
+
+.content{
+	overflow-y: auto;
+	height: 94vh;
+}
