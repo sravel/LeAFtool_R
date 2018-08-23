@@ -549,6 +549,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   rv$lesion_color_border <- input$lesion_color_border
   rv$lesion_color_bodies <- input$lesion_color_bodies
   rv$displayableData <- DT::datatable(data = NULL)
+  rv$dirInResult <- rv$dirSamplesOut
 
 
   ############################ RUN ANALYSIS
