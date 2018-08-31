@@ -82,9 +82,10 @@ rv <<- reactiveValues(
                         blur_value = 0,
 
                         # edit
-#                        dirInResult = NULL
-                        dirInResult = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
-                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/exemple2/results/"), full.names=FALSE, pattern = "*_lesion.jpeg")
+                        dirInResult = NULL,
+                        loadImageEdit = NULL
+#                        dirInResult = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
+#                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/exemple2/results/"), full.names=FALSE, pattern = "*_lesion.jpeg")
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS

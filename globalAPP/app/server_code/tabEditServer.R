@@ -43,13 +43,20 @@ output$dirInResult <- renderText({
 })
 
 observeEvent(input$dirInResult,{
-  home <- normalizePath(allVolumesAvail[input$dirInResult$root])
-  rv$dirInResult <- file.path(home, paste(unlist(input$dirInResult$path[-1],"/"), collapse = .Platform$file.sep))
+  if (!is.integer(input$dirInResult))
+  {
+    print("toto")
+    home <- normalizePath(allVolumesAvail[input$dirInResult$root])
+    rv$dirInResult <- file.path(home, paste(unlist(input$dirInResult$path[-1],"/"), collapse = .Platform$file.sep))
+  }
 })
 
 observe({
-  rv$loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
-  updateSelectInput(session, "imageEdit", label = NULL, choices = rv$loadImageEdit)
+  if (!is.null(rv$dirInResult))
+  {
+    rv$loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
+    updateSelectInput(session, "imageEdit", label = NULL, choices = rv$loadImageEdit)
+  }
 })
 
 

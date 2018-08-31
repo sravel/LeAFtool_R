@@ -341,11 +341,14 @@ output$dirSamples <- renderText({
 })
 
 updateDirAnalysis <- observeEvent(input$dirInSamples,{
-  home <- normalizePath(allVolumesAvail[input$dirInSamples$root])
-  rv$dirSamples <- file.path(home, paste(unlist(input$dirInSamples$path[-1]), collapse = .Platform$file.sep))
-  rv$exitStatusAna -1
-  rv$messAna <- NULL
-  rv$errAna <- NULL
+  if (!is.integer(input$dirInSamples))
+  {
+    home <- normalizePath(allVolumesAvail[input$dirInSamples$root])
+    rv$dirSamples <- file.path(home, paste(unlist(input$dirInSamples$path[-1]), collapse = .Platform$file.sep))
+    rv$exitStatusAna -1
+    rv$messAna <- NULL
+    rv$errAna <- NULL
+  }
 })
 
 ############################################
@@ -364,11 +367,14 @@ output$dirOutAnalysis <- renderText({
 })
 
 updateDirOutAnalysis <- observeEvent(input$dirOut,{
-  home <- normalizePath(allVolumesAvail[input$dirOut$root])
-  rv$dirSamplesOut <- file.path(home, paste(unlist(input$dirOut$path[-1],"/"), collapse = .Platform$file.sep))
-  rv$exitStatusAna <- -1
-  rv$messAna <- NULL
-  rv$errAna <- NULL
+  if (!is.integer(input$dirOut))
+  {
+    home <- normalizePath(allVolumesAvail[input$dirOut$root])
+    rv$dirSamplesOut <- file.path(home, paste(unlist(input$dirOut$path[-1],"/"), collapse = .Platform$file.sep))
+    rv$exitStatusAna <- -1
+    rv$messAna <- NULL
+    rv$errAna <- NULL
+  }
 })
 
 ############################################
@@ -383,7 +389,10 @@ output$fileRData <- renderText({
 })
 
 observeEvent(input$fileRDataIn,{
+  if (!is.integer(input$fileRDataIn))
+  {
     rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath))
+  }
 })
 
 observe({
