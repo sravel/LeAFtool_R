@@ -28,141 +28,137 @@
 tabItem(
   # Tab for calibration input/output
   tabName = "tabAnalysis",
+
+  # BOX for input
   fluidRow(
     box(
       title = "Analysis Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
       column(width = 5,
-             fluidRow( class = "spaceRow",
-               shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "dirInSamples"),
-               verbatimTextOutput("dirSamples", placeholder = TRUE)
+      # DIRECTORIES Input
+        fluidRow( class = "spaceRow",
+          shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+            helper(icon = "question",
+                type = "markdown",
+                content = "dirInSamples"),
+          verbatimTextOutput("dirSamples", placeholder = TRUE)
+        ),
+        fluidRow( class = "spaceRow",
+          shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+            helper(icon = "question",
+                type = "markdown",
+                content = "dirOut"),
+          verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
+        ),
+        fluidRow( class = "spaceRow",
+          shinyFilesButton('fileRDataIn', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-info") %>%
+            helper(icon = "question",
+                type = "markdown",
+                content = "fileRDataIn"),
+          verbatimTextOutput('fileRData', placeholder = TRUE),
 
-             ),
-             fluidRow( class = "spaceRow",
-               shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "dirOut"),
-               verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
-             ),
-             fluidRow( class = "spaceRow",
-               shinyFilesButton('fileRDataIn', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-info") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "fileRDataIn"),
-               verbatimTextOutput('fileRData', placeholder = TRUE),
-
-#               conditionalPanel(
-#                 condition = "input.dirSamples && input.dirOut && input.fileRData && output.codeValidationInt == 1", br(),
-                 actionButton("runButtonAnalysis", "Run Analysis!")
-#               )
-             )
+          conditionalPanel(
+            condition = "input.dirSamples && input.dirOut && input.fileRData && output.codeValidationInt == 1", br(),
+            actionButton("runButtonAnalysis", "Run Analysis!")
+          )
+        )
       ),
       column(width = 2,
-      ### Image parameters
-            h4("Image parameters:"),
-              numericInput("blur_value", "Blur image:", value = 0 , min = 0, max = 5, step = 0.1, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "blur_value"),
-              checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "rmScanLine"),
-      ### Leaf parameters
-             h4("Leaf parameters:"),
-             numericInput("leaf_min_size", "Leaf min size:", value = 10, min=1,  width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "leaf_min_size"),
-
-             numericInput("leaf_border_size", "Leaf border size:", value = 3, min=1, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "leaf_border_size")
+        ### Image parameters
+        h4("Image parameters:"),
+          numericInput("blur_value", "Blur image:", value = 0 , min = 0, max = 5, step = 0.1, width = "150px") %>%
+            helper(icon = "question",
+                  type = "markdown",
+                  content = "blur_value"),
+          checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
+            helper(icon = "question",
+                  type = "markdown",
+                  content = "rmScanLine"),
+        ### Leaf parameters
+        h4("Leaf parameters:"),
+          numericInput("leaf_min_size", "Leaf min size:", value = 10, min=1,  width = "150px") %>%
+            helper(icon = "question",
+                  type = "markdown",
+                  content = "leaf_min_size"),
+          numericInput("leaf_border_size", "Leaf border size:", value = 3, min=1, width = "150px") %>%
+            helper(icon = "question",
+                  type = "markdown",
+                  content = "leaf_border_size")
       ),
       column(width = 2,offset = 0,
       ### Lesion parameters
-             h4("Lesion parameters:"),
-             checkboxInput("rmEdge", "Remove edge lesions", value = FALSE, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "rmEdge"),
+        h4("Lesion parameters:"),
+        checkboxInput("rmEdge", "Remove edge lesions", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "rmEdge"),
+        checkboxInput("rmEccentric", "Remove eccentric", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "lesion_eccentric"),
+        conditionalPanel(
+          condition = "input.rmEccentric",
+            numericInput("lesion_eccentric","Eccentric size", value = 0.99, min = 0.01, max = 1, step = 0.01, width = "150px")  %>%
+              helper(icon = "question",
+                    type = "markdown",
+                    content = "lesion_eccentric")
+        ),
+        numericInput("lesion_min_size", "Lesion min size:", value = 10, min=1, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "lesion_min_size"),
+        numericInput("lesion_max_size", "Lesion max size:", value = 10000, min=1, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                 content = "lesion_max_size"),
 
-             checkboxInput("rmEccentric", "Remove eccentric", value = FALSE, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "lesion_eccentric"),
-             conditionalPanel(
-               condition = "input.rmEccentric",
-               numericInput("lesion_eccentric","Eccentric size", value = 0.99, min = 0.01, max = 1, step = 0.01, width = "150px")  %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "lesion_eccentric")
-             ),
-
-             numericInput("lesion_min_size", "Lesion min size:", value = 10, min=1, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "lesion_min_size"),
-
-             numericInput("lesion_max_size", "Lesion max size:", value = 10000, min=1, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "lesion_max_size"),
-
-             numericInput("lesion_border_size", "Lesion border size:", value = 3, min=1, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "lesion_border_size"),
-
-            column(width = 12, offset = 0,
-              fluidRow(
-                tags$label("Lesions color")
-              ),
-              fluidRow( class = "colorRow",
-                column(width = 6, offset = 0,
-                  tags$label("border"),
-                  colourInput("lesion_color_border",  label = "", value = "green",
-                              palette = "limited", allowedCols = NULL,
-                              allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
-               helper(icon = "question",
+        numericInput("lesion_border_size", "Lesion border size:", value = 3, min=1, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "lesion_border_size"),
+        column(width = 12, offset = 0,
+          fluidRow(
+            tags$label("Lesions color")
+          ),
+          fluidRow( class = "colorRow",
+            column(width = 6, offset = 0,
+              tags$label("border"),
+              colourInput("lesion_color_border",  label = "", value = "green",
+                          palette = "limited", allowedCols = NULL,
+                          allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
+                helper(icon = "question",
                       type = "markdown",
                       content = "lesion_color_border")
-
-                ),
-                column(width = 6, offset = 0,
-                  tags$label("bodies"),
-                  colourInput("lesion_color_bodies",  label = "", value = "white",
-                              palette = "limited", allowedCols = NULL,
-                              allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
-               helper(icon = "question",
+            ),
+            column(width = 6, offset = 0,
+              tags$label("bodies"),
+              colourInput("lesion_color_bodies",  label = "", value = "white",
+                          palette = "limited", allowedCols = NULL,
+                          allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
+                helper(icon = "question",
                       type = "markdown",
                       content = "lesion_color_bodies")
-                )
-              )
             )
+          )
+        )
       ),
       column(width = 2, offset = 0,
       ### running parameters
-             h4("Running Mode"),
-             checkboxInput("parallelMode", "Active Parallel mode", value = FALSE, width = "150px") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "parallelMode"),
-
-             conditionalPanel(
-               condition = "input.parallelMode",
-               numericInput("parallelThreadsNum","Number of Threads", value = max_no_cores, min = 1, max = max_no_cores, width = "150px")  %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "parallelThreadsNum")
-             )
+        h4("Running Mode"),
+        checkboxInput("parallelMode", "Active Parallel mode", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "parallelMode"),
+        conditionalPanel(
+          condition = "input.parallelMode",
+            numericInput("parallelThreadsNum","Number of Threads", value = max_no_cores, min = 1, max = max_no_cores, width = "150px")  %>%
+              helper(icon = "question",
+                    type = "markdown",
+                    content = "parallelThreadsNum")
+        )
       )
     )
   ),
+  # BOX ERROR
   fluidRow(
     conditionalPanel(
       condition = 'output.codeValidationInt==0',
@@ -172,6 +168,7 @@ tabItem(
       )
     )
   ),
+  # BOX RESULT
   fluidRow(
     conditionalPanel(
       condition = "output.analysisFinish==1",
