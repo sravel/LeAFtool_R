@@ -52,6 +52,11 @@ extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
   xCoord <- list(min = min(b$x),max = max(b$x))
   yCoord <- list(min = min(b$y),max = max(b$y))
   XYcoord <- list(x = xCoord, y = yCoord)
+#  print(paste("surface leaves EXTRACT : ", surfaceLeaves))
+  if (is.na(surfaceLeaves[i,])) i <- 1
+#  print(paste("surface leaf : ", surfaceLeaves[i,]))
+#  print(paste("leafNum : ", i))
+
   list(b = b, XYcoord = XYcoord, leaf = leaf, leaf.surface = surfaceLeaves[i,], leafNum = i)
 }
 
@@ -137,7 +142,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   featuresLesionClean <- as.data.frame(featuresLesion)
 
 #  print(paste(x$leafNum, x$leaf.surface, sep = "   "))
-  if (is.na(x$leaf.surface)) x$leaf.surface <- 0
+#  if (is.na(x$leaf.surface)) x$leaf.surface <- 0
 
   featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
 
@@ -614,8 +619,18 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     }
   }
 
-  tmpCmd  <- paste0("awk '{if($1 == \"image\"){} else{ print $0}}'  ", rv$dirSamplesOut, "/*_Merge_lesions.csv | sort -k1 |sort -k1,1 -k2n,2n > ",rv$dirSamplesOut,"/merge_ResumeCount.csv")
-  returnvalue  <- system(tmpCmd, intern = TRUE)
+  mymergeddata = multmerge(rv$dirSamplesOut, "*_Merge_lesions.csv")
+
+  write.table(
+    mymergeddata,
+    file = paste0(rv$dirSamplesOut,"/merge_ResumeCount.csv"),
+    quote = FALSE,
+    row.names = FALSE,
+    sep = '\t'
+  )
+
+#  tmpCmd  <- paste0("awk  FNR==1 && NR!=1'{if($1 == \"image\"){} else{ print $0}}'  ", rv$dirSamplesOut, "/*_Merge_lesions.csv | sort -k1 |sort -k1,1 -k2n,2n > ",rv$dirSamplesOut,"/merge_ResumeCount.csv")
+#  returnvalue  <- system(tmpCmd, intern = TRUE)
   rv$exitStatusAna <- 1
 
 
