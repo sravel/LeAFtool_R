@@ -28,32 +28,34 @@
 tabItem(
   # Tab for calibration input/output
   tabName = "tabCalibration",
+
+  # BOX input
   fluidRow(
     box(
       title = "Calibration Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 6,
       column(4,
-             tags$div(class = "calibrationTXT", "Calibration input directory must include sub-folders:",  tags$br(),
-                      tags$ul(
-                        tags$li("limb"),
-                        tags$li("background"),
-                        tags$li("lesion")
-                      )
-             )
+        tags$div(class = "calibrationTXT", "Calibration input directory must include sub-folders:",  tags$br(),
+          tags$ul(
+            tags$li("limb"),
+            tags$li("background"),
+            tags$li("lesion")
+          )
+        )
       ),
       column(8,
         fluidRow( class = "spaceRow",
-             shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
-               helper(icon = "question",
-                      type = "markdown",
-                      content = "dirCalibration")
-#                      bsPopover(id = "dirCalibration", "Select Input folder", "the input folder must have sub-folders", trigger="hover", options = NULL),
+          shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+            helper(icon = "question",
+                  type = "markdown",
+                  content = "dirCalibration")
         ),
         fluidRow(
-               verbatimTextOutput("dirCalibration", placeholder = FALSE)
+          verbatimTextOutput("dirCalibration", placeholder = FALSE)
         )
       )
     )
   ),
+  # BOX ERROR
   fluidRow(
     conditionalPanel(
       condition = "output.codeAna == 0",br(),
@@ -63,6 +65,7 @@ tabItem(
       )
     )
   ),
+  # BOX RESULT
   fluidRow(
     conditionalPanel(
       condition = "output.codeAna == 1",
