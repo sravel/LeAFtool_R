@@ -140,6 +140,13 @@ existDirCalibration <- function(dirCalibration){
   )
 }
 
+multmerge = function(mypath, pattern){
+#  print(mypath)
+  filenames=list.files(path=mypath, full.names=TRUE, pattern = pattern)
+#  print(filenames)
+  datalist = lapply(filenames, function(x){read.csv(file=x,header=T, sep="\t")})
+  Reduce(function(x,y) {rbind(x,y)}, datalist)
+}
 
 ############################################
 ## writing server function
