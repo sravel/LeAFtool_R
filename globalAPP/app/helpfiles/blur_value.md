@@ -1,10 +1,8 @@
-## Remove Scan lines
+## Blur image
 
 ***
 
-Remove lines build by scanner like this:
-
-<img src="../www/exempleScan.jpeg" alt="">
+Apply blur on image if value > 0
 
 ***
 **Info**

@@ -2,7 +2,7 @@
 
 ***
 
-Remove lesion on border of the leafs
+Remove lesion on border of the leaf
 
 <img src="../www/exempleBorder.jpeg" alt="">
 
