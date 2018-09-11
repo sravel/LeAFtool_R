@@ -88,6 +88,7 @@ observeEvent(input$imageEdit, {
     rv$loadCSVcurrentImage <- read.csv(rv$loadCSVcurrentImageName ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
     rv$csv_Merge_lesionsFile <- paste(rv$dirInResult, "/",baseName,"_Merge_lesions.csv", sep = '')
     rv$AG <- read.csv(rv$csv_Merge_lesionsFile ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+    rv$MERGE <- read.csv(paste0(rv$dirInResult,"/merge_ResumeCount.csv") ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
     load(file = paste0(rv$dirInResult, "/",baseName,".RData"), envir = .GlobalEnv)
 #    print(analyse.li)
@@ -112,6 +113,20 @@ DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FAL
 output$AG <- DT::renderDataTable({
 
 DT::datatable(data = as.data.frame(rv$AG , stringAsFactors = FALSE, row.names = NULL),
+
+                                     escape=FALSE,
+                                     selection="single",
+                                     style = "bootstrap",
+                                     filter = "none",
+                                     options = list(
+                                       paging=TRUE,searching = FALSE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
+                                     )
+              )
+})
+
+output$MERGE <- DT::renderDataTable({
+
+DT::datatable(data = as.data.frame(rv$mymergeddata , stringAsFactors = FALSE, row.names = NULL),
 
                                      escape=FALSE,
                                      selection="single",
@@ -281,6 +296,16 @@ updateAll <- function(leaves){
   write.table(
     rv$AG,
     file = rv$csv_Merge_lesionsFile,
+    quote = FALSE,
+    row.names = FALSE,
+    sep = '\t'
+  )
+
+  rv$mymergeddata = multmerge(rv$dirInResult, "*_Merge_lesions.csv")
+
+  write.table(
+    rv$mymergeddata,
+    file = paste0(rv$dirInResult,"/merge_ResumeCount.csv"),
     quote = FALSE,
     row.names = FALSE,
     sep = '\t'
