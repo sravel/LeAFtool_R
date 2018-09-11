@@ -29,49 +29,50 @@
 tabItem(
   # Tab for calibration input/output
   tabName = "tabEdit",
-
-  box(
-      title = "Edit Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
-
+  # BOX SELECT EDIT
+  box( title = "Edit Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
     fluidRow( class = "spaceRow",
       column(width = 3,offset = 0,
-         shinyDirButton(id = 'dirInResult', label = 'Select Input results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
-         helper(icon = "question",
-            type = "markdown",
-            content = "dirInResult"),
-         verbatimTextOutput("dirInResult", placeholder = TRUE)
+        shinyDirButton(id = 'dirInResult', label = 'Select Input results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "dirInResult"),
+        verbatimTextOutput("dirInResult", placeholder = TRUE)
        ),
-       column(width = 3,offset = 0,
+      column(width = 3,offset = 0,
         selectInput("imageEdit", "Sample image:",NULL)
-       )
+      )
     )
   ),
-
-  box(
-      title = "Edit Selection", status = "success",solidHeader = TRUE, collapsible = FALSE, width = 12,
-
+  # BOX EDITION
+  box( title = "Edit Selection", status = "success",solidHeader = TRUE, collapsible = FALSE, width = 12,
     fluidRow( class = "spaceRow",
       column(width = 4,offset = 0,
-       jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
+        jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
       ),
       column(width = 4,offset = 0,
-       jqui_resizable(plotOutput("plotcurrentImageEdit",click = "plot_click",
-                                                        dblclick = "plot_dbclick",
-                                                        brush = "plot_brush",
-                                                        hover = hoverOpts(id = "plot_hover", delay = 50, delayType = c("debounce", "throttle"))
-                                )
-                      )
+        jqui_resizable(
+          plotOutput("plotcurrentImageEdit",click = "plot_click",
+                    dblclick = "plot_dbclick",
+                    brush = "plot_brush",
+                    hover = hoverOpts(id = "plot_hover", delay = 50, delayType = c("debounce", "throttle"))
+          )
+        )
       ),
       column(width = 4,offset = 0,
-       jqui_resizable(plotOutput("zoomcurrentImageEdit"))
+        jqui_resizable(plotOutput("zoomcurrentImageEdit"))
       )
     ),
+    # TABLES
     fluidRow( class = "spaceRow",
       column(width = 12,offset = 0,
-      div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
+        div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
       ),
       column(width = 10,offset = 0,
-      div(DT::dataTableOutput("AG", width = "100%"))
+        div(DT::dataTableOutput("AG", width = "100%"))
+      ),
+      column(width = 10,offset = 0,
+        div(DT::dataTableOutput("MERGE", width = "100%"))
       )
     )
   )

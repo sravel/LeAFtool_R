@@ -28,51 +28,70 @@
 tabItem(# Tab for Home input/output
   tabName = "tabHome",
   fluidRow(
-    box(title = "Count Lesion tools manual", status = "primary", solidHeader = TRUE, collapsible = FALSE, width = 12,
-      fluidRow(column( 4, offset = 0,
-        tags$div( class = "home",
-          "The analysis procedure consists of 2 steps::",
-          tags$br(),
-          tags$ul(tags$li("Calibration"),
-                  tags$li("Analysis"))
+    box(title = "ALAMA 	  Automatic Lesion Analysis Measure Area manual", status = "primary", solidHeader = TRUE, collapsible = FALSE, width = 12,
+      fluidRow(column( 12, offset = 0,
+        withTags(
+          div( class = "home",
+            "http://acronymcreator.net/ace.py " ,br(),
+            "LETAL      Lesion Estimate Tools Area Leaf" ,br(),
+            "         LEThAL 	  Lesion Estimate Tools Area Leaf" ,br(),
+            "         TOMALES 	  TOols Measure Area LESion" ,br(),
+            "         COLLATe 	  COunt Leaf Lesion Area Tools" ,br(),
+            "         TALLIM 	  Tools Area Lesion LImb Measure" ,br(),
+            "         CALLIsTO 	  Count Area Lesion LImb TOols" ,br(),
+            "         MATiLLA 	  MeAsure Tools Leaf Lesion Area" ,br(),
+            "         SkILLET 	  SIze Limb Lesion Estimate Tools" ,br(),
+            "         SLALOM 	  Size LeAf LesiOn Measure" ,br(),
+            "         CLARET 	  Count Lesion AREa Tools" ,br(),
+            "         ALECTO 	  Area LEsion Count TOols" ,br(),
+            "         ALAMA 	  Automatic Lesion Analysis Measure Area" ,br(),
+
+            "         The analysis procedure consists of 2 steps:",
+            br(),
+            ul(
+              li("Calibration"),
+              li("Analysis")
+            )
+          )
         )
       )),
-      fluidRow( column( width = 6, offset = 0,
-          tags$div(
-            class = "calibrationHome",
-            tags$h2("Calibration"),
-            tags$p('Important note: the calibration directory must contain the sub-directory "background", "limb" and "lesion" with these names (case-sensitive).'),
-            tags$p('The current version accepts these three categories of pixels, but the calibration directory can contain more than three subdirectories since the name of the useful subdirectories is specified.'),
-            tags$p('There is no constraint on the name and the number of the calibration image files (the program always reads all the files present in the useful subdirectories).'),
-            tags$p('At the end of the learning phase, three files are created in the calibration directory (the first part of the name these files is the name of the directory with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
+      fluidRow(
+        column( width = 6, offset = 0,
+          withTags(
+            div( class = "calibrationHome",
+              h2("Calibration"),
+              p('Important note: the calibration directory must contain the sub-directory "background", "limb" and "lesion" with these names (case-sensitive).'),
+              p('The current version accepts these three categories of pixels, but the calibration directory can contain more than three subdirectories since the name of the useful subdirectories is specified.'),
+              p('There is no constraint on the name and the number of the calibration image files (the program always reads all the files present in the useful subdirectories).'),
+              p('At the end of the learning phase, three files are created in the calibration directory (the first part of the name these files is the name of the directory with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
+            )
           ),
           tags$div(
             tags$p("Output exemple:"),
             actionButton( "showCalibration", class = "btn-img", img(src = "calibration.png", width = '60%', height = '60%'))
           )
-      ),
+        ),
         column( width = 6, offset = 0,
-          tags$div( class = "analysisHome",
-            tags$h2("Analysis"),
-            tags$p('Analysis parameters:'),
-            tags$ul(
-              tags$li("Samples directory: directory for storing files to be analyzed"),
-              tags$li("Output directory: "),
-              tags$li(".RData file: file created during the calibration phase in the calibration directory"),
-              tags$li("Leaf min size: Minimum area of a leaf"),
-              tags$li("Leaf border size: leaf edge thickness to be removed"),
-              tags$li("Lesion min size: minimum area of a lesion"),
-              tags$li("Lesion border size: thickness of lesion border to dilate / erode"),
-              tags$li("Lesion color output: color of lesions in the analyzed image (0 = black, 1 = white)")
-            ),
-            tags$p(
-              'There is no constraint on the name and the number of the sample images files.'
-            ),
-            tags$p('Note: Surfaces and thicknesses are given in pixels.')
+          withTags(
+            div( class = "analysisHome",
+              h2("Analysis"),
+              p("Analysis parameters:"),
+              ul(
+                li("Samples directory: directory for storing files to be analyzed"),
+                li("Output directory: "),
+                li(".RData file: file created during the calibration phase in the calibration directory"),
+                li("Leaf min size: Minimum area of a leaf"),
+                li("Leaf border size: leaf edge thickness to be removed"),
+                li("Lesion min size: minimum area of a lesion"),
+                li("Lesion border size: thickness of lesion border to dilate / erode"),
+                li("Lesion color output: color of lesions in the analyzed image (0 = black, 1 = white)")
+              ),
+              p("There is no constraint on the name and the number of the sample images files."),
+              p("Note: Surfaces and thicknesses are given in pixels.")
+            )
           ),
           tags$div(
             tags$p("Output exemple:"),
-            # tags$img(paste0("exemple.jpeg"))
             actionButton( "show", class = "btn-img", img(src = "exemple.jpeg", width = '60%', height = '60%'))
           )
         )

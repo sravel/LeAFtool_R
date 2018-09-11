@@ -97,7 +97,7 @@ unlink(logfilename)
 ############################################
 
 # add header
-header <- dashboardHeader(title = "Count Lesion Tools")
+header <- dashboardHeader(title = "ALAMA: Automatic Lesion Analysis Measure Area", titleWidth = 500)
 
 # Sidebar for acces to tab
 sidebar <- dashboardSidebar(
@@ -119,9 +119,9 @@ body <- dashboardBody(
 
   # Loading message
   hidden(
-    div(
+    tags$div(
       id = "loading-content",
-      h2("Loading...")
+      tags$h2("Loading...")
     )
   ),
 
