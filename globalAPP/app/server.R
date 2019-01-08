@@ -45,12 +45,12 @@ rv <<- reactiveValues(
 #                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/learning/learning.RData"),
 #                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/samples/"),
 #                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/results/"),
-                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/learning/learning.RData"),
-                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/samples/"),
-                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/results/"),
-#                       fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/sample4/"),
-#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
+#                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/learning/learning.RData"),
+#                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/samples/"),
+#                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/results/"),
+                       fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
+                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/sample4/"),
+                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
 #                         fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
 #                         dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
 #                         dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
@@ -140,6 +140,7 @@ existDirCalibration <- function(dirCalibration){
   )
 }
 
+# function to merge dataframe
 multmerge = function(mypath, pattern){
 #  print(mypath)
   filenames=list.files(path=mypath, full.names=TRUE, pattern = pattern)
@@ -154,7 +155,7 @@ multmerge = function(mypath, pattern){
 
 shinyServer(function(input, output, session) {
 
-  observe_helpers()
+  observe_helpers() # active help icon
 
   fileReaderData <- reactiveFileReader(500, session,
                                        logfilename, readLines)
@@ -192,7 +193,7 @@ shinyServer(function(input, output, session) {
   })
 
   observeEvent(input$close, {
-    unlink(logfilename)
+#    unlink(logfilename)
     closeAllConnections()
     # stopCluster(cl)
     registerDoSEQ()
@@ -200,7 +201,7 @@ shinyServer(function(input, output, session) {
   })
 
   session$onSessionEnded( function() {
-    unlink(logfilename)
+#    unlink(logfilename)
     closeAllConnections();
     # stopCluster(cl)
     registerDoSEQ()

@@ -27,7 +27,7 @@
 
 # list of packages required
 list.of.packages <- c("shiny","shinythemes","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
-                      "parallel","foreach","future","shinyFeedback","colourpicker","shinyhelper", "shinyjqui")
+                      "parallel","foreach","future","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "rstudioapi")
 
 
 #checking missing packages from list
@@ -61,16 +61,10 @@ library(MASS)
 
 # analysis
 library(foreach)
-#library(future)
-library(parallel)
+library(future)
+#library(parallel)
 library(doParallel)
-#library(doSNOW)
-
-
 library(ggplot2)
-library("jpeg")
-library("grid")
-library(Cairo)   # For nicer ggplot2 output when deployed on Linux
 
 library(shinyjqui)
 
@@ -82,15 +76,10 @@ set_wd <- function() {
 }
 set_wd()
 
+# create log file
 logfilename <<- paste0(currentFilePath,"/debug.txt")
+# remove previous log (not working if multiple instance on same path)
 unlink(logfilename)
-
-##Load functions scripts
-#for(file in list.files(paste(currentFilePath,"R_code",sep = .Platform$file.sep),
-#                       pattern="\\.(r|R)$",
-#                       full.names = TRUE)) {
-#  source(file)
-#}
 
 ############################################
 ## Shiny dashboard start
@@ -143,14 +132,14 @@ body <- dashboardBody(
       tabName = "tabDebug",
       h1("DEBUG"),
       verbatimTextOutput("debug"),
-      conditionalPanel(
-        condition = 'input.runButtonAnalysis',
-        box(
-          title = "LOG", status = "info",solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
-          actionButton('actu', "actualize", class = "btn "),
-          verbatimTextOutput('log', placeholder = TRUE)
-        )
-      ),
+#      conditionalPanel(
+#        condition = 'input.runButtonAnalysis',
+#        box(
+#          title = "LOG", status = "info",solidHeader = TRUE, collapsible = TRUE, collapsed = TRUE,
+#          actionButton('actu', "actualize", class = "btn ")
+#          verbatimTextOutput('log', placeholder = TRUE)
+#        )
+#      ),
       shinythemes::themeSelector()  # <--- Add this somewhere in the UI
     )
   )

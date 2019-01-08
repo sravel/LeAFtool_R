@@ -1,5 +1,5 @@
 
-background      limbe     lesion 
+background       limb     lesion 
      19223      28868       4488 
              LD1       LD2
 red    -9.948855  60.86633

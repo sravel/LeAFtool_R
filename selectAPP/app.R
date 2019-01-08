@@ -41,7 +41,7 @@ bounding.rectangle <- function(mask, object) {
 
 extrait.leaf <- function(i, mask, image.fond.noir) {
   b <<- bounding.rectangle(mask, i)
-  leaf <- image.fond.noir[b$y, b$x,]
+  leaf <<- image.fond.noir[b$y, b$x,]
   mask.leaf <- mask[b$y, b$x]
   leaf[mask.leaf != i] <- 0
   xCoord <- list(min = min(b$x),max = max(b$x))
@@ -121,7 +121,7 @@ server <- function(input, output) {
     nx <- dim(rv$imgBlack)[1]
     ny <- dim(rv$imgBlack)[2]
     plot(rv$imgBlack, all=TRUE)
-    points(rv$sortie$m.cx, rv$sortie$m.cy, pch='+', cex=2, col=rv$sortie$couleur)
+    points(rv$sortie$m.cx, rv$sortie$m.cy, pch='+', cex=0.5, col=rv$sortie$couleur)
   })
 
   output$position <- renderText({
@@ -392,6 +392,13 @@ server <- function(input, output) {
 
     leafLesionDT <- data.frame(image="toto", couleur=couleur, featuresLesion.surfmin, stringsAsFactors=FALSE)
     
+    # print(leafLesionDT$m.cx)
+    leafLesionDT$m.cx <- leafLesionDT$m.cx + XYcoord$y$min
+    print(leafLesionDT$m.cx)
+    
+    # print(leafLesionDT$m.cy)
+    leafLesionDT$m.cy <- leafLesionDT$m.cy + XYcoord$x$min
+    print(leafLesionDT$m.cy)
     # print(XYcoord)
     
     list(features = featuresLesion, maskLesion = maskLesion, leafLesionDT = leafLesionDT)

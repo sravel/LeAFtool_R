@@ -54,11 +54,13 @@ tabItem(
             helper(icon = "question",
                 type = "markdown",
                 content = "fileRDataIn"),
-          verbatimTextOutput('fileRData', placeholder = TRUE),
-
+          verbatimTextOutput('fileRData', placeholder = TRUE)
+        ),
+        fluidRow( class = "spaceRow",
           conditionalPanel(
-            condition = "input.dirSamples && input.dirOut && input.fileRData && output.codeValidationInt == 1", br(),
+            condition = "output.dirSamples && output.dirOutAnalysis && output.fileRData && output.codeValidationInt == 1",
             actionButton("runButtonAnalysis", "Run Analysis!")
+#            verbatimTextOutput('log', placeholder = TRUE)
           )
         )
       ),
@@ -159,15 +161,15 @@ tabItem(
     )
   ),
   # BOX ERROR
-  fluidRow(
-    conditionalPanel(
-      condition = 'output.codeValidationInt==0',
-      box(
-        title = "Warning", status = "warning",solidHeader = TRUE,
-        uiOutput("warning")
-      )
-    )
-  ),
+#  fluidRow(
+#    conditionalPanel(
+#      condition = 'output.codeValidationInt==0',
+#      box(
+#        title = "Warning", status = "warning",solidHeader = TRUE,
+#        uiOutput("warning")
+#      )
+#    )
+#  ),
   # BOX RESULT
   fluidRow(
     conditionalPanel(

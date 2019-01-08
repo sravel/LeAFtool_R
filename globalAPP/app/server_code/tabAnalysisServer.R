@@ -173,7 +173,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 # analysis One scan image
 analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
 
-  print("RUNNING")
+#  print("RUNNING")
   if (!file.exists(pathResult))
     dir.create(pathResult)
 
@@ -539,10 +539,10 @@ observeEvent(input$rmScanLine,{
 observeEvent(c(input$rmEccentric,input$lesion_eccentric),{
   rv$rmEccentric <- input$rmEccentric
   if (is.na(input$lesion_eccentric)){
-    updateNumericInput(session,"lesion_eccentric", value = 0.99,)
+    updateNumericInput(session,"lesion_eccentric", value = 0.99)
     rv$lesion_eccentric <- 0.99
   }else if (as.numeric(input$lesion_eccentric) > 1){
-    updateNumericInput(session,"lesion_eccentric", value = 1,)
+    updateNumericInput(session,"lesion_eccentric", value = 1)
     rv$lesion_eccentric <- 1
   }else if (as.numeric(input$lesion_eccentric) < 0.1){
     updateNumericInput(session,"lesion_eccentric", value = 0.1)
@@ -574,17 +574,15 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   c <- 1
   show("loading-content")
 
-  progress <<- shiny::Progress$new()
+  progress <<- shiny::Progress$new(session, min = 1, max = nbfiles+1)
   on.exit(progress$close())
-  progress$set(message = 'Analysis start, please wait', value = 0)
-
 
   if (rv$parallelMode == TRUE){
 
   # Start parallel session
-  progress$inc(c/nbfiles, detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
+  progress$set(c/nbfiles, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
 
-  cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK")
+  cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK") # retry = 5L, sleep = 30.0
   registerDoParallel(cl)
 
   # Add an entry to the log file
@@ -592,17 +590,13 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     append = TRUE)
 
   res <- foreach(imageFile = listFiles,
-
           .export = c(".GlobalEnv"),
           .combine = c)  %dopar%
           {
-              progress$set(message = 'toto\n', value = c)
-              progress$inc(c/nbfiles, detail = paste("analysis leaf ", c, "/", nbfiles))
-              print(imageFile)
-              analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageFile)
-              c <- c + 1
+              cat(imageFile , file = logfilename, append = TRUE) # write file to log
+              future({analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageFile)}) # use future to prevente error with reactive values
           }
-  print(res)
+#  print(res)
 #  # Close cluster mode
   stopCluster(cl)
   closeAllConnections();
@@ -610,13 +604,14 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   }else{
     c <- 1
     # if not cluster mode do sample by sample on one core
-    progress$inc(c/nbfiles, detail = paste("start one sample analysis with 1 cores"))
+    progress$set(value = 0 , detail = paste("Start samples analysis with 1 cores"))
     for (imageFile in listFiles){
-      progress$inc(c/nbfiles, detail = paste("analysis leaf ", c, "/", nbfiles))
+      progress$set(value = c, message = "Analysis run ", detail = paste("Analysis leaf ", c, "/", nbfiles))
       c <- c + 1
       analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageFile)
 
     }
+    progress$set( value = c, message = "Analysis Finish ")
   }
 
   mymergeddata = multmerge(rv$dirSamplesOut, "*_Merge_lesions.csv")
@@ -628,9 +623,6 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     row.names = FALSE,
     sep = '\t'
   )
-
-#  tmpCmd  <- paste0("awk  FNR==1 && NR!=1'{if($1 == \"image\"){} else{ print $0}}'  ", rv$dirSamplesOut, "/*_Merge_lesions.csv | sort -k1 |sort -k1,1 -k2n,2n > ",rv$dirSamplesOut,"/merge_ResumeCount.csv")
-#  returnvalue  <- system(tmpCmd, intern = TRUE)
   rv$exitStatusAna <- 1
 
 

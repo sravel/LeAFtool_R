@@ -1,2 +1,0 @@
-fichier	leaf	surfaceLeaf	nbLesions	surfaceLesions	pourcent.lesions
-01_cuba5_dpi42_4	1	302500	97	2407	0.795702479338843
