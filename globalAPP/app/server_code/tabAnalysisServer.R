@@ -1,6 +1,6 @@
 #####################################################################################################
 #
-# Copyright 2018 CIRAD-INRA
+# Copyright 2019 CIRAD-INRA
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -171,18 +171,18 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 }
 
 # analysis One scan image
-analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
+analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
 
 #  print("RUNNING")
   if (!file.exists(pathResult))
     dir.create(pathResult)
 
-  filename <- strsplit(imageFile, ".", fixed = TRUE)[[1]][1]
+  filename <- strsplit(imageSamples, ".", fixed = TRUE)[[1]][1]
   print(filename)
 
   fileRData <- paste(pathResult, '/', filename, ".RData", sep = '')
 
-  filename <- strsplit(imageFile, ".", fixed = TRUE)[[1]][1]
+  filename <- strsplit(imageSamples, ".", fixed = TRUE)[[1]][1]
   jpegfile <- paste(pathResult, '/', filename, "_both.jpeg", sep = '')
   jpegfileOnly <- paste(pathResult, '/', filename, "_lesion.jpeg", sep = '')
 
@@ -195,7 +195,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageFile) {
   lesion <- names(lda1$prior)[3]
 
   ## reading the source image
-  sourceImage <- paste(pathImages, '/', imageFile, sep = '')
+  sourceImage <- paste(pathImages, '/', imageSamples, sep = '')
   image <- readImage(sourceImage)
   widthSize = dim(image)[1]
   heightSize = dim(image)[2]
@@ -567,48 +567,54 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
 
   ############################ RUN ANALYSIS
-  # count number of files on input directory
-  listFiles <-list.files(rv$dirSamples)
+  # count number of Samples on input directory
+  listSamples <-list.files(rv$dirSamples)
 
-  nbfiles <<- length(listFiles)
+  nbSamples <<- length(listSamples)
   c <- 1
   show("loading-content")
 
-  progress <<- shiny::Progress$new(session, min = 1, max = nbfiles+1)
+  progress <<- shiny::Progress$new(session, min = 1, max = nbSamples+1)
   on.exit(progress$close())
 
   if (rv$parallelMode == TRUE){
 
-  # Start parallel session
-  progress$set(c/nbfiles, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
+    # if less samples than threads, update number of threads to use only max samples
+    if ( rv$parallelThreadsNum > nbSamples){
+      updateNumericInput(session,"parallelThreadsNum", value = nbSamples)
+      rv$parallelThreadsNum <- nbSamples
+    }
 
-  cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK") # retry = 5L, sleep = 30.0
-  registerDoParallel(cl)
+    # Start parallel session
+    progress$set(c/nbSamples, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
 
-  # Add an entry to the log file
-  cat(as.character(Sys.time()), '\n', file = logfilename,
-    append = TRUE)
+    cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK") # retry = 5L, sleep = 30.0
+    registerDoParallel(cl)
 
-  res <- foreach(imageFile = listFiles,
-          .export = c(".GlobalEnv"),
-          .combine = c)  %dopar%
-          {
-              cat(imageFile , file = logfilename, append = TRUE) # write file to log
-              future({analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageFile)}) # use future to prevente error with reactive values
-          }
-#  print(res)
-#  # Close cluster mode
-  stopCluster(cl)
-  closeAllConnections();
-  registerDoSEQ()
+    # Add an entry to the log file
+    cat(as.character(Sys.time()), '\n', file = logfilename,
+      append = TRUE)
+
+    res <- foreach(imageSamples = listSamples,
+            .export = c(".GlobalEnv"),
+            .combine = c)  %dopar%
+            {
+                cat(imageSamples , file = logfilename, append = TRUE) # write file to log
+                future({analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageSamples)}) # use future to prevente error with reactive values
+            }
+  #  print(res)
+  #  # Close cluster mode
+    stopCluster(cl)
+    closeAllConnections();
+    registerDoSEQ()
+
   }else{
-    c <- 1
     # if not cluster mode do sample by sample on one core
     progress$set(value = 0 , detail = paste("Start samples analysis with 1 cores"))
-    for (imageFile in listFiles){
-      progress$set(value = c, message = "Analysis run ", detail = paste("Analysis leaf ", c, "/", nbfiles))
+    for (imageSamples in listSamples){
+      progress$set(value = c, message = "Analysis run ", detail = paste("Analysis leaf ", c, "/", nbSamples))
       c <- c + 1
-      analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageFile)
+      analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageSamples)
 
     }
     progress$set( value = c, message = "Analysis Finish ")

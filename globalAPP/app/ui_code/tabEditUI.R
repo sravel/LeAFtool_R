@@ -1,6 +1,6 @@
 #####################################################################################################
 #
-# Copyright 2018 CIRAD-INRA
+# Copyright 2019 CIRAD-INRA
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,14 +32,14 @@ tabItem(
   # BOX SELECT EDIT
   box( title = "Edit Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
     fluidRow( class = "spaceRow",
-      column(width = 3,offset = 0,
+      column(width = 5,offset = 0,
         shinyDirButton(id = 'dirInResult', label = 'Select Input results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "dirInResult"),
         verbatimTextOutput("dirInResult", placeholder = TRUE)
        ),
-      column(width = 3,offset = 0,
+      column(width = 4,offset = 0,
         selectInput("imageEdit", "Sample image:",NULL)
       )
     )
