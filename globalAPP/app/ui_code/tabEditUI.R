@@ -33,7 +33,7 @@ tabItem(
   box( title = "Edit Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
     fluidRow( class = "spaceRow",
       column(width = 5,offset = 0,
-        shinyDirButton(id = 'dirInResult', label = 'Select Input results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+        shinyDirButton(id = 'dirInResult', label = 'Select Input results folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "dirInResult"),
@@ -41,6 +41,12 @@ tabItem(
        ),
       column(width = 4,offset = 0,
         selectInput("imageEdit", "Sample image:",NULL)
+      ),
+      column(width = 3,offset = 0,
+        checkboxInput("pchOriginal", "Add pch Original", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "pchOriginal")
       )
     )
   ),
@@ -64,14 +70,20 @@ tabItem(
       )
     ),
     # TABLES
-    fluidRow( class = "spaceRow",
+    box( title = "Table all lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
+      fluidRow( class = "spaceRow",
+        column(width = 12,offset = 0,
+          div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
+        )
+      )
+    ),
+    box( title = "Table merge leaf lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
       column(width = 12,offset = 0,
-        div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
-      ),
-      column(width = 10,offset = 0,
         div(DT::dataTableOutput("AG", width = "100%"))
-      ),
-      column(width = 10,offset = 0,
+      )
+    ),
+    box( title = "Table all leaves lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
+      column(width = 12,offset = 0,
         div(DT::dataTableOutput("MERGE", width = "100%"))
       )
     )

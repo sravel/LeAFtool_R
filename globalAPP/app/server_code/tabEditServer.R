@@ -45,7 +45,6 @@ output$dirInResult <- renderText({
 observeEvent(input$dirInResult,{
   if (!is.integer(input$dirInResult))
   {
-    print("toto")
     home <- normalizePath(allVolumesAvail[input$dirInResult$root])
     rv$dirInResult <- file.path(home, paste(unlist(input$dirInResult$path[-1],"/"), collapse = .Platform$file.sep))
   }
@@ -69,6 +68,14 @@ output$plotcurrentImageEdit <- renderPlot({
 output$plotcurrentImageOriginalEdit <- renderPlot({
   if ( is.null(rv$loadcurrentImageOriginaleEdit)) return(NULL)
   plot(rv$loadcurrentImageOriginaleEdit)
+  color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
+
+  if (rv$pchOriginal == TRUE){
+    points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
+  }
+
+  points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="green")
+
 })
 
 
@@ -126,7 +133,7 @@ DT::datatable(data = as.data.frame(rv$AG , stringAsFactors = FALSE, row.names = 
 
 output$MERGE <- DT::renderDataTable({
 
-DT::datatable(data = as.data.frame(rv$mymergeddata , stringAsFactors = FALSE, row.names = NULL),
+DT::datatable(data = as.data.frame(rv$MERGE , stringAsFactors = FALSE, row.names = NULL),
 
                                      escape=FALSE,
                                      selection="single",
@@ -301,10 +308,10 @@ updateAll <- function(leaves){
     sep = '\t'
   )
 
-  rv$mymergeddata = multmerge(rv$dirInResult, "*_Merge_lesions.csv")
+  rv$MERGE = multmerge(rv$dirInResult, "*_Merge_lesions.csv")
 
   write.table(
-    rv$mymergeddata,
+    rv$MERGE,
     file = paste0(rv$dirInResult,"/merge_ResumeCount.csv"),
     quote = FALSE,
     row.names = FALSE,
@@ -312,7 +319,10 @@ updateAll <- function(leaves){
   )
 }
 
-
+######### add pch to original image
+observeEvent(input$pchOriginal,{
+  rv$pchOriginal <- input$pchOriginal
+})
 
 
 #  output$plot_brushedpoints <- renderTable({
