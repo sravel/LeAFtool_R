@@ -30,23 +30,50 @@ tabItem(
   # Tab for calibration input/output
   tabName = "tabEdit",
   # BOX SELECT EDIT
-  box( title = "Edit Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
+  box( title = "Edit Input", status = "success", solidHeader = TRUE, collapsible = TRUE, width = 12,
     fluidRow( class = "spaceRow",
       column(width = 5,offset = 0,
         shinyDirButton(id = 'dirInResult', label = 'Select Input results folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "dirInResult"),
-        verbatimTextOutput("dirInResult", placeholder = TRUE)
-       ),
-      column(width = 4,offset = 0,
+        verbatimTextOutput("dirInResult", placeholder = TRUE),
         selectInput("imageEdit", "Sample image:",NULL)
-      ),
+        ),
       column(width = 3,offset = 0,
         checkboxInput("pchOriginal", "Add pch Original", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
-                content = "pchOriginal")
+                content = "pchOriginal"),
+        checkboxInput("zoomOriginalCheck", "Zoom Origal Image", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "zoomOriginalCheck")
+      ),
+      column(width = 4, offset = 0,
+        fluidRow(
+          tags$label("Lesions color Edit")
+        ),
+        fluidRow( class = "colorRow",
+          column(width = 6, offset = 0,
+            tags$label("border"),
+            colourpicker::colourInput("lesion_color_borderEdit",  label = "", value = "green",
+                        palette = c("square", "limited"), allowedCols = NULL,
+                        allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
+              helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_color_borderEdit")
+            ),
+          column(width = 6, offset = 0,
+            tags$label("bodies"),
+            colourpicker::colourInput("lesion_color_bodiesEdit",  label = "", value = "green",
+                        palette = c("square", "limited"), allowedCols = NULL,
+                        allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
+              helper(icon = "question",
+                      type = "markdown",
+                      content = "lesion_color_bodiesEdit")
+          )
+        )
       )
     )
   ),
@@ -55,6 +82,7 @@ tabItem(
     fluidRow( class = "spaceRow",
       column(width = 4,offset = 0,
         jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
+#        jqui_resizable(plotOutput("zoomcurrentOriginalImageEdit"))
       ),
       column(width = 4,offset = 0,
         jqui_resizable(

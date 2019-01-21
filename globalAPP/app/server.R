@@ -70,7 +70,7 @@ rv <<- reactiveValues(
                         lesion_max_size = 10000,
                         lesion_border_size = 3,
                         lesion_color_border = "green",
-                        lesion_color_bodies = "white",
+                        lesion_color_bodies = "green",
                         rmEdge = FALSE,
                         rmEccentric = FALSE,
                         lesion_eccentric = 0.99,
@@ -82,10 +82,10 @@ rv <<- reactiveValues(
                         blur_value = 0,
 
                         # edit
-                        dirInResult = NULL,
-                        loadImageEdit = NULL
-#                        dirInResult = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
-#                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/exemple2/results/"), full.names=FALSE, pattern = "*_lesion.jpeg")
+#                        dirInResult = NULL,
+#                        loadImageEdit = NULL
+                        dirInResult = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
+                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/musa/sample4Res/"), full.names=FALSE, pattern = "*_lesion.jpeg")
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS
@@ -134,9 +134,9 @@ allVolumesAvail <- getOwnVolume()
 # function to test if directory pass contain sub-directory limb, background lesion
 existDirCalibration <- function(dirCalibration){
   list(
-    dirlimb = file.exists(paste(dirCalibration,"/limb", sep = .Platform$file.sep)),
-    dirBackground = file.exists(paste(dirCalibration,"/background", sep = .Platform$file.sep)),
-    dirLesion = file.exists(paste(dirCalibration,"/lesion", sep = .Platform$file.sep))
+    dirlimb = dir.exists(paste(dirCalibration,"/limb", sep = .Platform$file.sep)),
+    dirBackground = dir.exists(paste(dirCalibration,"/background", sep = .Platform$file.sep)),
+    dirLesion = dir.exists(paste(dirCalibration,"/lesion", sep = .Platform$file.sep))
   )
 }
 

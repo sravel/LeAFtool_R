@@ -56,6 +56,16 @@ observe({
     rv$loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
     updateSelectInput(session, "imageEdit", label = NULL, choices = rv$loadImageEdit)
   }
+  if (!is.null(rv$dirInResult) && input$imageEdit != "")
+  {
+    rv$lesion_color_borderEdit <- input$lesion_color_borderEdit
+    rv$lesion_color_bodiesEdit <- input$lesion_color_bodiesEdit
+    rv$lesion_color_borderAlphaEdit <-col2rgb(input$lesion_color_borderEdit, alpha=TRUE)[4]/255
+    rv$lesion_color_bodiesAlphaEdit <-col2rgb(input$lesion_color_bodiesEdit, alpha=TRUE)[4]/255
+    leaves <- rv$loadCSVcurrentImage$leaf.number
+    isolate(updateAll(leaves))
+
+  }
 })
 
 
@@ -66,16 +76,24 @@ output$plotcurrentImageEdit <- renderPlot({
   points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=2, col=color)
 })
 output$plotcurrentImageOriginalEdit <- renderPlot({
-  if ( is.null(rv$loadcurrentImageOriginaleEdit)) return(NULL)
-  plot(rv$loadcurrentImageOriginaleEdit)
-  color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
 
-  if (rv$pchOriginal == TRUE){
-    points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
+ ### PLOT ALL FILE if checkbox uncheck
+  if (rv$zoomOriginalCheck == FALSE){
+    if ( is.null(rv$loadcurrentImageOriginaleEdit)) return(NULL)
+    plot(rv$loadcurrentImageOriginaleEdit)
+    color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
+    if (rv$pchOriginal == TRUE){
+      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
+    }
+    points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="green")
   }
+  #  else Plot zoom original File
+  if (rv$zoomOriginalCheck == TRUE){
 
-  points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="green")
-
+    if (is.null(rv$zoomInitial)) return(NULL)
+    plot(rv$zoomInitial)
+    points(rv$pointx, rv$pointy, pch='+', cex=3, col="blue")
+  }
 })
 
 
@@ -243,6 +261,7 @@ observeEvent(input$plot_brush,{
 
 
      rv$zoom <- rv$loadcurrentImageEdit[xleft:xright, ytop:ybottom,]
+     rv$zoomInitial <- rv$loadcurrentImageOriginaleEdit[xleft:xright, ytop:ybottom,]
    }
 
  })
@@ -250,7 +269,7 @@ observeEvent(input$plot_brush,{
 updateAll <- function(leaves){
 
   ## sortie des résultats et coloration des lésions
-  for (leaf in leaves)
+  for (leaf in unique(leaves))
   {
     maskLesion <- analyse.li[[leaf]][["maskLesion"]]
     maskLesionRed <- maskLesion
@@ -261,9 +280,11 @@ updateAll <- function(leaves){
     maskLesion[!(maskLesion %in% keep)] <- 0 ## suppression dans mask des objets rouges
     maskLesionRed[!(maskLesionRed %in% remove)] <- 0 ## suppression dans mask2 des objets non rouges
 
-    tmpimage <- rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,]
+    tmpimage <- rv$loadcurrentImageOriginaleEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,]
+#    tmpimage <- rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,]
     ## coloration des objets selon leur surface
-    tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c("green", "green"), opac=c(1, 1))
+
+    tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_borderEdit, rv$lesion_color_bodiesEdit), opac=c(rv$lesion_color_borderAlphaEdit, rv$lesion_color_bodiesAlphaEdit))
     tmpimage <- paintObjects(maskLesionRed ,tmpimage, thick=TRUE, col=c("red", "red"), opac=c(1, 1))
 
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
@@ -271,57 +292,63 @@ updateAll <- function(leaves){
 
   result <- rv$loadCSVcurrentImage[rv$loadCSVcurrentImage$lesion.status != "remove", ]
 
-    # Update merge leaves stats
-  ag.count <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], length)
-  names(ag.count)[4] <- "lesion.nb"
-#  print(ag.count)
-
-  ag.surface <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], sum)
-  names(ag.surface)[4] <- "lesion.surface"
-#  print(ag.surface)
-
-  ag <- merge(ag.count, ag.surface)
-  ag$pourcent.lesions <- ag$lesion.surface / ag$leaf.surface * 100
-  ag$lesion.nb[ag$lesion.surface == 0] <- 0
-  ag$lesion.surface[ag$lesion.surface == 0] <- 0
-
-  # if no lesions in one or more leaves
-  for (leafNum in unique(rv$loadCSVcurrentImage$leaf.number))
+  if ( !is.null(result) )
   {
-    if (! (leafNum %in% unique(ag$leaf.number) ))
+    # Update merge leaves stats
+    ag.count <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], length)
+    names(ag.count)[4] <- "lesion.nb"
+  #  print(ag.count)
+
+    ag.surface <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], sum)
+    names(ag.surface)[4] <- "lesion.surface"
+  #  print(ag.surface)
+
+    ag <- merge(ag.count, ag.surface)
+    ag$pourcent.lesions <- ag$lesion.surface / ag$leaf.surface * 100
+    ag$lesion.nb[ag$lesion.surface == 0] <- 0
+    ag$lesion.surface[ag$lesion.surface == 0] <- 0
+
+    # if no lesions in one or more leaves
+    for (leafNum in unique(rv$loadCSVcurrentImage$leaf.number))
     {
-      leafSurf <- rv$loadCSVcurrentImage$leaf.surface[rv$loadCSVcurrentImage$leaf.number == leafNum][1]
-      line <- data.frame(image = ag$image[1], leaf.number = leafNum, leaf.surface = leafSurf, lesion.nb = 0, lesion.surface = 0, pourcent.lesions = 0)
-      ag <- rbind(ag,line)
+      if (! (leafNum %in% unique(ag$leaf.number) ))
+      {
+        leafSurf <- rv$loadCSVcurrentImage$leaf.surface[rv$loadCSVcurrentImage$leaf.number == leafNum][1]
+        line <- data.frame(image = ag$image[1], leaf.number = leafNum, leaf.surface = leafSurf, lesion.nb = 0, lesion.surface = 0, pourcent.lesions = 0)
+        ag <- rbind(ag,line)
+      }
     }
+
+  #  print(ag)
+
+    rv$AG <- ag[order(ag$leaf.number),]
+
+    write.table(
+      rv$AG,
+      file = rv$csv_Merge_lesionsFile,
+      quote = FALSE,
+      row.names = FALSE,
+      sep = '\t'
+    )
+
+    rv$MERGE = multmerge(rv$dirInResult, "*_Merge_lesions.csv")
+
+    write.table(
+      rv$MERGE,
+      file = paste0(rv$dirInResult,"/merge_ResumeCount.csv"),
+      quote = FALSE,
+      row.names = FALSE,
+      sep = '\t'
+    )
   }
-
-#  print(ag)
-
-  rv$AG <- ag[order(ag$leaf.number),]
-
-  write.table(
-    rv$AG,
-    file = rv$csv_Merge_lesionsFile,
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
-
-  rv$MERGE = multmerge(rv$dirInResult, "*_Merge_lesions.csv")
-
-  write.table(
-    rv$MERGE,
-    file = paste0(rv$dirInResult,"/merge_ResumeCount.csv"),
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
 }
 
 ######### add pch to original image
 observeEvent(input$pchOriginal,{
   rv$pchOriginal <- input$pchOriginal
+})
+observeEvent(input$zoomOriginalCheck,{
+  rv$zoomOriginalCheck <- input$zoomOriginalCheck
 })
 
 

@@ -100,6 +100,7 @@ observeEvent(
         dirs <- list.dirs(rv$dirCalibration,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
 
         ## checking the existence of subdirectories passed as arguments
+#        group <- list("background","limb",c("lesion","lesion2"))
         group <- list("background","limb","lesion")
         if (any(is.na(match(unlist(group),dirs)))) stop("Directory(ies) nonexistent(s).")
 
@@ -143,6 +144,12 @@ observeEvent(
         rv$exitStatusCal <- 1
         rv$messCal <- rv$fileRData
         progress$inc(7/7, detail = "End of calibration 6/6")
+
+       ## sauvegarde des classes
+        rv$outClassesTXT <- paste(rv$dirCalibration,paste0(basename,"_classes.txt"),sep='/') ## output file csv
+        rv$outClassesTable <- rbind(data.frame(class="background",subclass="background"),data.frame(class="limb",subclass="limb"),data.frame(class="lesion",subclass=c("lesion","lesion2")))
+        write.table(rv$outClassesTable,rv$outClassesTXT,row.names=FALSE,quote=FALSE,sep='\t')
+
       }
       else{
         # print(paste("else inputdir",rv$datapath))

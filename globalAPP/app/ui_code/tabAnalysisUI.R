@@ -32,25 +32,25 @@ tabItem(
   # BOX for input
   fluidRow(
     box(
-      title = "Analysis Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 12,
+      title = "Analysis Input", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
       column(width = 5,
       # DIRECTORIES Input
         fluidRow( class = "spaceRow",
-          shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+          shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
             helper(icon = "question",
                 type = "markdown",
                 content = "dirInSamples"),
           verbatimTextOutput("dirSamples", placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
-          shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+          shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
             helper(icon = "question",
                 type = "markdown",
                 content = "dirOut"),
           verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
-          shinyFilesButton('fileRDataIn', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-info") %>%
+          shinyFilesButton('fileRDataIn', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-default") %>%
             helper(icon = "question",
                 type = "markdown",
                 content = "fileRDataIn"),
@@ -125,17 +125,17 @@ tabItem(
             column(width = 6, offset = 0,
               tags$label("border"),
               colourInput("lesion_color_border",  label = "", value = "green",
-                          palette = "limited", allowedCols = NULL,
-                          allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
+                          palette = c("square", "limited"), allowedCols = NULL,
+                          allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
                 helper(icon = "question",
                       type = "markdown",
                       content = "lesion_color_border")
             ),
             column(width = 6, offset = 0,
               tags$label("bodies"),
-              colourInput("lesion_color_bodies",  label = "", value = "white",
-                          palette = "limited", allowedCols = NULL,
-                          allowTransparent = FALSE, returnName = FALSE, showColour = "background") %>%
+              colourInput("lesion_color_bodies",  label = "", value = "green",
+                          palette = c("square", "limited"), allowedCols = NULL,
+                          allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
                 helper(icon = "question",
                       type = "markdown",
                       content = "lesion_color_bodies")

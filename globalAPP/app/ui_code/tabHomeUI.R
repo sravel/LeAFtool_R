@@ -28,32 +28,33 @@
 tabItem(# Tab for Home input/output
   tabName = "tabHome",
   fluidRow(
-    box(title = "ALAMA 	  Automatic Lesion Analysis Measure Area manual", status = "primary", solidHeader = TRUE, collapsible = FALSE, width = 12,
+    box(title = "ALAMA 	  Automatic Lesion Analysis Measure Area manual",status="success", solidHeader = TRUE, collapsible = FALSE, width = 12,
       fluidRow(column( 12, offset = 0,
-        withTags(
-          div( class = "home",
-            "http://acronymcreator.net/ace.py " ,br(),
-            "LETAL      Lesion Estimate Tools Area Leaf" ,br(),
-            "         LEThAL 	  Lesion Estimate Tools Area Leaf" ,br(),
-            "         TOMALES 	  TOols Measure Area LESion" ,br(),
-            "         COLLATe 	  COunt Leaf Lesion Area Tools" ,br(),
-            "         TALLIM 	  Tools Area Lesion LImb Measure" ,br(),
-            "         CALLIsTO 	  Count Area Lesion LImb TOols" ,br(),
-            "         MATiLLA 	  MeAsure Tools Leaf Lesion Area" ,br(),
-            "         SkILLET 	  SIze Limb Lesion Estimate Tools" ,br(),
-            "         SLALOM 	  Size LeAf LesiOn Measure" ,br(),
-            "         CLARET 	  Count Lesion AREa Tools" ,br(),
-            "         ALECTO 	  Area LEsion Count TOols" ,br(),
-            "         ALAMA 	  Automatic Lesion Analysis Measure Area" ,br(),
+      img(src = "logo.png")
+#        withTags(
+#          div( class = "home",
+##            "http://acronymcreator.net/ace.py " ,br(),
+##            "LETAL      Lesion Estimate Tools Area Leaf" ,br(),
+##            "         LEThAL 	  Lesion Estimate Tools Area Leaf" ,br(),
+##            "         TOMALES 	  TOols Measure Area LESion" ,br(),
+##            "         COLLATe 	  COunt Leaf Lesion Area Tools" ,br(),
+##            "         TALLIM 	  Tools Area Lesion LImb Measure" ,br(),
+##            "         CALLIsTO 	  Count Area Lesion LImb TOols" ,br(),
+##            "         MATiLLA 	  MeAsure Tools Leaf Lesion Area" ,br(),
+##            "         SkILLET 	  SIze Limb Lesion Estimate Tools" ,br(),
+##            "         SLALOM 	  Size LeAf LesiOn Measure" ,br(),
+##            "         CLARET 	  Count Lesion AREa Tools" ,br(),
+##            "         ALECTO 	  Area LEsion Count TOols" ,br(),
+##            "         ALAMA 	  Automatic Lesion Analysis Measure Area" ,br(),
 
-            "         The analysis procedure consists of 2 steps:",
-            br(),
-            ul(
-              li("Calibration"),
-              li("Analysis")
-            )
-          )
-        )
+#            "         The analysis procedure consists of 2 steps:",
+#            br(),
+#            ul(
+#              li("Calibration"),
+#              li("Analysis")
+#            )
+#          )
+#        )
       )),
       fluidRow(
         column( width = 6, offset = 0,

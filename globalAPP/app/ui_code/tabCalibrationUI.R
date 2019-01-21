@@ -32,7 +32,7 @@ tabItem(
   # BOX input
   fluidRow(
     box(
-      title = "Calibration Input", status = "primary",solidHeader = TRUE, collapsible = TRUE, width = 6,
+      title = "Calibration Input", status = "success", solidHeader = TRUE, collapsible = TRUE, width = 6,
       column(4,
         tags$div(class = "calibrationTXT", "Calibration input directory must include sub-folders:",  tags$br(),
           tags$ul(
@@ -44,7 +44,7 @@ tabItem(
       ),
       column(8,
         fluidRow( class = "spaceRow",
-          shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-info") %>%
+          shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "dirCalibration")

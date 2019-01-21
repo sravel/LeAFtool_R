@@ -65,32 +65,35 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
   f <- x$leaf
   # replacement of the background by limb
-#  df6 <-
-#    data.frame(
-#      red = as.numeric(imageData(f)[, , 1]),
-#      green = as.numeric(imageData(f)[, , 2]),
-#      blue = as.numeric(imageData(f)[, , 3])
-#    )
-#  df6$predict <- predict(lda1, df6)$class
-#  df.limb <- df6[df6$predict==limb,]
-#  black.background <- df6$red+df6$green+df6$blue==0
-#  mean.limb <- apply(df.limb[1:3],2,mean)
-#  df6[black.background,1] <- mean.limb[1]
-#  df6[black.background,2] <- mean.limb[2]
-#  df6[black.background,3] <- mean.limb[3]
-#  imageData(f)[,,1] <- df6$red
-#  imageData(f)[,,2] <- df6$green
-#  imageData(f)[,,3] <- df6$blue
+  df6 <-
+    data.frame(
+      red = as.numeric(imageData(f)[, , 1]),
+      green = as.numeric(imageData(f)[, , 2]),
+      blue = as.numeric(imageData(f)[, , 3])
+    )
+  df6$predict <- predict(lda1, df6)$class
+  df.limb <- df6[df6$predict %in% limb,]
+  black.background <- df6$red+df6$green+df6$blue==0
+  mean.limb <- apply(df.limb[1:3],2,mean)
+  df6[black.background,1] <- mean.limb[1]
+  df6[black.background,2] <- mean.limb[2]
+  df6[black.background,3] <- mean.limb[3]
+  imageData(f)[,,1] <- df6$red
+  imageData(f)[,,2] <- df6$green
+  imageData(f)[,,3] <- df6$blue
 
   # blur image or not
   if (rv$blur_value != 0){
-    f <- gblur(f,rv$blur_value)
+#    f <- gblur(f,rv$blur_value)
+    flo <- makeBrush(rv$blur_value, shape='disc', step=FALSE)^2
+    flo <- flo/sum(flo)
+    f <- filter2(f, flo)
   }
 
   # analysis
   df6 <- data.frame(red=as.numeric(imageData(f)[,,1]), green=as.numeric(imageData(f)[,,2]), blue=as.numeric(imageData(f)[,,3]))
   df6$predict <- predict(lda1, df6)$class
-  df6$tache <- as.numeric(df6$predict==lesion)
+  df6$tache <- as.numeric(df6$predict %in% lesion)
   mask <- channel(f, "gray")
   tache <- matrix(df6$tache, nrow=nrow(imageData(mask)))
   imageData(mask) <- tache
@@ -141,9 +144,6 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
   featuresLesionClean <- as.data.frame(featuresLesion)
 
-#  print(paste(x$leafNum, x$leaf.surface, sep = "   "))
-#  if (is.na(x$leaf.surface)) x$leaf.surface <- 0
-
   featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
 
   featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
@@ -156,7 +156,6 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   moments <- as.data.frame(computeFeatures.moment(maskLesion))
   moments$m.cy <- moments$m.cy + x$XYcoord$x$min - 1
   moments$m.cx <- moments$m.cx + x$XYcoord$y$min - 1
-
 
   moments$lesion.number <- as.numeric(row.names(moments))
   featuresLesionCleanPos <- merge(featuresLesionClean, moments)
@@ -177,22 +176,25 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
   if (!file.exists(pathResult))
     dir.create(pathResult)
 
+  # build filename output
   filename <- strsplit(imageSamples, ".", fixed = TRUE)[[1]][1]
-  print(filename)
-
   fileRData <- paste(pathResult, '/', filename, ".RData", sep = '')
-
-  filename <- strsplit(imageSamples, ".", fixed = TRUE)[[1]][1]
   jpegfile <- paste(pathResult, '/', filename, "_both.jpeg", sep = '')
   jpegfileOnly <- paste(pathResult, '/', filename, "_lesion.jpeg", sep = '')
-
   csv_Merge_lesionsFile <- paste(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
   csv_All_lesionsFile <- paste(pathResult, '/', filename, "_All_lesions.csv", sep = '')
-
 
   background <- names(lda1$prior)[1]
   limb <- names(lda1$prior)[2]
   lesion <- names(lda1$prior)[3]
+
+#  classes <- read.table(rv$outClassesTXT,header=TRUE,sep='\t')
+
+#  background <- classes$subclass[classes$class=="background"]
+#  limb <- classes$subclass[classes$class=="limb"]
+#  lesion <- classes$subclass[classes$class=="lesion"]
+
+
 
   ## reading the source image
   sourceImage <- paste(pathImages, '/', imageSamples, sep = '')
@@ -278,7 +280,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
 
     maskLesion <- analyse.li[[i]][["maskLesion"]]
     tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
-    tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_border, rv$lesion_color_bodies), opac=c(1, 1))
+    tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_border, rv$lesion_color_bodies), opac=c(rv$lesion_color_borderAlpha, rv$lesion_color_bodiesAlpha))
     image[li[[i]]$b$y, li[[i]]$b$x,] <- tmpimage
 
   }
@@ -562,6 +564,11 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   rv$exitStatusAna <- 0
   rv$lesion_color_border <- input$lesion_color_border
   rv$lesion_color_bodies <- input$lesion_color_bodies
+  rv$lesion_color_borderAlpha <-col2rgb(input$lesion_color_border, alpha=TRUE)[4]/255
+  rv$lesion_color_bodiesAlpha <-col2rgb(input$lesion_color_bodies, alpha=TRUE)[4]/255
+    print(rv$lesion_color_borderAlpha)
+    print(rv$lesion_color_bodiesAlpha)
+
   rv$displayableData <- DT::datatable(data = NULL)
   rv$dirInResult <- rv$dirSamplesOut
 
