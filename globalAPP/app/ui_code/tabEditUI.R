@@ -82,7 +82,6 @@ tabItem(
     fluidRow( class = "spaceRow",
       column(width = 4,offset = 0,
         jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
-#        jqui_resizable(plotOutput("zoomcurrentOriginalImageEdit"))
       ),
       column(width = 4,offset = 0,
         jqui_resizable(
@@ -102,6 +101,7 @@ tabItem(
       fluidRow( class = "spaceRow",
         column(width = 12,offset = 0,
           div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
+#          div(style = 'overflow-x: scroll', textOutput("coor"))
         )
       )
     ),

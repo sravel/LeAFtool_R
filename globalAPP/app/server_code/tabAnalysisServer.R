@@ -188,12 +188,14 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
   limb <- names(lda1$prior)[2]
   lesion <- names(lda1$prior)[3]
 
-#  classes <- read.table(rv$outClassesTXT,header=TRUE,sep='\t')
+#  background <- rv$classes$subclass[rv$classes$class=="background"]
+#  limb <- rv$classes$subclass[rv$classes$class=="limb"]
+#  lesion <- rv$classes$subclass[rv$classes$class=="lesion"]
 
-#  background <- classes$subclass[classes$class=="background"]
-#  limb <- classes$subclass[classes$class=="limb"]
-#  lesion <- classes$subclass[classes$class=="lesion"]
-
+#  print(rv$classes)
+#  print(background)
+#  print(limb)
+#  print(lesion)
 
 
   ## reading the source image
@@ -399,6 +401,10 @@ observeEvent(input$fileRDataIn,{
   if (!is.integer(input$fileRDataIn))
   {
     rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath))
+    filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath)))
+#    print(filename)
+    rv$fileClass <- paste0(filename,"_classes.txt")
+#    print(rv$fileClass)
   }
 })
 
@@ -411,6 +417,11 @@ observe({
     rv$exitStatusAna <- -1
     rv$messAna <- NULL
     rv$errAna <- NULL
+#
+  }
+if (!is.null(rv$fileClass) && file.exists(rv$fileClass)) {
+    # User has not uploaded correct file yet
+    rv$classes <- read.table(rv$fileClass,header=TRUE,sep='\t')
   }
 })
 

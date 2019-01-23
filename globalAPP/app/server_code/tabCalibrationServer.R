@@ -40,11 +40,6 @@ load_group <- function(g) {
   do.call(rbind, li)
 }
 
-calibration <- function() {
-
-
-}
-
 ###############################################
 ## CODE serveur
 ###############################################
@@ -99,10 +94,21 @@ observeEvent(
         progress$inc(2/7, detail = "Load sub-directories 2/6")
         dirs <- list.dirs(rv$dirCalibration,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
 
+        ## Check subDir folder
+        limbDir <- list.dirs(paste0(path.sample,"limb"),full.names=FALSE)[-1]
+        if (length(limbDir)==0){limbDir = "limb"}
+        else { limbDir <- paste0("limb/",limbDir)}
+
+        lesionDir <- list.dirs(paste0(path.sample,"/lesion"),full.names=FALSE)[-1]
+        if (length(lesionDir)==0){lesionDir = "lesion"}
+        else { lesionDir <- paste0("lesion/",lesionDir)}
+
+        backgroundDir <- list.dirs(paste0(path.sample,"/background"),full.names=FALSE)[-1]
+        if (length(backgroundDir)==0){backgroundDir = "background"}
+        else { backgroundDir <- paste0("background/",backgroundDir)}
+
         ## checking the existence of subdirectories passed as arguments
-#        group <- list("background","limb",c("lesion","lesion2"))
-        group <- list("background","limb","lesion")
-        if (any(is.na(match(unlist(group),dirs)))) stop("Directory(ies) nonexistent(s).")
+        group <- c(backgroundDir,limbDir,lesionDir)
 
         ## constitution of the data.frame of the pixels of the samples
         progress$inc(3/7, detail = "Build dataframe with learning 3/6")
@@ -147,7 +153,7 @@ observeEvent(
 
        ## sauvegarde des classes
         rv$outClassesTXT <- paste(rv$dirCalibration,paste0(basename,"_classes.txt"),sep='/') ## output file csv
-        rv$outClassesTable <- rbind(data.frame(class="background",subclass="background"),data.frame(class="limb",subclass="limb"),data.frame(class="lesion",subclass=c("lesion","lesion2")))
+        rv$outClassesTable <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
         write.table(rv$outClassesTable,rv$outClassesTXT,row.names=FALSE,quote=FALSE,sep='\t')
 
       }

@@ -38,25 +38,26 @@ shinyDirChoose(
   restrictions = system.file(package = 'base')
 )
 
+# To add file path in UI
 output$dirInResult <- renderText({
   rv$dirInResult
 })
 
+# extract file Path on input
 observeEvent(input$dirInResult,{
   if (!is.integer(input$dirInResult))
   {
     home <- normalizePath(allVolumesAvail[input$dirInResult$root])
     rv$dirInResult <- file.path(home, paste(unlist(input$dirInResult$path[-1],"/"), collapse = .Platform$file.sep))
+    loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
+    updateSelectInput(session, "imageEdit", label = NULL, choices = loadImageEdit)
   }
 })
 
+## OBSERVATEUR A MODIFIER
 observe({
-  if (!is.null(rv$dirInResult))
-  {
-    rv$loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
-    updateSelectInput(session, "imageEdit", label = NULL, choices = rv$loadImageEdit)
-  }
-  if (!is.null(rv$dirInResult) && input$imageEdit != "")
+
+  if (!is.null(rv$dirInResult))# && input$imageEdit != "")
   {
     rv$lesion_color_borderEdit <- input$lesion_color_borderEdit
     rv$lesion_color_bodiesEdit <- input$lesion_color_bodiesEdit
@@ -64,7 +65,32 @@ observe({
     rv$lesion_color_bodiesAlphaEdit <-col2rgb(input$lesion_color_bodiesEdit, alpha=TRUE)[4]/255
     leaves <- rv$loadCSVcurrentImage$leaf.number
     isolate(updateAll(leaves))
+  }
+  #### SAVE IMAGE IF CHANGE COLOR
+  if (!is.null(rv$loadcurrentImageEdit) && !is.null(rv$loadcurrentImageOriginaleEdit) && !is.null(rv$originalFileNameBoth) && !is.null(rv$originalFileName))
+  {
+    isolate({
+      # print both sample and lesion images
+      jpeg(rv$originalFileNameBoth,
+           width = rv$widthSize,
+           height = rv$heightSize*2,
+           units = "px")
+      par( mfrow = c(2,1) )
+      display(rv$loadcurrentImageOriginaleEdit, method="raster")
+      display(rv$loadcurrentImageEdit, method = "raster")
+      dev.off()
 
+      # print only output file image with lesion
+      jpeg(rv$originalFileName,
+           width = rv$widthSize,
+           height = rv$heightSize,
+           units = "px")
+      par( mfrow = c(1,1) )
+      display(rv$loadcurrentImageEdit, method = "raster")
+    #  points(result$m.cx, result$m.cy, pch='+', cex=2, col="blue")
+
+      dev.off()
+    })
   }
 })
 
@@ -83,7 +109,8 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
     plot(rv$loadcurrentImageOriginaleEdit)
     color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
     if (rv$pchOriginal == TRUE){
-      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
+#      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
+      text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=color)
     }
     points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="green")
   }
@@ -92,6 +119,11 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
 
     if (is.null(rv$zoomInitial)) return(NULL)
     plot(rv$zoomInitial)
+#    if (rv$pchOriginal == TRUE){
+##      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
+#      color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
+#      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=color)
+#    }
     points(rv$pointx, rv$pointy, pch='+', cex=3, col="blue")
   }
 })
@@ -101,11 +133,13 @@ observeEvent(input$imageEdit, {
   #Load image for plot
   lesionImg <- strsplit(input$imageEdit, ".", fixed = TRUE)[[1]][1]
   pathImg <- paste(rv$dirInResult, input$imageEdit, sep = '/')
+#  print(pathImg)
   if(file.exists(pathImg) && !is.null(rv$dirInResult) && input$imageEdit != ""){
     baseName <- gsub("_lesion", "", lesionImg)
-    originalFileName <- paste0(rv$dirInResult, "/",baseName,"_both.jpeg")
+    rv$originalFileName <- paste0(rv$dirInResult, "/",baseName,"_lesion.jpeg")
+    rv$originalFileNameBoth <- paste0(rv$dirInResult, "/",baseName,"_both.jpeg")
     rv$loadcurrentImageEdit <- readImage(pathImg)
-    img <- readImage(originalFileName)
+    img <- readImage(rv$originalFileNameBoth)
     rv$widthSize = dim(img)[1]
     rv$heightSize = dim(img)[2]/2
     rv$loadcurrentImageOriginaleEdit <- img[1:rv$widthSize,1:rv$heightSize,]
@@ -259,6 +293,8 @@ observeEvent(input$plot_brush,{
                  ))
      )
 
+    rv$addleft <- xleft
+    rv$addbottom <- ybottom
 
      rv$zoom <- rv$loadcurrentImageEdit[xleft:xright, ytop:ybottom,]
      rv$zoomInitial <- rv$loadcurrentImageOriginaleEdit[xleft:xright, ytop:ybottom,]
@@ -285,7 +321,7 @@ updateAll <- function(leaves){
     ## coloration des objets selon leur surface
 
     tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_borderEdit, rv$lesion_color_bodiesEdit), opac=c(rv$lesion_color_borderAlphaEdit, rv$lesion_color_bodiesAlphaEdit))
-    tmpimage <- paintObjects(maskLesionRed ,tmpimage, thick=TRUE, col=c("red", "red"), opac=c(1, 1))
+    tmpimage <- paintObjects(maskLesionRed ,tmpimage, thick=TRUE, col=c("red", "red"), opac=c(0.3, 0))
 
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
   }
