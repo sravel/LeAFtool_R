@@ -29,10 +29,21 @@
 
 .shiny-notification {
 	position:fixed;
-	top: calc(50%);
-	left: calc(50%);
+	top: calc(30%);
+	left: calc(40%);
+	width: 22%;
+	height: 20%;
+}
+.progress-text {
+	font-size: 20px;
+	display: block;
 }
 
+.progress-detail {
+	font-size: 18px;
+	display: block;
+
+}
 
 .calibrationTXT {
 	text-align: left;
@@ -194,4 +205,13 @@ body{
 	max-height: 100px;
 	z-index: 1030;
 	border-bottom: 2px solid #894E00;
+}
+
+
+.pre {
+ white-space: pre-wrap;       /* css-3 */
+ white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+ white-space: -pre-wrap;      /* Opera 4-6 */
+ white-space: -o-pre-wrap;    /* Opera 7 */
+ word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }

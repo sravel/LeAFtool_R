@@ -45,6 +45,9 @@ boundingRectangle <<- function(mask, object) {
 }
 
 extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
+#  kern = makeBrush(size = 201)
+#  opening(imageBackgroundBlack, kern)
+#  imageBackgroundBlack <- fillHull(imageBackgroundBlack)
   b <- boundingRectangle(mask, i)
   leaf <- imageBackgroundBlack[b$y, b$x,]
   mask.leaf <- mask[b$y, b$x]
@@ -170,9 +173,9 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 }
 
 # analysis One scan image
-analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
+analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 
-#  print("RUNNING")
+  print("RUNNING")
   if (!file.exists(pathResult))
     dir.create(pathResult)
 
@@ -184,21 +187,21 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
   csv_Merge_lesionsFile <- paste(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
   csv_All_lesionsFile <- paste(pathResult, '/', filename, "_All_lesions.csv", sep = '')
 
-  background <- names(lda1$prior)[1]
-  limb <- names(lda1$prior)[2]
-  lesion <- names(lda1$prior)[3]
+#  background <- names(lda1$prior)[1]
+#  limb <- names(lda1$prior)[2]
+#  lesion <- names(lda1$prior)[3]
 
-#  background <- rv$classes$subclass[rv$classes$class=="background"]
-#  limb <- rv$classes$subclass[rv$classes$class=="limb"]
-#  lesion <- rv$classes$subclass[rv$classes$class=="lesion"]
+  background <- classes$subclass[classes$class=="background"]
+  limb <- classes$subclass[classes$class=="limb"]
+  lesion <- classes$subclass[classes$class=="lesion"]
 
-#  print(rv$classes)
-#  print(background)
-#  print(limb)
-#  print(lesion)
-
+  print(classes)
+  print(background)
+  print(limb)
+  print(lesion)
 
   ## reading the source image
+#  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = "Step 2/7 : Read image sample and apply calibration")
   sourceImage <- paste(pathImages, '/', imageSamples, sep = '')
   image <- readImage(sourceImage)
   widthSize = dim(image)[1]
@@ -214,8 +217,8 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
   df5$predict <- predict(lda1, df5)$class
 
   ## creating lesions and leafs identifiers
-  df5$lesion <- as.numeric(df5$predict == lesion)
-  df5$leaf <- as.numeric(df5$predict != background)
+  df5$lesion <- as.numeric(df5$predict %in% lesion)
+  df5$leaf <- as.numeric(!(df5$predict %in% background))
 
   ## mask of leafs
   maskLeaf <- channel(image, "gray")
@@ -256,12 +259,15 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
   imageBackgroundBlack[maskLeaf == 0] <- 0
 
   ## separation of leafs
+#  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = "Step 3/7 : Extract leaves")
   li <- lapply(as.numeric(row.names(featuresLeaf)), extractLeaf, maskLeaf, imageBackgroundBlack, surfaceLeaves)
 
   ## analyse des leafs
+#  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = "Step 4/7 : Extract lesion on leaves")
   analyse.li <- lapply(li,  analyseLeaf,  lda1 = lda1,  lesion = lesion, limb = limb, filename = filename)
 
   # print both sample and lesion images
+#  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = "Step 5/7 : Generate output images")
   jpeg(jpegfile,
        width = widthSize,
        height = heightSize*2,
@@ -301,6 +307,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
 
   dev.off()
 
+#  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = "Step 6/7 : Generate ouput tables")
   write.table(
     result,
     file = csv_All_lesionsFile,
@@ -330,7 +337,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples) {
     row.names = FALSE,
     sep = '\t'
   )
-
+#  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = "Step 7/7 : Finish sammple")
   return(paste0("FINISH: ",sourceImage,"\n",jpegfileOnly))
 }
 
@@ -403,7 +410,7 @@ observeEvent(input$fileRDataIn,{
     rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath))
     filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath)))
 #    print(filename)
-    rv$fileClass <- paste0(filename,"_classes.txt")
+#    rv$fileClass <- paste0(filename,"_classes.txt")
 #    print(rv$fileClass)
   }
 })
@@ -577,8 +584,6 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   rv$lesion_color_bodies <- input$lesion_color_bodies
   rv$lesion_color_borderAlpha <-col2rgb(input$lesion_color_border, alpha=TRUE)[4]/255
   rv$lesion_color_bodiesAlpha <-col2rgb(input$lesion_color_bodies, alpha=TRUE)[4]/255
-    print(rv$lesion_color_borderAlpha)
-    print(rv$lesion_color_bodiesAlpha)
 
   rv$displayableData <- DT::datatable(data = NULL)
   rv$dirInResult <- rv$dirSamplesOut
@@ -589,7 +594,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   listSamples <-list.files(rv$dirSamples)
 
   nbSamples <<- length(listSamples)
-  c <- 1
+  rv$nbSamplesAnalysis <- 1
   show("loading-content")
 
   progress <<- shiny::Progress$new(session, min = 1, max = nbSamples+1)
@@ -604,7 +609,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     }
 
     # Start parallel session
-    progress$set(c/nbSamples, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
+    progress$set(rv$nbSamplesAnalysis/nbSamples, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
 
     cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK") # retry = 5L, sleep = 30.0
     registerDoParallel(cl)
@@ -618,7 +623,9 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
             .combine = c)  %dopar%
             {
                 cat(imageSamples , file = logfilename, append = TRUE) # write file to log
-                future({analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageSamples)}) # use future to prevente error with reactive values
+                future({
+                  analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageSamples, rv$classes)
+                }) # use future to prevente error with reactive values
             }
   #  print(res)
   #  # Close cluster mode
@@ -630,12 +637,12 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     # if not cluster mode do sample by sample on one core
     progress$set(value = 0 , detail = paste("Start samples analysis with 1 cores"))
     for (imageSamples in listSamples){
-      progress$set(value = c, message = "Analysis run ", detail = paste("Analysis leaf ", c, "/", nbSamples))
-      c <- c + 1
-      analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageSamples)
+      progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = "Step 1/7 Start function")
 
+      analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageSamples, rv$classes)
+      rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
     }
-    progress$set( value = c, message = "Analysis Finish ")
+    progress$set( value = rv$c, message = "Analysis Finish ")
   }
 
   mymergeddata = multmerge(rv$dirSamplesOut, "*_Merge_lesions.csv")
@@ -663,8 +670,8 @@ output$analysisFinish <- renderText({
 })
 
 img_uri <- function(x) {
-  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
-#  sprintf("<img src='%s' height='60'></img>", x)
+#  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
+  sprintf("<img src='file://%s' height='60'></img>", x)
 }
 
 

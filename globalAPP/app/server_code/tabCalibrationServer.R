@@ -31,6 +31,7 @@
 ## function of reading images of a group; return the pixel data.frame
 load_group <- function(g) {
   path_group <- paste(rv$dirCalibration,g,sep='/')
+  print(path_group)
   files_group <- list.files(path_group,full.name=TRUE)
   sample <- lapply(files_group,readImage)
   ## creation of the data frame of the sampled pixels
@@ -107,6 +108,10 @@ observeEvent(
         if (length(backgroundDir)==0){backgroundDir = "background"}
         else { backgroundDir <- paste0("background/",backgroundDir)}
 
+        print(limbDir)
+        print(lesionDir)
+        print(backgroundDir)
+
         ## checking the existence of subdirectories passed as arguments
         group <- c(backgroundDir,limbDir,lesionDir)
 
@@ -115,7 +120,7 @@ observeEvent(
         li <- lapply(group,load_group)
         df2 <- do.call(rbind, li)
 
-        ## iscriminant analysis
+        ## discriminant analysis
         progress$inc(4/7, detail = "Build analysis discriminante 4/6")
         lda1 <- lda(df2[2:4], df2$group)
 
