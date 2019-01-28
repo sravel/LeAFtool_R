@@ -609,8 +609,8 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     }
 
     # Start parallel session
-    progress$set(rv$nbSamplesAnalysis/nbSamples, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
-
+#    progress$set(rv$nbSamplesAnalysis/nbSamples, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores"))
+#    plan(multisession)
     cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK") # retry = 5L, sleep = 30.0
     registerDoParallel(cl)
 
@@ -623,11 +623,11 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
             .combine = c)  %dopar%
             {
                 cat(imageSamples , file = logfilename, append = TRUE) # write file to log
-                future({
+                f <- future({
                   analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageSamples, rv$classes)
                 }) # use future to prevente error with reactive values
             }
-  #  print(res)
+    print(res)
   #  # Close cluster mode
     stopCluster(cl)
     closeAllConnections();

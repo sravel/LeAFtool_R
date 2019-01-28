@@ -46,7 +46,6 @@ if (!require('EBImage')) {
 library(shiny)
 library(shinythemes)
 library(shinydashboard)
-library(dashboardthemes)
 library(shinyFiles)
 library(shinyBS)
 library(DT)
@@ -64,6 +63,7 @@ library(MASS)
 # analysis
 library(foreach)
 library(future)
+#library(doSNOW)
 library(doParallel)
 
 set_wd <- function() {

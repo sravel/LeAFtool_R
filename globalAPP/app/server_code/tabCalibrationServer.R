@@ -96,15 +96,15 @@ observeEvent(
         dirs <- list.dirs(rv$dirCalibration,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
 
         ## Check subDir folder
-        limbDir <- list.dirs(paste0(path.sample,"limb"),full.names=FALSE)[-1]
+        limbDir <- list.dirs(paste0(rv$dirCalibration,"limb"),full.names=FALSE)[-1]
         if (length(limbDir)==0){limbDir = "limb"}
         else { limbDir <- paste0("limb/",limbDir)}
 
-        lesionDir <- list.dirs(paste0(path.sample,"/lesion"),full.names=FALSE)[-1]
+        lesionDir <- list.dirs(paste0(rv$dirCalibration,"/lesion"),full.names=FALSE)[-1]
         if (length(lesionDir)==0){lesionDir = "lesion"}
         else { lesionDir <- paste0("lesion/",lesionDir)}
 
-        backgroundDir <- list.dirs(paste0(path.sample,"/background"),full.names=FALSE)[-1]
+        backgroundDir <- list.dirs(paste0(rv$dirCalibration,"/background"),full.names=FALSE)[-1]
         if (length(backgroundDir)==0){backgroundDir = "background"}
         else { backgroundDir <- paste0("background/",backgroundDir)}
 
