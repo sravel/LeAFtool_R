@@ -1,4 +1,5 @@
-"";"background";"limb";"lesion"
-"background";19223;0;0
-"limb";0;28868;0
-"lesion";1;32;4455
+"";"background";"limb";"lesion/lesion1";"lesion/lesion2"
+"background";19223;0;0;0
+"limb";0;28868;0;0
+"lesion/lesion1";1;25;4369;93
+"lesion/lesion2";7;1;0;5772

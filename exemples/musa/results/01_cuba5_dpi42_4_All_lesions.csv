@@ -1,2 +1,0 @@
-image	leaf.number	lesion.status	lesion.number	lesion.surface	lesion.perimeter	lesion.radius.mean	lesion.radius.sd	lesion.radius.min	lesion.radius.max	leaf.surface	m.cx	m.cy	m.majoraxis	m.eccentricity	m.theta
-01_cuba5_dpi42_4	1	keep	2	102	37	5.45647460161071	1.85063222533421	2.08388719202176	8.71264330709342	302500	210.205882352941	71.5588235294118	17.8153697244786	0.89723812306009	-1.42973420937929

@@ -1,0 +1,32 @@
+2019-02-05 11:40:01 
+starting worker pid=4633 on localhost:11145 at 11:40:01.110
+starting worker pid=4634 on localhost:11145 at 11:40:01.120
+starting worker pid=4635 on localhost:11145 at 11:40:01.129
+starting worker pid=4636 on localhost:11145 at 11:40:01.137
+starting worker pid=4637 on localhost:11145 at 11:40:01.146
+2019-02-05 11:40:01 
+testCut_2.jpg
+testCut_3.jpg
+testCut_4.jpg
+testCut_1.jpg
+testCut_0.jpg
+[1] "RUNNING: testCut_3.jpg"
+[1] "RUNNING: testCut_4.jpg"
+[1] "RUNNING: testCut_2.jpg"
+[1][1] "RUNNING: testCut_0.jpg" "RUNNING: testCut_1.jpg"
+
+Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
+  'size' was rounded to the next odd number:  101
+Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
+  'size' was rounded to the next odd number:  101
+Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
+  'size' was rounded to the next odd number:  101
+Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
+  'size' was rounded to the next odd number:  101
+Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
+  'size' was rounded to the next odd number:  101
+[1] "FINISH: testCut_0.jpg"
+[1] "FINISH: testCut_1.jpg"
+[1] "FINISH: testCut_3.jpg"
+[1] "FINISH: testCut_2.jpg"
+[1] "FINISH: testCut_4.jpg"

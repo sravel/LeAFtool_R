@@ -1,2 +1,0 @@
-image	leaf.number	lesion.status	lesion.number	lesion.surface	lesion.perimeter	lesion.radius.mean	lesion.radius.sd	lesion.radius.min	lesion.radius.max	leaf.surface	m.cx	m.cy	m.majoraxis	m.eccentricity	m.theta
-00-border	1	keep	1	104	33	5.41002454910591	1.27875550645502	3.02605763219875	7.77365757324797	302500	346.403846153846	251.653846153846	15.5240083517765	0.830467966596585	0.28504520816078
