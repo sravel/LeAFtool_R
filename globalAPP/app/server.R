@@ -38,20 +38,24 @@ rv <<- reactiveValues(
                         exitStatusCal = -1, messCal = NULL, errCal = NULL,
                         dirCalibration = NULL, outCalibrationTable = NULL,
                         outCalibrationCSV = NULL, plotFileCalibration = NULL,
-#                        fileClass = NULL,
-                        # for analysis
-#                       fileRData = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning.RData"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple2/samples/"),
-#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
+#                        # for analysis
+#                       fileRData = paste0(currentFilePath,"/../../exemples/exemple1/learning/learning.RData"),
+#                       fileClass = paste0(currentFilePath,"/../../exemples/exemple1/learning/learning_classes.txt"),
+#                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple1/samples/"),
+#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple1/results/"),
+
 #                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/learning/learning.RData"),
 #                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/samples/"),
 #                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/results/"),
 #                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/learning/learning.RData"),
 #                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/samples/"),
 #                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/results/"),
+
 #                       fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
+#                       fileClass = paste0(currentFilePath,"/../../exemples/musa/learning/learning_classes.txt"),
 #                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/sample4/"),
 #                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
+
                        fileRData = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning.RData"),
                        fileClass = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning_classes.txt"),
                        dirSamples = paste0(currentFilePath,"/../../exemples/musaBrut/samples/"),
@@ -62,6 +66,7 @@ rv <<- reactiveValues(
 #                        fileRData = NULL,
 #                        dirSamples = NULL,
 #                        dirSamplesOut = NULL,
+#                        fileClass = NULL,
 
 
                         exitStatusAna = -1, messAna = NULL, errAna = NULL,
@@ -162,17 +167,17 @@ shinyServer(function(input, output, session) {
 
   observe_helpers() # active help icon
 
-  fileReaderData <- reactiveFileReader(500, session,
-                                       logfilename, readLines)
+#  fileReaderData <- reactiveFileReader(500, session,
+#                                       logfilename, readLines)
 
-  output$log <- renderText({
-    # Read the text, and make it a consistent number of lines so
-    # that the output box doesn't grow in height.
-    text <- fileReaderData()
-    length(text) <- 14
-    text[is.na(text)] <- ""
-    paste(text, collapse = '\n')
-  })
+#  output$log <- renderText({
+#    # Read the text, and make it a consistent number of lines so
+#    # that the output box doesn't grow in height.
+#    text <- fileReaderData()
+#    length(text) <- 100
+#    text[is.na(text)] <- ""
+#    paste(text, collapse = '\n')
+#  })
 
   # Load functions for tab calibration
   source(file.path("server_code", "tabCalibrationServer.R"), local = TRUE)$value
@@ -218,5 +223,8 @@ shinyServer(function(input, output, session) {
     output$debug <- renderPrint({
       rv %>% reactiveValuesToList
     })
+
+#    rv$log <- fileReaderData()
+
   })
 })

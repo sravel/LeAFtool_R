@@ -102,6 +102,39 @@
 	color: #FFFFFF;
 }
 
+/*
+####### Ajustement des modals
+*/
+.modal-lg {
+	width: 90vw;
+	margin: 30px auto;
+}
+
+.modal-body {
+	position: relative;
+	padding: 15px;
+	height: 80vh;
+}
+.modal-dialog {
+	width: 90vw;
+	margin: 30px auto;
+}
+.sF-dirInfo > div {
+	height: 68vh;
+	border: 1px solid grey;
+	border-radius: 5px;
+	overflow: auto;
+}
+.sF-fileWindow {
+	margin-top: 10px;
+	height: 71vh;
+	border: 1px solid grey;
+	border-radius: 5px;
+	overflow: auto;
+}
+/*
+##### ajustement div space
+*/
 .spaceRow {
 	margin-bottom: 15px;
 }

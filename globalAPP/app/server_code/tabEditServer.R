@@ -162,7 +162,7 @@ DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FAL
                                      escape=FALSE,
                                      selection="single",
                                      style = "bootstrap",
-                                     filter = "bottom",
+                                     filter = list(position = 'top', clear = TRUE, plain = FALSE),
                                      options = list(
                                        paging=TRUE,searching = TRUE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
                                      )

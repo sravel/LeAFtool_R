@@ -69,7 +69,7 @@ tabItem(# Tab for Home input/output
           ),
           tags$div(
             tags$p("Output exemple:"),
-            actionButton( "showCalibration", class = "btn-img", img(src = "calibration.png", width = '60%', height = '60%'))
+            actionButton( "showCalibration", class = "btn-img", img(src = "learning.jpeg", width = '60%', height = '60%'))
           )
         ),
         column( width = 6, offset = 0,

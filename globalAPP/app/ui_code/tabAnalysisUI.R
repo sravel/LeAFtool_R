@@ -60,7 +60,7 @@ tabItem(
           conditionalPanel(
             condition = "output.dirSamples && output.dirOutAnalysis && output.fileRData && output.codeValidationInt == 1",
             actionButton("runButtonAnalysis", "Run Analysis!")
-#            verbatimTextOutput('log', placeholder = TRUE)
+#            verbatimTextOutput('log', placeholder = FALSE)
           )
         )
       ),

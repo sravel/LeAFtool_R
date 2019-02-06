@@ -31,7 +31,7 @@
 ## function of reading images of a group; return the pixel data.frame
 load_group <- function(g) {
   path_group <- paste(rv$dirCalibration,g,sep='/')
-  print(path_group)
+#  print(path_group)
   files_group <- list.files(path_group,full.name=TRUE)
   sample <- lapply(files_group,readImage)
   ## creation of the data frame of the sampled pixels
@@ -96,7 +96,7 @@ observeEvent(
         dirs <- list.dirs(rv$dirCalibration,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
 
         ## Check subDir folder
-        limbDir <- list.dirs(paste0(rv$dirCalibration,"limb"),full.names=FALSE)[-1]
+        limbDir <- list.dirs(paste0(rv$dirCalibration,"/limb"),full.names=FALSE)[-1]
         if (length(limbDir)==0){limbDir = "limb"}
         else { limbDir <- paste0("limb/",limbDir)}
 
@@ -108,12 +108,14 @@ observeEvent(
         if (length(backgroundDir)==0){backgroundDir = "background"}
         else { backgroundDir <- paste0("background/",backgroundDir)}
 
-        print(limbDir)
-        print(lesionDir)
-        print(backgroundDir)
+#        print(limbDir)
+#        print(lesionDir)
+#        print(backgroundDir)
 
         ## checking the existence of subdirectories passed as arguments
         group <- c(backgroundDir,limbDir,lesionDir)
+        nbGroups <- length(group)
+        print(nbGroups)
 
         ## constitution of the data.frame of the pixels of the samples
         progress$inc(3/7, detail = "Build dataframe with learning 3/6")
@@ -125,39 +127,71 @@ observeEvent(
         lda1 <- lda(df2[2:4], df2$group)
 
         ## name common to the 3 output files, identical to the name of the directory
-        basename <- tail(strsplit(rv$dirCalibration,'/')[[1]],1)
+        rv$basename <- tail(strsplit(rv$dirCalibration,'/')[[1]],1)
 
         ## writing the text file of the results
         progress$inc(5/7, detail = "Write output files (csv,jpeg) 5/6")
-        file.txt <- paste(rv$dirCalibration,paste0(basename,".txt"),sep='/') ## output file texte
+        file.txt <- paste(rv$dirCalibration,paste0(rv$basename,".txt"),sep='/') ## output file texte
         sink(file.txt)
         print(table(df2$group))
         print(lda1$scaling)
         df2$predict <- predict(lda1, df2[2:4])$class
         sink()
 
-        rv$outCalibrationCSV <- paste(rv$dirCalibration,paste0(basename,"_info.csv"),sep='/') ## output file csv
+        rv$outCalibrationCSV <- paste(rv$dirCalibration,paste0(rv$basename,"_info.csv"),sep='/') ## output file csv
         rv$outCalibrationTable <- as.data.frame.matrix(table(df2$group, df2$predict))
         write.csv2(rv$outCalibrationTable, file = rv$outCalibrationCSV)
 
         ## graph of groups in the discriminant plane
-        rv$plotFileCalibration <- paste(rv$dirCalibration,paste0(basename,".jpeg"),sep='/') ## output file jpeg
+        rv$plotFileCalibration <- paste(rv$dirCalibration,paste0(rv$basename,".jpeg"),sep='/') ## output file jpeg
         df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
+        df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
 
-        jpeg(rv$plotFileCalibration)
-        print(xyplot(LD2~LD1, group=group, cex=0.8, alpha=1, pch=1, asp=1, auto.key=TRUE, data=df4))
+        jpeg(rv$plotFileCalibration,
+          width = 800,
+          height = 800,
+          quality = 100,
+          units = "px")
+
+        print(
+#              xyplot(LD2~LD1,data=df4,
+#                      groups=group, cex=0.9, alpha=0, pch=1, aspect = "xy",
+#                      auto.key=list(columns = nbGroups),
+#                      xlab="",
+#                      ylab="",
+#                      main="ACP",
+#                      par.settings = list(superpose.symbol = list(col = rainbow(nbGroups),
+#                                                   pch = 19)),
+#                    )
+
+              ggplot( data = df4) +
+                      geom_point(aes(x = LD1, y = LD2, shape = df4$classes.1,  color = df4$group, group=df4$classes.1, fill = NULL)) +
+                      labs( x = "Linear discriminant 1", y = "Linear discriminant 2",
+                              title = "Linear discriminant analysis calibration",
+                              caption="Source: ALAMA"
+                          ) +
+                          guides(fill=guide_legend("Groups")) +
+                      theme(  legend.position = "top",
+                              legend.key = element_rect(fill=NA),
+#                              legend.title="Groups",
+                              panel.grid.major = element_blank(),
+                              panel.grid.minor = element_blank()
+                          ) +
+                          guides(shape = FALSE, size = FALSE)
+
+              )
         dev.off()
 
         ## sauvegarde de l'analyse
         progress$inc(6/7, detail = "Save analysis into R file 6/6")
-        rv$fileRData <- paste(rv$dirCalibration,paste0(basename,".RData"),sep='/')
+        rv$fileRData <- paste(rv$dirCalibration,paste0(rv$basename,".RData"),sep='/')
         save(lda1,file=rv$fileRData)
         rv$exitStatusCal <- 1
         rv$messCal <- rv$fileRData
         progress$inc(7/7, detail = "End of calibration 6/6")
 
        ## sauvegarde des classes
-        rv$outClassesTXT <- paste(rv$dirCalibration,paste0(basename,"_classes.txt"),sep='/') ## output file csv
+        rv$outClassesTXT <- paste(rv$dirCalibration,paste0(rv$basename,"_classes.txt"),sep='/') ## output file csv
         rv$outClassesTable <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
         write.table(rv$outClassesTable,rv$outClassesTXT,row.names=FALSE,quote=FALSE,sep='\t')
 
@@ -215,6 +249,20 @@ output$table <- renderTable({
 },striped = TRUE, bordered = TRUE,
 align = 'c',
 rownames = TRUE)
+
+# view large plot
+observeEvent(input$img_zoom_cal,
+             {
+               addResourcePath("Calibration",rv$dirCalibration) # Images are located outside shiny App
+               showModal(      # Information Dialog Box
+                 modalDialog(
+                   title = "Output calibration",
+                   size = "l",
+                   easyClose = TRUE,
+                   img(src=paste0('Calibration/',rv$basename,".jpeg"),height='100%')
+                )
+               )
+             })
 
 
 outputOptions(output, "codeAna", suspendWhenHidden = FALSE)
