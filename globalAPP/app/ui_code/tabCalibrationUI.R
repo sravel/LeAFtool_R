@@ -80,12 +80,14 @@ tabItem(
           )
         ),
         fluidRow( class = "spaceRow",
-          column(4,
+          column(12,
             tags$div(class = "infoDiv","ACP build with pixel calibration:",
-                 plotOutput("img", click = "img_zoom_cal")
+                 plotOutput("img", click = "img_zoom_cal", width = "100%", height = "100%")
             )
-          ),
-          column(8,
+          )
+        ),
+        fluidRow( class = "spaceRow",
+          column(12,
             tags$div(class = "infoDiv","Table ...?:",
                  tableOutput("table")
             )
