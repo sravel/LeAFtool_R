@@ -115,7 +115,7 @@ observeEvent(
         ## checking the existence of subdirectories passed as arguments
         group <- c(backgroundDir,limbDir,lesionDir)
         nbGroups <- length(group)
-        print(nbGroups)
+#        print(nbGroups)
 
         ## constitution of the data.frame of the pixels of the samples
         progress$inc(3/7, detail = "Build dataframe with learning 3/6")
@@ -147,39 +147,34 @@ observeEvent(
         df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
         df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
 
+        # Palette color for graph
+        colBackPalette <- c("#0000FF","#74D0F1","#26C4EC","#0F9DE8","#1560BD","#0095B6","#00CCCB","#1034A6","#0ABAB5","#1E7FCB")
+        colLimbPalette <- c("#32CD32","#9ACD32","#00FA9A","#008000","#ADFF2F","#6B8E23","#3CB371","#006400","#2E8B57","#00FF00")
+        colLesionPalette <- c("#FF0000","#DB0073","#91283B","#B82010","#FF4901","#AE4A34","#FF0921","#BC2001","#FF5E4D","#E73E01")
+
+        colBack <- colBackPalette[1:length(backgroundDir)]
+        colLimb <- colLimbPalette[1:length(limbDir)]
+        colLesion <- colLesionPalette[1:length(backgroundDir)]
+
+        # Save picture of Discriminent analysis
         jpeg(rv$plotFileCalibration,
           width = 800,
           height = 800,
           quality = 100,
           units = "px")
-
-        print(
-#              xyplot(LD2~LD1,data=df4,
-#                      groups=group, cex=0.9, alpha=0, pch=1, aspect = "xy",
-#                      auto.key=list(columns = nbGroups),
-#                      xlab="",
-#                      ylab="",
-#                      main="ACP",
-#                      par.settings = list(superpose.symbol = list(col = rainbow(nbGroups),
-#                                                   pch = 19)),
-#                    )
-
-              ggplot( data = df4) +
-                      geom_point(aes(x = LD1, y = LD2, shape = df4$classes.1,  color = df4$group, group=df4$classes.1, fill = NULL)) +
-                      labs( x = "Linear discriminant 1", y = "Linear discriminant 2",
-                              title = "Linear discriminant analysis calibration",
-                              caption="Source: ALAMA"
-                          ) +
-                          guides(fill=guide_legend("Groups")) +
-                      theme(  legend.position = "top",
-                              legend.key = element_rect(fill=NA),
-#                              legend.title="Groups",
-                              panel.grid.major = element_blank(),
-                              panel.grid.minor = element_blank()
-                          ) +
-                          guides(shape = FALSE, size = FALSE)
-
-              )
+        g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes.1)) +
+                    geom_point() +
+                    scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                    labs( x = "New x axis label", y = "New y axis label",
+                            title = "Add a title above the plot",
+                            caption="Source: ALAMA", colour = "Groups"
+                        ) +
+                    theme( legend.position = "right",
+                            panel.grid.major = element_blank(),
+                            panel.grid.minor = element_blank()
+                        ) +
+                    guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+        print(g)
         dev.off()
 
         ## sauvegarde de l'analyse
@@ -236,8 +231,8 @@ output$img <- renderImage({
   else{
     # Return a list containing the filename
     return(list(src = rv$plotFileCalibration,
-         width = 400,
-         height = 400,
+         width = 800,
+         height = 800,
          filetype = "image/jpeg",
          alt = "plot img"))
   }
@@ -259,7 +254,7 @@ observeEvent(input$img_zoom_cal,
                    title = "Output calibration",
                    size = "l",
                    easyClose = TRUE,
-                   img(src=paste0('Calibration/',rv$basename,".jpeg"),height='100%')
+                   img(src=paste0('Calibration/',rv$basename,".jpeg"), height = "100%")
                 )
                )
              })

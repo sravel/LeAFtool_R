@@ -109,7 +109,6 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
     plot(rv$loadcurrentImageOriginaleEdit)
     color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
     if (rv$pchOriginal == TRUE){
-#      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
       text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=color)
     }
     points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="green")
@@ -119,11 +118,11 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
 
     if (is.null(rv$zoomInitial)) return(NULL)
     plot(rv$zoomInitial)
-#    if (rv$pchOriginal == TRUE){
-##      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
-#      color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
-#      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=color)
-#    }
+    if (rv$pchOriginal == TRUE){
+#      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
+      color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
+      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=color)
+    }
     points(rv$pointx, rv$pointy, pch='+', cex=3, col="blue")
   }
 })
@@ -157,36 +156,41 @@ observeEvent(input$imageEdit, {
 
 output$results <- DT::renderDataTable({
 
-DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FALSE, row.names = NULL),
-
+  if (is.null(rv$loadCSVcurrentImage)) return(NULL)
+  DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FALSE, row.names = NULL),
                                      escape=FALSE,
-                                     selection="single",
+                                     selection="multiple",
                                      style = "bootstrap",
                                      filter = list(position = 'top', clear = TRUE, plain = FALSE),
                                      options = list(
                                        paging=TRUE,searching = TRUE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
                                      )
-              )
+  ) %>%
+  formatStyle(
+    'lesion.status',
+    backgroundColor = styleEqual(c("keep","remove"), c('green', 'red'))
+  ) %>%
+  formatRound(c("lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max", "m.cx", "m.cy", "m.majoraxis", "m.eccentricity", "m.theta"), 4)
 })
 
 output$AG <- DT::renderDataTable({
 
-DT::datatable(data = as.data.frame(rv$AG , stringAsFactors = FALSE, row.names = NULL),
-
-                                     escape=FALSE,
-                                     selection="single",
-                                     style = "bootstrap",
-                                     filter = "none",
-                                     options = list(
-                                       paging=TRUE,searching = FALSE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
-                                     )
-              )
+  if (is.null(rv$AG)) return(NULL)
+  DT::datatable(data = as.data.frame(rv$AG , stringAsFactors = FALSE, row.names = NULL),
+     escape=FALSE,
+     selection="single",
+     style = "bootstrap",
+     filter = "none",
+     options = list(
+       paging=TRUE,searching = FALSE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
+     )
+  )
 })
 
 output$MERGE <- DT::renderDataTable({
 
-DT::datatable(data = as.data.frame(rv$MERGE , stringAsFactors = FALSE, row.names = NULL),
-
+  if (is.null(rv$MERGE)) return(NULL)
+  DT::datatable(data = as.data.frame(rv$MERGE , stringAsFactors = FALSE, row.names = NULL),
                                      escape=FALSE,
                                      selection="single",
                                      style = "bootstrap",
@@ -194,7 +198,7 @@ DT::datatable(data = as.data.frame(rv$MERGE , stringAsFactors = FALSE, row.names
                                      options = list(
                                        paging=TRUE,searching = FALSE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
                                      )
-              )
+  )
 })
 
 
@@ -295,6 +299,11 @@ observeEvent(input$plot_brush,{
 
     rv$addleft <- xleft
     rv$addbottom <- ybottom
+
+    print(rv$addleft)
+    print(rv$addbottom)
+    print(rv$addleft)
+    print(rv$addbottom)
 
      rv$zoom <- rv$loadcurrentImageEdit[xleft:xright, ytop:ybottom,]
      rv$zoomInitial <- rv$loadcurrentImageOriginaleEdit[xleft:xright, ytop:ybottom,]
