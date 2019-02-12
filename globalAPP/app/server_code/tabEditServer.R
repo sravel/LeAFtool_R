@@ -43,7 +43,7 @@ output$dirInResult <- renderText({
   rv$dirInResult
 })
 
-# extract file Path on input
+# extract file Path on input and update list of images
 observeEvent(input$dirInResult,{
   if (!is.integer(input$dirInResult))
   {
@@ -54,17 +54,18 @@ observeEvent(input$dirInResult,{
   }
 })
 
-## OBSERVATEUR A MODIFIER
+############################################
+## OBSERVE
+############################################
 observe({
 
+  #### Update color of lesion
   if (!is.null(rv$dirInResult))# && input$imageEdit != "")
   {
     rv$lesion_color_borderEdit <- input$lesion_color_borderEdit
     rv$lesion_color_bodiesEdit <- input$lesion_color_bodiesEdit
     rv$lesion_color_borderAlphaEdit <-col2rgb(input$lesion_color_borderEdit, alpha=TRUE)[4]/255
     rv$lesion_color_bodiesAlphaEdit <-col2rgb(input$lesion_color_bodiesEdit, alpha=TRUE)[4]/255
-    leaves <- rv$loadCSVcurrentImage$leaf.number
-    isolate(updateAll(leaves))
   }
   #### SAVE IMAGE IF CHANGE COLOR
   if (!is.null(rv$loadcurrentImageEdit) && !is.null(rv$loadcurrentImageOriginaleEdit) && !is.null(rv$originalFileNameBoth) && !is.null(rv$originalFileName))
@@ -87,52 +88,17 @@ observe({
            units = "px")
       par( mfrow = c(1,1) )
       display(rv$loadcurrentImageEdit, method = "raster")
-    #  points(result$m.cx, result$m.cy, pch='+', cex=2, col="blue")
-
       dev.off()
     })
   }
 })
 
-
-output$plotcurrentImageEdit <- renderPlot({
-  if ( is.null(rv$loadcurrentImageEdit)) return(NULL)
-  plot(rv$loadcurrentImageEdit)
-  color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
-  points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=2, col=color)
-})
-output$plotcurrentImageOriginalEdit <- renderPlot({
-
- ### PLOT ALL FILE if checkbox uncheck
-  if (rv$zoomOriginalCheck == FALSE){
-    if ( is.null(rv$loadcurrentImageOriginaleEdit)) return(NULL)
-    plot(rv$loadcurrentImageOriginaleEdit)
-    color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
-    if (rv$pchOriginal == TRUE){
-      text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=color)
-    }
-    points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="green")
-  }
-  #  else Plot zoom original File
-  if (rv$zoomOriginalCheck == TRUE){
-
-    if (is.null(rv$zoomInitial)) return(NULL)
-    plot(rv$zoomInitial)
-    if (rv$pchOriginal == TRUE){
-#      points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=color)
-      color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
-      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=color)
-    }
-    points(rv$pointx, rv$pointy, pch='+', cex=3, col="blue")
-  }
-})
-
-
+#### LOAD all infos
 observeEvent(input$imageEdit, {
   #Load image for plot
   lesionImg <- strsplit(input$imageEdit, ".", fixed = TRUE)[[1]][1]
   pathImg <- paste(rv$dirInResult, input$imageEdit, sep = '/')
-#  print(pathImg)
+
   if(file.exists(pathImg) && !is.null(rv$dirInResult) && input$imageEdit != ""){
     baseName <- gsub("_lesion", "", lesionImg)
     rv$originalFileName <- paste0(rv$dirInResult, "/",baseName,"_lesion.jpeg")
@@ -149,15 +115,62 @@ observeEvent(input$imageEdit, {
     rv$MERGE <- read.csv(paste0(rv$dirInResult,"/merge_ResumeCount.csv") ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
     load(file = paste0(rv$dirInResult, "/",baseName,".RData"), envir = .GlobalEnv)
-#    print(analyse.li)
   }
 })
 
+############################################
+## DISPLAY IMAGES
+############################################
 
+#### Display image original
+output$plotcurrentImageOriginalEdit <- renderPlot({
+
+ ### PLOT ALL FILE if checkbox uncheck
+  if (rv$zoomOriginalCheck == FALSE){
+    if ( is.null(rv$loadcurrentImageOriginaleEdit)) return(NULL)
+
+    plot(rv$loadcurrentImageOriginaleEdit)
+    if (rv$pchOriginal == TRUE){
+      text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
+    }
+    points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="darkgoldenrod1")
+  }
+  #  else Plot zoom original File
+  if (rv$zoomOriginalCheck == TRUE){
+    if (is.null(rv$zoomInitial)) return(NULL)
+
+    plot(rv$zoomInitial)
+    if (rv$pchOriginal == TRUE){
+      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom+200, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
+    }
+    points(rv$pointx, rv$pointy, pch='+', cex=3, col="darkgoldenrod1")
+  }
+})
+#### Display image lesion color
+output$plotcurrentImageEdit <- renderPlot({
+  if ( is.null(rv$loadcurrentImageEdit)) return(NULL)
+  plot(rv$loadcurrentImageEdit)
+  points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=2, col=rv$color)
+})
+
+#### Display image lesion color ZOOM
+output$zoomcurrentImageEdit <- renderPlot({
+  if (is.null(rv$zoom)) return(NULL)
+  plot(rv$zoom)
+  points(rv$pointx, rv$pointy, pch='+', cex=3, col="darkgoldenrod1")
+})
+
+
+############################################
+## DISPLAY TABLES
+############################################
+
+#### ALL lesion tables for selected image
 output$results <- DT::renderDataTable({
 
   if (is.null(rv$loadCSVcurrentImage)) return(NULL)
-  DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FALSE, row.names = NULL),
+  DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FALSE),
+                                     rownames = NULL,
                                      escape=FALSE,
                                      selection="multiple",
                                      style = "bootstrap",
@@ -170,27 +183,31 @@ output$results <- DT::renderDataTable({
     'lesion.status',
     backgroundColor = styleEqual(c("keep","remove"), c('green', 'red'))
   ) %>%
-  formatRound(c("lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max", "m.cx", "m.cy", "m.majoraxis", "m.eccentricity", "m.theta"), 4)
+  formatRound(c("lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max", "m.cx", "m.cy", "m.majoraxis", "m.eccentricity", "m.theta"), 2)
 })
 
+#### ALL lesion merge by leaf for selected image
 output$AG <- DT::renderDataTable({
 
   if (is.null(rv$AG)) return(NULL)
-  DT::datatable(data = as.data.frame(rv$AG , stringAsFactors = FALSE, row.names = NULL),
-     escape=FALSE,
-     selection="single",
-     style = "bootstrap",
-     filter = "none",
-     options = list(
-       paging=TRUE,searching = FALSE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
-     )
+  DT::datatable(data = as.data.frame(rv$AG , stringAsFactors = FALSE),
+                 rownames = NULL,
+                 escape=FALSE,
+                 selection="single",
+                 style = "bootstrap",
+                 filter = "none",
+                 options = list(
+                   paging=TRUE,searching = FALSE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
+                 )
   )
 })
 
+#### ALL lesion merge by leaf for selected all images
 output$MERGE <- DT::renderDataTable({
 
   if (is.null(rv$MERGE)) return(NULL)
-  DT::datatable(data = as.data.frame(rv$MERGE , stringAsFactors = FALSE, row.names = NULL),
+  DT::datatable(data = as.data.frame(rv$MERGE , stringAsFactors = FALSE),
+                                     rownames = NULL,
                                      escape=FALSE,
                                      selection="single",
                                      style = "bootstrap",
@@ -201,57 +218,25 @@ output$MERGE <- DT::renderDataTable({
   )
 })
 
+############################################
+## EVENTS on plot
+############################################
 
+################## CLICK
+observeEvent(input$plot_click,{
 
-observeEvent(input$plot_click$x,{
-
-if(is.null(input$plot_click$x)) return(NULL)
-  click <- c(input$plot_click$x, input$plot_click$y)
+  if(is.null(input$plot_click$x)) return(NULL)
   res <- nearPoints(rv$loadCSVcurrentImage, input$plot_click, xvar = "m.cx", yvar = "m.cy", threshold = 10, maxpoints = 1)
-  row <- as.integer(row.names(res))
-
-  if(length(res$lesion.number) != 0){
-    rv$loadCSVcurrentImage$lesion.status[row] <- if (rv$loadCSVcurrentImage$lesion.status[row]=="keep") "remove" else if (rv$loadCSVcurrentImage$lesion.status[row]=="remove") "keep"
-  }
-  write.table(
-    rv$loadCSVcurrentImage,
-    file = rv$loadCSVcurrentImageName,
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
-
-  leaves <- res$leaf.number
-  updateAll(leaves)
+  updateAll(res)
 })
 
 ################## BRUSH
-
 observeEvent(input$plot_brush,{
   res <- brushedPoints(rv$loadCSVcurrentImage, input$plot_brush, xvar = "m.cx", yvar = "m.cy")
-  if (nrow(res) == 0)
-    return()
-  for (i in row.names(res)) {
-    row <- as.integer(i)
-    rv$loadCSVcurrentImage$lesion.status[row] <- if (rv$loadCSVcurrentImage$lesion.status[row]=="keep") "remove" else if (rv$loadCSVcurrentImage$lesion.status[row]=="remove") "keep"
-  }
-    write.table(
-    rv$loadCSVcurrentImage,
-    file = rv$loadCSVcurrentImageName,
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
-  leaves <- res$leaf.number
-  updateAll(leaves)
-
+  updateAll(res)
 })
 
-  output$zoomcurrentImageEdit <- renderPlot({
-    if (is.null(rv$zoom)) return(NULL)
-    plot(rv$zoom)
-    points(rv$pointx, rv$pointy, pch='+', cex=3, col="blue")
-  })
+
 
  observeEvent(input$plot_hover, {
    if (!is.null(input$plot_hover$x) &&!is.null(input$plot_hover$y)){
@@ -286,24 +271,21 @@ observeEvent(input$plot_brush,{
      if (is.null(rv$pointy)) rv$pointy <- (ybottom-ytop)/2
      if (is.null(rv$pointx)) rv$pointx <- (xright-xleft)/2
 
-     output$coor <- renderPrint(print(paste("xleft",xleft,
-                 "xright",xright,
-                 "ytop",ytop,
-                 "ybottom",ybottom,
-                 "input$plot_hover$x",input$plot_hover$x,
-                 "input$plot_hover$y",input$plot_hover$y,
-                 "rv$pointx",rv$pointx,
-                 "rv$pointy",rv$pointy
-                 ))
-     )
+#     output$coor <- renderPrint(print(paste("xleft",xleft,
+#                 "xright",xright,
+#                 "ytop",ytop,
+#                 "ybottom",ybottom,
+#                 "input$plot_hover$x",input$plot_hover$x,
+#                 "input$plot_hover$y",input$plot_hover$y,
+#                 "rv$pointx",rv$pointx,
+#                 "rv$pointy",rv$pointy,
+#                 "LEFT:", rv$addleft,
+#                 "BOTTOM:",  rv$addbottom
+#                 ))
+#     )
 
     rv$addleft <- xleft
     rv$addbottom <- ybottom
-
-    print(rv$addleft)
-    print(rv$addbottom)
-    print(rv$addleft)
-    print(rv$addbottom)
 
      rv$zoom <- rv$loadcurrentImageEdit[xleft:xright, ytop:ybottom,]
      rv$zoomInitial <- rv$loadcurrentImageOriginaleEdit[xleft:xright, ytop:ybottom,]
@@ -311,9 +293,26 @@ observeEvent(input$plot_brush,{
 
  })
 
-updateAll <- function(leaves){
+updateAll <- function(res){
+  if (nrow(res) == 0) return(NULL)  # if no lesion
 
-  ## sortie des résultats et coloration des lésions
+  ## If lesion near click or in brush, update status
+  for (i in row.names(res)) {
+    row <- as.integer(i)
+    rv$loadCSVcurrentImage$lesion.status[row] <- if (rv$loadCSVcurrentImage$lesion.status[row]=="keep") "remove" else if (rv$loadCSVcurrentImage$lesion.status[row]=="remove") "keep"
+  }
+  ## Update csv file
+  write.table(
+    rv$loadCSVcurrentImage,
+    file = rv$loadCSVcurrentImageName,
+    quote = FALSE,
+    row.names = FALSE,
+    sep = '\t'
+  )
+
+  ## Update lesion color on image
+  leaves <- res$leaf.number
+
   for (leaf in unique(leaves))
   {
     maskLesion <- analyse.li[[leaf]][["maskLesion"]]
@@ -325,9 +324,8 @@ updateAll <- function(leaves){
     maskLesion[!(maskLesion %in% keep)] <- 0 ## suppression dans mask des objets rouges
     maskLesionRed[!(maskLesionRed %in% remove)] <- 0 ## suppression dans mask2 des objets non rouges
 
+    # open original file
     tmpimage <- rv$loadcurrentImageOriginaleEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,]
-#    tmpimage <- rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,]
-    ## coloration des objets selon leur surface
 
     tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_borderEdit, rv$lesion_color_bodiesEdit), opac=c(rv$lesion_color_borderAlphaEdit, rv$lesion_color_bodiesAlphaEdit))
     tmpimage <- paintObjects(maskLesionRed ,tmpimage, thick=TRUE, col=c("red", "red"), opac=c(0.3, 0))
@@ -335,9 +333,10 @@ updateAll <- function(leaves){
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
   }
 
+  # update aggregate table
   result <- rv$loadCSVcurrentImage[rv$loadCSVcurrentImage$lesion.status != "remove", ]
 
-  if ( !is.null(result) )
+  if ( nrow(result) != 0 )
   {
     # Update merge leaves stats
     ag.count <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], length)
@@ -353,39 +352,48 @@ updateAll <- function(leaves){
     ag$lesion.nb[ag$lesion.surface == 0] <- 0
     ag$lesion.surface[ag$lesion.surface == 0] <- 0
 
-    # if no lesions in one or more leaves
+    # if leaves and one or more no lesion
     for (leafNum in unique(rv$loadCSVcurrentImage$leaf.number))
     {
       if (! (leafNum %in% unique(ag$leaf.number) ))
       {
         leafSurf <- rv$loadCSVcurrentImage$leaf.surface[rv$loadCSVcurrentImage$leaf.number == leafNum][1]
-        line <- data.frame(image = ag$image[1], leaf.number = leafNum, leaf.surface = leafSurf, lesion.nb = 0, lesion.surface = 0, pourcent.lesions = 0)
+        line <- data.frame(image = rv$loadCSVcurrentImage$image[1], leaf.number = leafNum, leaf.surface = leafSurf, lesion.nb = 0, lesion.surface = 0, pourcent.lesions = 0)
         ag <- rbind(ag,line)
       }
     }
-
-  #  print(ag)
-
-    rv$AG <- ag[order(ag$leaf.number),]
-
-    write.table(
-      rv$AG,
-      file = rv$csv_Merge_lesionsFile,
-      quote = FALSE,
-      row.names = FALSE,
-      sep = '\t'
-    )
-
-    rv$MERGE = multmerge(rv$dirInResult, "*_Merge_lesions.csv")
-
-    write.table(
-      rv$MERGE,
-      file = paste0(rv$dirInResult,"/merge_ResumeCount.csv"),
-      quote = FALSE,
-      row.names = FALSE,
-      sep = '\t'
-    )
   }
+
+  if ( nrow(result) == 0 ) # if no lesions in one or more leaves
+  {
+    for (leafNum in unique(rv$loadCSVcurrentImage$leaf.number))
+    {
+      leafSurf <- rv$loadCSVcurrentImage$leaf.surface[rv$loadCSVcurrentImage$leaf.number == leafNum][1]
+      ag <- data.frame(image = rv$loadCSVcurrentImage$image[1], leaf.number = leafNum, leaf.surface = leafSurf, lesion.nb = 0, lesion.surface = 0, pourcent.lesions = 0)
+    }
+  }
+#  print(ag)
+
+  rv$AG <- ag[order(ag$leaf.number),]
+
+  write.table(
+    rv$AG,
+    file = rv$csv_Merge_lesionsFile,
+    quote = FALSE,
+    row.names = FALSE,
+    sep = '\t'
+  )
+
+  rv$MERGE = multmerge(rv$dirInResult, "*_Merge_lesions.csv")
+
+  write.table(
+    rv$MERGE,
+    file = paste0(rv$dirInResult,"/merge_ResumeCount.csv"),
+    quote = FALSE,
+    row.names = FALSE,
+    sep = '\t'
+  )
+
 }
 
 ######### add pch to original image
@@ -394,6 +402,24 @@ observeEvent(input$pchOriginal,{
 })
 observeEvent(input$zoomOriginalCheck,{
   rv$zoomOriginalCheck <- input$zoomOriginalCheck
+})
+
+
+########## If table filter on velues, color lesion in darkorange1 on plot
+
+observeEvent(c(input$results_rows_all,input$results_rows_selected), {
+  rv$filtered_data <- rv$loadCSVcurrentImage[input$results_rows_all,]
+  rv$missing <- rv$loadCSVcurrentImage[-(input$results_rows_all),]
+
+  #### update color of lesion base on filter
+  rv$color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
+  for (i in input$results_rows_selected) {
+    rv$color[i] <- "cyan"
+  }
+  for (i in row.names(rv$missing)) {
+    row <- as.integer(i)
+    if (rv$color[row] != "red") rv$color[row] <- "darkorange1"
+  }
 })
 
 

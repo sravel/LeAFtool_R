@@ -87,8 +87,8 @@ tabItem(
         jqui_resizable(
           plotOutput("plotcurrentImageEdit",click = "plot_click",
                     dblclick = "plot_dbclick",
-                    brush = "plot_brush",
-                    hover = hoverOpts(id = "plot_hover", delay = 50, delayType = c("debounce", "throttle"))
+                    brush = brushOpts(id = "plot_brush", delay = 100, delayType = "debounce", resetOnNew = TRUE),
+                    hover = hoverOpts(id = "plot_hover", delay = 80, delayType = "debounce")
           )
         )
       ),
