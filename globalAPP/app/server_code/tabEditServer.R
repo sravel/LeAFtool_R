@@ -405,7 +405,7 @@ observeEvent(input$zoomOriginalCheck,{
 })
 
 
-########## If table filter on velues, color lesion in darkorange1 on plot
+########## If table filter on values, color lesion in darkorange1 on plot
 
 observeEvent(c(input$results_rows_all,input$results_rows_selected), {
   rv$filtered_data <- rv$loadCSVcurrentImage[input$results_rows_all,]

@@ -154,7 +154,7 @@ observeEvent(
 
         colBack <- colBackPalette[1:length(backgroundDir)]
         colLimb <- colLimbPalette[1:length(limbDir)]
-        colLesion <- colLesionPalette[1:length(backgroundDir)]
+        colLesion <- colLesionPalette[1:length(lesionDir)]
 
         # Save picture of Discriminent analysis
         jpeg(rv$plotFileCalibration,

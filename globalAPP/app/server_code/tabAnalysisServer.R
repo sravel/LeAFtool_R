@@ -601,6 +601,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
   displayableData <- DT::datatable(data = NULL)
   rv$dirInResult <- rv$dirSamplesOut
+
   rv$responseDataFilter <- NULL
 
 
