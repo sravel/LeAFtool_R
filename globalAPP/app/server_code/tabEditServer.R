@@ -66,6 +66,8 @@ observe({
     rv$lesion_color_bodiesEdit <- input$lesion_color_bodiesEdit
     rv$lesion_color_borderAlphaEdit <-col2rgb(input$lesion_color_borderEdit, alpha=TRUE)[4]/255
     rv$lesion_color_bodiesAlphaEdit <-col2rgb(input$lesion_color_bodiesEdit, alpha=TRUE)[4]/255
+    leaves <- rv$loadCSVcurrentImage$leaf.number
+    updateLesionColor(leaves)
   }
   #### SAVE IMAGE IF CHANGE COLOR
   if (!is.null(rv$loadcurrentImageEdit) && !is.null(rv$loadcurrentImageOriginaleEdit) && !is.null(rv$originalFileNameBoth) && !is.null(rv$originalFileName))
@@ -130,10 +132,11 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
     if ( is.null(rv$loadcurrentImageOriginaleEdit)) return(NULL)
 
     plot(rv$loadcurrentImageOriginaleEdit)
+    
     if (rv$pchOriginal == TRUE){
       text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
     }
-    points(input$plot_hover$x, input$plot_hover$y, pch='+', cex=2, col="darkgoldenrod1")
+    points(input$plot_hover$x, input$plot_hover$y, pch=4, cex=3, col="tomato")
   }
   #  else Plot zoom original File
   if (rv$zoomOriginalCheck == TRUE){
@@ -143,7 +146,7 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
     if (rv$pchOriginal == TRUE){
       text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom+200, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
     }
-    points(rv$pointx, rv$pointy, pch='+', cex=3, col="darkgoldenrod1")
+    points(rv$pointx, rv$pointy, pch=4, cex=3, col="tomato")
   }
 })
 #### Display image lesion color
@@ -157,7 +160,7 @@ output$plotcurrentImageEdit <- renderPlot({
 output$zoomcurrentImageEdit <- renderPlot({
   if (is.null(rv$zoom)) return(NULL)
   plot(rv$zoom)
-  points(rv$pointx, rv$pointy, pch='+', cex=3, col="darkgoldenrod1")
+  points(rv$pointx, rv$pointy, pch=4, cex=3, col="tomato")
 })
 
 
@@ -293,26 +296,9 @@ observeEvent(input$plot_brush,{
 
  })
 
-updateAll <- function(res){
-  if (nrow(res) == 0) return(NULL)  # if no lesion
-
-  ## If lesion near click or in brush, update status
-  for (i in row.names(res)) {
-    row <- as.integer(i)
-    rv$loadCSVcurrentImage$lesion.status[row] <- if (rv$loadCSVcurrentImage$lesion.status[row]=="keep") "remove" else if (rv$loadCSVcurrentImage$lesion.status[row]=="remove") "keep"
-  }
-  ## Update csv file
-  write.table(
-    rv$loadCSVcurrentImage,
-    file = rv$loadCSVcurrentImageName,
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
-
+updateLesionColor <- function(leaves){
+  
   ## Update lesion color on image
-  leaves <- res$leaf.number
-
   for (leaf in unique(leaves))
   {
     maskLesion <- analyse.li[[leaf]][["maskLesion"]]
@@ -332,6 +318,30 @@ updateAll <- function(res){
 
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
   }
+  
+}
+
+
+updateAll <- function(res){
+  if (nrow(res) == 0) return(NULL)  # if no lesion
+
+  ## If lesion near click or in brush, update status
+  for (i in row.names(res)) {
+    row <- as.integer(i)
+    rv$loadCSVcurrentImage$lesion.status[row] <- if (rv$loadCSVcurrentImage$lesion.status[row]=="keep") "remove" else if (rv$loadCSVcurrentImage$lesion.status[row]=="remove") "keep"
+  }
+  ## Update csv file
+  write.table(
+    rv$loadCSVcurrentImage,
+    file = rv$loadCSVcurrentImageName,
+    quote = FALSE,
+    row.names = FALSE,
+    sep = '\t'
+  )
+
+  ## Update lesion color on image
+  leaves <- res$leaf.number
+  updateLesionColor(leaves)
 
   # update aggregate table
   result <- rv$loadCSVcurrentImage[rv$loadCSVcurrentImage$lesion.status != "remove", ]
