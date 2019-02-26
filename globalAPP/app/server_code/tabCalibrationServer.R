@@ -143,7 +143,9 @@ observeEvent(
         write.csv2(rv$outCalibrationTable, file = rv$outCalibrationCSV)
 
         ## graph of groups in the discriminant plane
-        rv$plotFileCalibration <- paste(rv$dirCalibration,paste0(rv$basename,".jpeg"),sep='/') ## output file jpeg
+        rv$plotFileCalibration1_2 <- paste(rv$dirCalibration,paste0(rv$basename,"1_2.jpeg"),sep='/') ## output file jpeg
+        rv$plotFileCalibration1_3 <- paste(rv$dirCalibration,paste0(rv$basename,"1_3.jpeg"),sep='/') ## output file jpeg
+        rv$plotFileCalibration2_3 <- paste(rv$dirCalibration,paste0(rv$basename,"2_3.jpeg"),sep='/') ## output file jpeg
         df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
         df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
 
@@ -157,7 +159,7 @@ observeEvent(
         colLesion <- colLesionPalette[1:length(lesionDir)]
 
         # Save picture of Discriminent analysis
-        jpeg(rv$plotFileCalibration,
+        jpeg(rv$plotFileCalibration1_2,
           width = 800,
           height = 800,
           quality = 100,
@@ -165,7 +167,47 @@ observeEvent(
         g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes.1)) +
                     geom_point() +
                     scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                    labs( x = "New x axis label", y = "New y axis label",
+                    labs( x = "LD1", y = "LD2",
+                            title = "Add a title above the plot",
+                            caption="Source: ALAMA", colour = "Groups"
+                        ) +
+                    theme( legend.position = "right",
+                            panel.grid.major = element_blank(),
+                            panel.grid.minor = element_blank()
+                        ) +
+                    guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+        print(g)
+        dev.off()
+        # Save picture of Discriminent analysis
+        jpeg(rv$plotFileCalibration1_3,
+          width = 800,
+          height = 800,
+          quality = 100,
+          units = "px")
+        g <- ggplot( data = df4, aes(x = LD1, y = LD3, colour = group, shape = classes.1)) +
+                    geom_point() +
+                    scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                    labs( x = "LD1", y = "LD3",
+                            title = "Add a title above the plot",
+                            caption="Source: ALAMA", colour = "Groups"
+                        ) +
+                    theme( legend.position = "right",
+                            panel.grid.major = element_blank(),
+                            panel.grid.minor = element_blank()
+                        ) +
+                    guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+        print(g)
+        dev.off()
+        # Save picture of Discriminent analysis
+        jpeg(rv$plotFileCalibration2_3,
+          width = 800,
+          height = 800,
+          quality = 100,
+          units = "px")
+        g <- ggplot( data = df4, aes(x = LD2, y = LD3, colour = group, shape = classes.1)) +
+                    geom_point() +
+                    scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                    labs( x = "LD2", y = "LD3",
                             title = "Add a title above the plot",
                             caption="Source: ALAMA", colour = "Groups"
                         ) +
@@ -223,14 +265,44 @@ output$err <- renderPrint({
   rv$errCal
 })
 
-output$img <- renderImage({
-  if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration)){
+output$img1_2 <- renderImage({
+  if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration1_2)){
     return(list(src ="",
          alt = "plot img"))
   }
   else{
     # Return a list containing the filename
-    return(list(src = rv$plotFileCalibration,
+    return(list(src = rv$plotFileCalibration1_2,
+         width = 800,
+         height = 800,
+         filetype = "image/jpeg",
+         alt = "plot img"))
+  }
+}, deleteFile = FALSE)
+
+output$img1_3 <- renderImage({
+  if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration1_3)){
+    return(list(src ="",
+         alt = "plot img"))
+  }
+  else{
+    # Return a list containing the filename
+    return(list(src = rv$plotFileCalibration1_3,
+         width = 800,
+         height = 800,
+         filetype = "image/jpeg",
+         alt = "plot img"))
+  }
+}, deleteFile = FALSE)
+
+output$img2_3 <- renderImage({
+  if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration2_3)){
+    return(list(src ="",
+         alt = "plot img"))
+  }
+  else{
+    # Return a list containing the filename
+    return(list(src = rv$plotFileCalibration2_3,
          width = 800,
          height = 800,
          filetype = "image/jpeg",
@@ -246,7 +318,7 @@ align = 'c',
 rownames = TRUE)
 
 # view large plot
-observeEvent(input$img_zoom_cal,
+observeEvent(input$img1_2_zoom_cal,
              {
                addResourcePath("Calibration",rv$dirCalibration) # Images are located outside shiny App
                showModal(      # Information Dialog Box
@@ -254,7 +326,31 @@ observeEvent(input$img_zoom_cal,
                    title = "Output calibration",
                    size = "l",
                    easyClose = TRUE,
-                   img(src=paste0('Calibration/',rv$basename,".jpeg"), height = "100%")
+                   img(src=paste0('Calibration/',rv$basename,"1_2.jpeg"), height = "100%")
+                )
+               )
+             })
+observeEvent(input$img1_3_zoom_cal,
+             {
+               addResourcePath("Calibration",rv$dirCalibration) # Images are located outside shiny App
+               showModal(      # Information Dialog Box
+                 modalDialog(
+                   title = "Output calibration",
+                   size = "l",
+                   easyClose = TRUE,
+                   img(src=paste0('Calibration/',rv$basename,"1_3.jpeg"), height = "100%")
+                )
+               )
+             })
+observeEvent(input$img2_3_zoom_cal,
+             {
+               addResourcePath("Calibration",rv$dirCalibration) # Images are located outside shiny App
+               showModal(      # Information Dialog Box
+                 modalDialog(
+                   title = "Output calibration",
+                   size = "l",
+                   easyClose = TRUE,
+                   img(src=paste0('Calibration/',rv$basename,"2_3.jpeg"), height = "100%")
                 )
                )
              })

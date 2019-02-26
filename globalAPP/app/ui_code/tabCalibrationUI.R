@@ -82,7 +82,21 @@ tabItem(
         fluidRow( class = "spaceRow",
           column(12,
             tags$div(class = "infoDiv","ACP build with pixel calibration:",
-                 plotOutput("img", click = "img_zoom_cal", width = "100%", height = "100%")
+                 plotOutput("img1_2", click = "img1_2_zoom_cal", width = "100%", height = "100%")
+            )
+          )
+        ),
+        fluidRow( class = "spaceRow",
+          column(12,
+            tags$div(class = "infoDiv","ACP build with pixel calibration:",
+                 plotOutput("img1_3", click = "img1_3_zoom_cal", width = "100%", height = "100%")
+            )
+          )
+        ),
+        fluidRow( class = "spaceRow",
+          column(12,
+            tags$div(class = "infoDiv","ACP build with pixel calibration:",
+                 plotOutput("img2_3", click = "img2_3_zoom_cal", width = "100%", height = "100%")
             )
           )
         ),
