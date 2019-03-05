@@ -425,7 +425,7 @@ observeEvent(input$fileRDataIn,{
     rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath))
     filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath)))
 #    print(filename)
-#    rv$fileClass <- paste0(filename,"_classes.txt")
+    rv$fileClass <- paste0(filename,"_classes.txt")
 #    print(rv$fileClass)
   }
 })

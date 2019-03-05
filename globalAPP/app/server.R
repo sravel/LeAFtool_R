@@ -44,29 +44,20 @@ rv <<- reactiveValues(
 #                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple1/samples/"),
 #                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple1/results/"),
 
-#                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/learning/learning.RData"),
-#                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/samples/"),
-#                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple2/results/"),
-#                       fileRData = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/learning/learning.RData"),
-#                       dirSamples = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/samples/"),
-#                       dirSamplesOut = paste0("/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/results/"),
+#                       fileRData = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning.RData"),
+#                       fileClass = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning_classes.txt"),
+#                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple2/samples/"),
+#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
 
-#                       fileRData = paste0(currentFilePath,"/../../exemples/musa/learning/learning.RData"),
-#                       fileClass = paste0(currentFilePath,"/../../exemples/musa/learning/learning_classes.txt"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/musa/sample4/"),
-#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
+#                       fileRData = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning.RData"),
+#                       fileClass = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning_classes.txt"),
+#                       dirSamples = paste0(currentFilePath,"/../../exemples/musaBrut/samples/"),
+#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musaBrut/samplesRes/"),
 
-                       fileRData = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning.RData"),
-                       fileClass = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning_classes.txt"),
-                       dirSamples = paste0(currentFilePath,"/../../exemples/musaBrut/samples/"),
-                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musaBrut/samplesRes/"),
-#                         fileRData = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Apprentissage/Apprentissage.RData",
-#                         dirSamples = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/samples1/",
-#                         dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/scripts/GUI/countLesionTools/exemples/Images/Result/",
-#                        fileRData = NULL,
-#                        dirSamples = NULL,
-#                        dirSamplesOut = NULL,
-#                        fileClass = NULL,
+                        fileRData = NULL,
+                        dirSamples = NULL,
+                        dirSamplesOut = NULL,
+                        fileClass = NULL,
 
 
                         exitStatusAna = -1, messAna = NULL, errAna = NULL,
@@ -74,28 +65,28 @@ rv <<- reactiveValues(
                         codeValidationInt = 1,
                         rmScanLine = FALSE,
 
-                        leaf_min_size = 1000,
-                        leaf_border_size = 100,
-                        lesion_min_size = 10,
+                        leaf_min_size = 10,
+                        leaf_border_size = 1,
+                        lesion_min_size = 1,
                         lesion_max_size = 120000,
-                        lesion_border_size = 3,
+                        lesion_border_size = 1,
                         lesion_color_border = "green",
                         lesion_color_bodies = "green",
                         rmEdge = FALSE,
-                        rmEccentric = TRUE,
-                        lesion_eccentric = 1,
+                        rmEccentric = FALSE,
+                        lesion_eccentric = 0,
 
                         # both
 #                       fileRData= NULL,
                         parallelMode = FALSE,
                         parallelThreadsNum = max_no_cores,
-                        blur_value = 3,
+                        blur_value = 0,
 
                         # edit
-#                        dirInResult = NULL,
-#                        loadImageEdit = NULL
-                        dirInResult = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
-                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/musa/sample4Res/"), full.names=FALSE, pattern = "*_lesion.jpeg")
+                        dirInResult = NULL,
+                        loadImageEdit = NULL
+#                        dirInResult = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
+#                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/musa/sample4Res/"), full.names=FALSE, pattern = "*_lesion.jpeg")
                         )
 
 # function derive from shinyFiles to load Home on linux and home for MACOS

@@ -67,7 +67,7 @@ tabItem(
       column(width = 2,
         ### Image parameters
         h4("Image parameters:"),
-          numericInput("blur_value", "Blur image:", value = 3 , min = 0, max = 5, step = 0.1, width = "150px") %>%
+          numericInput("blur_value", "Blur image:", value = 0 , min = 0, max = 5, step = 0.1, width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "blur_value"),
@@ -77,11 +77,11 @@ tabItem(
                   content = "rmScanLine"),
         ### Leaf parameters
         h4("Leaf parameters:"),
-          numericInput("leaf_min_size", "Leaf min size:", value = 1000, min=1,  width = "150px") %>%
+          numericInput("leaf_min_size", "Leaf min size:", value = 10, min=1,  width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "leaf_min_size"),
-          numericInput("leaf_border_size", "Leaf border size:", value = 100, min=1, width = "150px") %>%
+          numericInput("leaf_border_size", "Leaf border size:", value = 1, min=1, width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "leaf_border_size")
@@ -93,7 +93,7 @@ tabItem(
           helper(icon = "question",
                 type = "markdown",
                 content = "rmEdge"),
-        checkboxInput("rmEccentric", "Remove eccentric", value = TRUE, width = "150px") %>%
+        checkboxInput("rmEccentric", "Remove eccentric", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "lesion_eccentric"),
