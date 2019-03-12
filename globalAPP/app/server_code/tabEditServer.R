@@ -57,7 +57,7 @@ observeEvent(input$dirInResult,{
 ############################################
 ## OBSERVE
 ############################################
-observe({
+observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
 
   #### Update color of lesion
   if (!is.null(rv$dirInResult))# && input$imageEdit != "")
@@ -132,7 +132,7 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
     if ( is.null(rv$loadcurrentImageOriginaleEdit)) return(NULL)
 
     plot(rv$loadcurrentImageOriginaleEdit)
-    
+
     if (rv$pchOriginal == TRUE){
       text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
     }
@@ -297,7 +297,7 @@ observeEvent(input$plot_brush,{
  })
 
 updateLesionColor <- function(leaves){
-  
+
   ## Update lesion color on image
   for (leaf in unique(leaves))
   {
@@ -318,7 +318,7 @@ updateLesionColor <- function(leaves){
 
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
   }
-  
+
 }
 
 

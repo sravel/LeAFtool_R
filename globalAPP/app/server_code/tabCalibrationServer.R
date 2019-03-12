@@ -124,7 +124,8 @@ observeEvent(
 
         ## discriminant analysis
         progress$inc(4/7, detail = "Build analysis discriminante 4/6")
-        lda1 <- lda(df2[2:4], df2$group)
+#        lda1 <- lda(df2[2:4], df2$group)
+        lda1 <- lda(df2[2:4], df2$group, prior=rep(1,length(group))/length(group))
 
         ## name common to the 3 output files, identical to the name of the directory
         rv$basename <- tail(strsplit(rv$dirCalibration,'/')[[1]],1)

@@ -121,12 +121,14 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   momentsLesion <- computeFeatures.moment(mask)
 
   ## Remove objects
-  w.small <- w.great <- w.eccentric <- w.edge <- NULL
+  w.small <- w.great <- w.eccentricMin <- w.eccentricMax <- w.edge <- NULL
 
   ## search for small objects
-  w.small <- which(featuresLesion[,"s.area"] <= rv$lesion_min_size)
+  w.small <- which(featuresLesion[,"s.area"] < rv$lesion_min_size)
   ## search for great objects
-  w.great <- which(featuresLesion[,"s.area"] >= rv$lesion_max_size)
+  w.great <- which(featuresLesion[,"s.area"] > rv$lesion_max_size)
+
+    print(w.small)
 
   if (rv$rmEdge == TRUE){
     ## search objets on the edge of the image
@@ -139,10 +141,17 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
   # remove eccentric lesions
   if (rv$rmEccentric == TRUE){
-    w.eccentric <- which(momentsLesion[,"m.eccentricity"] > rv$lesion_eccentric)
+    w.eccentricMin <- which(momentsLesion[,"m.eccentricity"] < rv$rmEccentricMin)
+    w.eccentricMax <- which(momentsLesion[,"m.eccentricity"] > rv$rmEccentricMax)
   }
+
+  print(rv$rmEccentricMin)
+  print(rv$rmEccentricMax)
+  print(w.eccentricMin)
+  print(w.eccentricMax)
+
   # apply to maskLesion
-  mask[mask %in% c(w.small, w.great, w.edge, w.eccentric)] <- 0
+  mask[mask %in% c(w.small, w.great, w.edge, w.eccentricMin, w.eccentricMax)] <- 0
   maskLesion <- mask
 
   display(maskLesion, method = "raster", all = TRUE)
@@ -503,9 +512,11 @@ observeEvent(input$lesion_min_size,{
 ###### lesion_max_size
 observeEvent(input$lesion_max_size,{
   validate_INT(input$lesion_max_size, "lesion_max_size")
-  if (!is.na(input$lesion_min_size) && (is.na(input$lesion_max_size) || input$lesion_min_size > input$lesion_max_size)){
+  if ( input$lesion_min_size > input$lesion_max_size){
     updateNumericInput(session,"lesion_max_size", value = as.numeric(input$lesion_min_size)+1)
     rv$lesion_max_size <- as.numeric(input$lesion_min_size)+1
+  }else{
+    rv$lesion_max_size <- as.numeric(input$lesion_max_size)
   }
 })
 
@@ -571,20 +582,14 @@ observeEvent(input$rmScanLine,{
 
 
 ######### Eccentricity
-observeEvent(c(input$rmEccentric,input$lesion_eccentric),{
+observeEvent(input$rmEccentric,{
   rv$rmEccentric <- input$rmEccentric
-  if (is.na(input$lesion_eccentric)){
-    updateNumericInput(session,"lesion_eccentric", value = 0.99)
-    rv$lesion_eccentric <- 0.99
-  }else if (as.numeric(input$lesion_eccentric) > 1){
-    updateNumericInput(session,"lesion_eccentric", value = 1)
-    rv$lesion_eccentric <- 1
-  }else if (as.numeric(input$lesion_eccentric) < 0.1){
-    updateNumericInput(session,"lesion_eccentric", value = 0.1)
-    rv$lesion_eccentric <- 0.1
-  }else{
-    rv$lesion_eccentric <- as.numeric(input$lesion_eccentric)
-  }
+})
+
+######### Eccentricity Range
+observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
+  rv$rmEccentricMin <- input$lesion_eccentric_slider[1]
+  rv$rmEccentricMax <- input$lesion_eccentric_slider[2]
 })
 
 ############################################
