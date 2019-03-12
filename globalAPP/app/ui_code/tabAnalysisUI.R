@@ -99,7 +99,7 @@ tabItem(
                 content = "lesion_eccentric"),
         conditionalPanel(
           condition = "input.rmEccentric",
-            numericInput("lesion_eccentric","Eccentric size", value = 1, min = 0.01, max = 1, step = 0.01, width = "150px")  %>%
+            sliderInput("lesion_eccentric_slider", label = "Eccentric size", min = 0, max = 1, value = c(0, 1), step = 0.01, width = "150px") %>%
               helper(icon = "question",
                     type = "markdown",
                     content = "lesion_eccentric")

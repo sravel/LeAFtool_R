@@ -116,31 +116,4 @@ tabItem(
       )
     )
   )
-
-
-#  tabsetPanel(
-#    tabPanel("Static raster", width = 10,
-#      fluidRow(
-#      column(4,
-#        selectInput("image", "Sample image:", rv$LeafNamesFile,
-#         plotOutput("raster")
-#      ),
-#      column(6,
-
-#           imageOutput("raster2",click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"),
-#         verbatimTextOutput("position"),
-#         verbatimTextOutput("brushPos"),
-#         tableOutput("plot_brushedpoints")
-#      )
-#      ),
-#      fluidRow(
-#      tableOutput("results"),
-#      verbatimTextOutput("infos")
-#      )
-#    ),
-
-#    tabPanel("Interactive browser",
-#         displayOutput("widget", width = "100%", height = "800px")
-#    )
-#  )
 )
