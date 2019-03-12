@@ -33,6 +33,9 @@
 ## Global functions
 ############################################
 
+# to only 2 digits after dot
+options(digits=2)
+
 rv <<- reactiveValues(
                         # for calibration
                         exitStatusCal = -1, messCal = NULL, errCal = NULL,
