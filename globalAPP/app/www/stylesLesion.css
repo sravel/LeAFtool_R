@@ -248,3 +248,14 @@ body{
  white-space: -o-pre-wrap;    /* Opera 7 */
  word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+/*
+slider color
+*/
+.js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {
+                                                  background: #00a65a;
+                                                  border-top: 1px solid #00a65a ;
+                                                  border-bottom: 1px solid #00a65a ;}
+
+                            /* changes the colour of the number tags */
+                           .irs-from, .irs-to, .irs-single { background: #00a65a }
