@@ -45,10 +45,12 @@ boundingRectangle <<- function(mask, object) {
 }
 
 extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
+  ##### FOR BANANA LEAF #########################################
 #  kern = makeBrush(size = 201)
 #  opening(imageBackgroundBlack, kern)
 #  display(imageBackgroundBlack, method = "raster", all = TRUE)
 #  imageBackgroundBlack <- fillHull(imageBackgroundBlack)
+ ################################################################
   b <- boundingRectangle(mask, i)
   leaf <- imageBackgroundBlack[b$y, b$x,]
   mask.leaf <- mask[b$y, b$x]
@@ -89,15 +91,11 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
   # blur image or not
   if (rv$blur_value == TRUE){
-    print(paste("BLUR:",rv$blur_value))
-#    f <- gblur(f,rv$blur_value)
     flo <- makeBrush(rv$blur_value, shape='disc', step=FALSE)^2
     flo <- flo/sum(flo)
     f <- filter2(f, flo)
-#    print(f)
   }
 
-#  print(imageData(f))
   # analysis
   df6 <- data.frame(red=as.numeric(imageData(f)[,,1]), green=as.numeric(imageData(f)[,,2]), blue=as.numeric(imageData(f)[,,3]))
   df6$predict <- predict(lda1, df6)$class
@@ -203,10 +201,6 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   jpegfileOnly <- paste(pathResult, '/', filename, "_lesion.jpeg", sep = '')
   csv_Merge_lesionsFile <- paste(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
   csv_All_lesionsFile <- paste(pathResult, '/', filename, "_All_lesions.csv", sep = '')
-
-#  background <- names(lda1$prior)[1]
-#  limb <- names(lda1$prior)[2]
-#  lesion <- names(lda1$prior)[3]
 
   background <- classes$subclass[classes$class=="background"]
   limb <- classes$subclass[classes$class=="limb"]
