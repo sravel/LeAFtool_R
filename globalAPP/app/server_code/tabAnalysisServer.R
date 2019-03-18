@@ -45,8 +45,8 @@ boundingRectangle <<- function(mask, object) {
 }
 
 extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
-  kern = makeBrush(size = 201)
-  opening(imageBackgroundBlack, kern)
+#  kern = makeBrush(size = 201)
+#  opening(imageBackgroundBlack, kern)
 #  display(imageBackgroundBlack, method = "raster", all = TRUE)
 #  imageBackgroundBlack <- fillHull(imageBackgroundBlack)
   b <- boundingRectangle(mask, i)
@@ -85,15 +85,19 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   imageData(f)[,,1] <- df6$red
   imageData(f)[,,2] <- df6$green
   imageData(f)[,,3] <- df6$blue
+  # end replace
 
   # blur image or not
-  if (rv$blur_value != 0){
+  if (rv$blur_value == TRUE){
+    print(paste("BLUR:",rv$blur_value))
 #    f <- gblur(f,rv$blur_value)
     flo <- makeBrush(rv$blur_value, shape='disc', step=FALSE)^2
     flo <- flo/sum(flo)
     f <- filter2(f, flo)
+#    print(f)
   }
 
+#  print(imageData(f))
   # analysis
   df6 <- data.frame(red=as.numeric(imageData(f)[,,1]), green=as.numeric(imageData(f)[,,2]), blue=as.numeric(imageData(f)[,,3]))
   df6$predict <- predict(lda1, df6)$class
@@ -144,11 +148,6 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
     w.eccentricMin <- which(momentsLesion[,"m.eccentricity"] < rv$rmEccentricMin)
     w.eccentricMax <- which(momentsLesion[,"m.eccentricity"] > rv$rmEccentricMax)
   }
-
-  print(rv$rmEccentricMin)
-  print(rv$rmEccentricMax)
-  print(w.eccentricMin)
-  print(w.eccentricMax)
 
   # apply to maskLesion
   mask[mask %in% c(w.small, w.great, w.edge, w.eccentricMin, w.eccentricMax)] <- 0
@@ -396,7 +395,7 @@ updateDirAnalysis <- observeEvent(input$dirInSamples,{
 ############################################
 shinyDirChoose(
   input,'dirOut',
-  filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG"),
+  filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
   roots = allVolumesAvail,
   session = session,
   restrictions = system.file(package = 'base')
@@ -460,61 +459,127 @@ if (!is.null(rv$fileClass) && file.exists(rv$fileClass)) {
 ## Validate value for options
 ############################################
 
-validate_INT <- function(inputValue,name) {
-  if(!is.numeric(inputValue) || (inputValue <= 0) || is.na(inputValue)){
-    rv$codeValidationInt <- 0
-    rv$warning <- HTML(paste0("Please input a number >= 0 for <b>",name,"</b> !"))
-    feedbackWarning(
-      inputId = name,
-      condition = all(c(
-        inputValue <= 0,
-        inputValue  %% 1 == 0
-      )),
-      text = "Warning please enter 0 < value"
-    )
-    updateNumericInput(session,name, value = 1)
+#validate_INT <- function(inputValue,name) {
+#  if(!is.numeric(inputValue) || (inputValue <= 0) || is.na(inputValue)){
+#    rv$codeValidationInt <- 0
+#    rv$warning <- HTML(paste0("Please input a number >= 0 for <b>",name,"</b> !"))
+#    feedbackWarning(
+#      inputId = name,
+#      condition = all(c(
+#        inputValue <= 0,
+#        inputValue  %% 1 == 0
+#      )),
+#      text = "Warning please enter 0 < value"
+#    )
+#    updateNumericInput(session,name, value = 1)
+#  }else{
+#    rv$codeValidationInt <- 1
+#  }
+#  feedbackDanger(
+#      inputId = name,
+#      condition = is.na(inputValue),
+#      text = "Danger please enter number"
+#    )
+#}
+
+returnInpair <- function(value){
+  if(value%%2==0){
+    return(value+1)
   }else{
-    rv$codeValidationInt <- 1
+    return(value)
   }
-  feedbackDanger(
-      inputId = name,
-      condition = is.na(inputValue),
-      text = "Danger please enter number"
-    )
 }
+
 ######## Image
 ###### Blur image
-observeEvent(input$blur_value,{
-  rv$blur_value <- as.numeric(input$blur_value)
+
+###### active or not (checkbox)
+observeEvent(input$active_blur,{
+  rv$active_blur <- input$active_blur
 })
 
+observeEvent(input$blur_value,{
+  feedbackDanger(
+      inputId = "blur_value",
+      condition = is.na(input$blur_value),
+      text = "Please add number 'or 1 will be use'"
+    )
+  req(input$blur_value)
+  if (is.na(input$blur_value) || as.numeric(input$blur_value) == 0){
+    updateNumericInput(session,"blur_value", value = 1)
+    rv$blur_value <- 1
+  }
+  else{
+    rv$blur_value <- returnInpair(as.numeric(input$blur_value))
+    updateNumericInput(session,"blur_value", value = returnInpair(as.numeric(input$blur_value)))
+  }
+})
 
 ######## LEAF
 ###### leaf_min_size
 observeEvent(input$leaf_min_size,{
-  validate_INT(input$leaf_min_size, "leaf_min_size")
-  rv$leaf_min_size <- as.numeric(input$leaf_min_size)
+  feedbackDanger(
+      inputId = "leaf_min_size",
+      condition = is.na(input$leaf_min_size),
+      text = "Please add number 'or 100 will be use'"
+    )
+  req(input$leaf_min_size)
+  if (is.na(input$leaf_min_size) || as.numeric(input$leaf_min_size) == 0){
+    updateNumericInput(session,"leaf_min_size", value = 100)
+    rv$leaf_min_size <- 100
+  }
+  else{
+    rv$leaf_min_size <- as.numeric(input$leaf_min_size)
+  }
 })
 
 ###### leaf_border_size
 observeEvent(input$leaf_border_size,{
-  validate_INT(input$leaf_border_size, "leaf_border_size")
-  rv$leaf_border_size <- as.numeric(input$leaf_border_size)
+  feedbackDanger(
+      inputId = "leaf_border_size",
+      condition = is.na(input$leaf_border_size),
+      text = "Please add number 'or 5 will be use'"
+    )
+  req(input$leaf_border_size)
+  if (is.na(input$leaf_border_size) || as.numeric(input$leaf_border_size) == 0){
+    updateNumericInput(session,"leaf_border_size", value = 5)
+    rv$leaf_border_size <- 5
+  }
+  else{
+    updateNumericInput(session,"leaf_border_size", value = returnInpair(as.numeric(input$leaf_border_size)))
+    rv$leaf_border_size <- returnInpair(as.numeric(input$leaf_border_size))
+  }
 })
 
 ######## LESIONS
 ###### lesion_min_size
 observeEvent(input$lesion_min_size,{
-  validate_INT(input$lesion_min_size, "lesion_min_size")
-  rv$lesion_min_size <- as.numeric(input$lesion_min_size)
+  feedbackDanger(
+      inputId = "lesion_min_size",
+      condition = is.na(input$lesion_min_size),
+      text = "Please add number 'or 10 will be use'"
+    )
+  req(input$lesion_min_size)
+  if (is.na(input$lesion_min_size) || as.numeric(input$lesion_min_size) == 0){
+    updateNumericInput(session,"lesion_min_size", value = 10)
+    rv$lesion_min_size <- 10
+  }
+  else{
+    rv$lesion_min_size <- as.numeric(input$lesion_min_size)
+  }
 })
 
 ###### lesion_max_size
 observeEvent(input$lesion_max_size,{
-  validate_INT(input$lesion_max_size, "lesion_max_size")
-  if ( input$lesion_min_size > input$lesion_max_size){
-    updateNumericInput(session,"lesion_max_size", value = as.numeric(input$lesion_min_size)+1)
-    rv$lesion_max_size <- as.numeric(input$lesion_min_size)+1
+  feedbackDanger(
+      inputId = "lesion_max_size",
+      condition = is.na(input$lesion_max_size),
+      text = "Please add number 'or 120000 will be use'"
+    )
+  req(input$lesion_max_size)
+  if (is.na(input$lesion_max_size) || as.numeric(input$lesion_max_size) == 0 || input$lesion_min_size > input$lesion_max_size){
+    updateNumericInput(session,"lesion_max_size", value = 120000)
+    rv$lesion_max_size <- 120000
   }else{
     rv$lesion_max_size <- as.numeric(input$lesion_max_size)
   }
@@ -522,8 +587,19 @@ observeEvent(input$lesion_max_size,{
 
 ###### lesion_border_size
 observeEvent(input$lesion_border_size,{
-  validate_INT(input$lesion_border_size, "lesion_border_size")
-  rv$lesion_border_size <- as.numeric(input$lesion_border_size)
+  feedbackDanger(
+      inputId = "lesion_border_size",
+      condition = is.na(input$lesion_border_size),
+      text = "Please add number 'or 3 will be use'"
+    )
+  req(input$lesion_border_size)
+  if ( is.na(input$lesion_border_size) || as.numeric(input$lesion_border_size) == 0){
+    updateNumericInput(session,"lesion_border_size", value = 3)
+    rv$lesion_border_size <- 3
+  }else{
+  updateNumericInput(session,"lesion_border_size", value = 1))
+  rv$lesion_border_size <- returnInpair(as.numeric(input$lesion_border_size))
+  }
 })
 
 
@@ -539,7 +615,12 @@ output$warning <- renderUI({
 observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
   rv$parallelMode <- input$parallelMode
   max_no_cores <- as.numeric(max(1, detectCores() - 2))
-
+  feedbackDanger(
+      inputId = "parallelThreadsNum",
+      condition = is.na(input$parallelThreadsNum),
+      text = paste("Please add number 'or ",max_no_cores," will be use'")
+    )
+  req(input$parallelThreadsNum)
   if (is.na(input$parallelThreadsNum)){
     updateNumericInput(session,"parallelThreadsNum", value = max_no_cores)
     rv$parallelThreadsNum <- max_no_cores
@@ -554,22 +635,6 @@ observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
   }
 })
 
-######### Blur
-observeEvent(input$blur_value,{
-
-  if (is.na(input$blur_value)){
-    updateNumericInput(session,"blur_value", value = 0)
-    rv$blur_value <- 0
-  }else if (as.numeric(input$blur_value) > 5){
-    updateNumericInput(session,"blur_value", value = 5)
-    rv$blur_value <- 5
-  }else if (as.numeric(input$blur_value) < 0){
-    updateNumericInput(session,"blur_value", value = 0)
-    rv$blur_value <- 0
-  }else{
-    rv$blur_value <- as.numeric(input$blur_value)
-  }
-})
 
 ######### rm edge lesion
 observeEvent(input$rmEdge,{

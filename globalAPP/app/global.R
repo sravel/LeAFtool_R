@@ -21,8 +21,8 @@
 # MA 02110-1301, USA.
 #
 # You should have received a copy of the CeCILL-C license with this program.
-#If not see <http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt>
-#
+# If not see <http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt>
+# 
 # Intellectual property belongs to CIRAD and South Green developpement plateform
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################

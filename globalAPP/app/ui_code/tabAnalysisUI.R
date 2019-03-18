@@ -67,21 +67,28 @@ tabItem(
       column(width = 2,
         ### Image parameters
         h4("Image parameters:"),
-          numericInput("blur_value", "Blur image:", value = 0 , min = 0, max = 5, step = 0.1, width = "150px") %>%
-            helper(icon = "question",
-                  type = "markdown",
-                  content = "blur_value"),
+        checkboxInput("active_blur", "Apply blur on image", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "active_blur"),
+        conditionalPanel(
+          condition = "input.active_blur",
+            numericInput("blur_value", "Blur image:", value = 1 , min = 1, max = 11, step = 2, width = "150px") %>%
+              helper(icon = "question",
+                    type = "markdown",
+                    content = "blur_value")
+        ),
           checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "rmScanLine"),
         ### Leaf parameters
         h4("Leaf parameters:"),
-          numericInput("leaf_min_size", "Leaf min size:", value = 10, min=1,  width = "150px") %>%
+          numericInput("leaf_min_size", "Leaf min size:", value = 100, min=1,  width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "leaf_min_size"),
-          numericInput("leaf_border_size", "Leaf border size:", value = 1, min=1, width = "150px") %>%
+          numericInput("leaf_border_size", "Leaf border size:", value = 5, min=1, step = 2, width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "leaf_border_size")
@@ -113,7 +120,7 @@ tabItem(
                 type = "markdown",
                  content = "lesion_max_size"),
 
-        numericInput("lesion_border_size", "Lesion border size:", value = 3, min=1, width = "150px") %>%
+        numericInput("lesion_border_size", "Lesion border size:", value = 3, min=1, step = 2, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "lesion_border_size"),
