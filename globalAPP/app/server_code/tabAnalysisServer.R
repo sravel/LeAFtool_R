@@ -591,7 +591,7 @@ observeEvent(input$lesion_border_size,{
     updateNumericInput(session,"lesion_border_size", value = 3)
     rv$lesion_border_size <- 3
   }else{
-  updateNumericInput(session,"lesion_border_size", value = 1))
+  updateNumericInput(session,"lesion_border_size", value = 1)
   rv$lesion_border_size <- returnInpair(as.numeric(input$lesion_border_size))
   }
 })
