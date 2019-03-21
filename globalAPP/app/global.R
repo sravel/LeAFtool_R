@@ -26,9 +26,12 @@
 # Intellectual property belongs to CIRAD and South Green developpement plateform
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################
+rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
+gc() #free up memrory and report the memory usage.
 
 library(parallel)
 max_no_cores <- as.numeric(max(1, detectCores() - 2))
+
 
 runCountLesion <- function(port=NULL) {
   if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)

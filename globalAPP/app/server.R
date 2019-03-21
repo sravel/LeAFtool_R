@@ -57,10 +57,15 @@ rv <<- reactiveValues(
 #                       dirSamples = paste0(currentFilePath,"/../../exemples/musaBrut/samples/"),
 #                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musaBrut/samplesRes/"),
 
-                        fileRData = NULL,
-                        dirSamples = NULL,
-                        dirSamplesOut = NULL,
-                        fileClass = NULL,
+#                        fileRData = NULL,
+#                        dirSamples = NULL,
+#                        dirSamplesOut = NULL,
+#                        fileClass = NULL,
+
+                        fileRData = "/media/sebastien/Bayer/ScriptsSEB/images/exemples/riz/samples/samples.RData",
+                        dirSamples = "/home/sebastien/00-ALAMA-Exemple/riz/image/",
+                        dirSamplesOut = "/home/sebastien/00-ALAMA-Exemple/riz/result/",
+                        fileClass = "/media/sebastien/Bayer/ScriptsSEB/images/exemples/riz/samples/samples_classes.txt",
 
 
                         exitStatusAna = -1, messAna = NULL, errAna = NULL,
@@ -73,11 +78,13 @@ rv <<- reactiveValues(
                         lesion_min_size = 1,
                         lesion_max_size = 120000,
                         lesion_border_size = 1,
-                        lesion_color_border = "green",
-                        lesion_color_bodies = "green",
+                        lesion_color_border = "blue",
+                        lesion_color_bodies = "#FE8E0000",
                         rmEdge = FALSE,
                         rmEccentric = FALSE,
-                        lesion_eccentric = 0,
+                        lesion_eccentricMin = 0,
+                        lesion_eccentricMax = 1,
+                        active_blur = FALSE,
 
                         # both
 #                       fileRData= NULL,

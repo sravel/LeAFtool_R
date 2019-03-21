@@ -73,6 +73,7 @@ observeEvent(
       rv$exitStatusCal <- -1
       rv$messCal <- NULL
       rv$errCal <- NULL
+      rv$plotALL <- TRUE
 
       # test if all subfolder mandatory
       listdirCalibration <- existDirCalibration(rv$dirCalibration)
@@ -115,7 +116,6 @@ observeEvent(
         ## checking the existence of subdirectories passed as arguments
         group <- c(backgroundDir,limbDir,lesionDir)
         nbGroups <- length(group)
-#        print(nbGroups)
 
         ## constitution of the data.frame of the pixels of the samples
         progress$inc(3/7, detail = "Build dataframe with learning 3/6")
@@ -165,60 +165,79 @@ observeEvent(
           height = 800,
           quality = 100,
           units = "px")
-        g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes.1)) +
-                    geom_point() +
-                    scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                    labs( x = "LD1", y = "LD2",
-                            title = "Add a title above the plot",
-                            caption="Source: ALAMA", colour = "Groups"
-                        ) +
-                    theme( legend.position = "right",
-                            panel.grid.major = element_blank(),
-                            panel.grid.minor = element_blank()
-                        ) +
-                    guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
-        print(g)
-        dev.off()
-        # Save picture of Discriminent analysis
-        jpeg(rv$plotFileCalibration1_3,
-          width = 800,
-          height = 800,
-          quality = 100,
-          units = "px")
-        g <- ggplot( data = df4, aes(x = LD1, y = LD3, colour = group, shape = classes.1)) +
-                    geom_point() +
-                    scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                    labs( x = "LD1", y = "LD3",
-                            title = "Add a title above the plot",
-                            caption="Source: ALAMA", colour = "Groups"
-                        ) +
-                    theme( legend.position = "right",
-                            panel.grid.major = element_blank(),
-                            panel.grid.minor = element_blank()
-                        ) +
-                    guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
-        print(g)
-        dev.off()
-        # Save picture of Discriminent analysis
-        jpeg(rv$plotFileCalibration2_3,
-          width = 800,
-          height = 800,
-          quality = 100,
-          units = "px")
-        g <- ggplot( data = df4, aes(x = LD2, y = LD3, colour = group, shape = classes.1)) +
-                    geom_point() +
-                    scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                    labs( x = "LD2", y = "LD3",
-                            title = "Add a title above the plot",
-                            caption="Source: ALAMA", colour = "Groups"
-                        ) +
-                    theme( legend.position = "right",
-                            panel.grid.major = element_blank(),
-                            panel.grid.minor = element_blank()
-                        ) +
-                    guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
-        print(g)
-        dev.off()
+
+        if ( nbGroups <= 3){
+          g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes)) +
+                      geom_point() +
+                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                      labs( x = "LD1", y = "LD2",
+                              title = "Add a title above the plot",
+                              caption="Source: ALAMA", colour = "Groups"
+                          ) +
+                      theme( legend.position = "right",
+                              panel.grid.major = element_blank(),
+                              panel.grid.minor = element_blank()
+                          ) +
+                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+          print(g)
+          dev.off()
+          rv$plotALL <- FALSE
+        }else{
+          g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes.1)) +
+                      geom_point() +
+                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                      labs( x = "LD1", y = "LD2",
+                              title = "Add a title above the plot",
+                              caption="Source: ALAMA", colour = "Groups"
+                          ) +
+                      theme( legend.position = "right",
+                              panel.grid.major = element_blank(),
+                              panel.grid.minor = element_blank()
+                          ) +
+                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+          print(g)
+          dev.off()
+          # Save picture of Discriminent analysis
+          jpeg(rv$plotFileCalibration1_3,
+            width = 800,
+            height = 800,
+            quality = 100,
+            units = "px")
+          g <- ggplot( data = df4, aes(x = LD1, y = LD3, colour = group, shape = classes.1)) +
+                      geom_point() +
+                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                      labs( x = "LD1", y = "LD3",
+                              title = "Add a title above the plot",
+                              caption="Source: ALAMA", colour = "Groups"
+                          ) +
+                      theme( legend.position = "right",
+                              panel.grid.major = element_blank(),
+                              panel.grid.minor = element_blank()
+                          ) +
+                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+          print(g)
+          dev.off()
+          # Save picture of Discriminent analysis
+          jpeg(rv$plotFileCalibration2_3,
+            width = 800,
+            height = 800,
+            quality = 100,
+            units = "px")
+          g <- ggplot( data = df4, aes(x = LD2, y = LD3, colour = group, shape = classes.1)) +
+                      geom_point() +
+                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                      labs( x = "LD2", y = "LD3",
+                              title = "Add a title above the plot",
+                              caption="Source: ALAMA", colour = "Groups"
+                          ) +
+                      theme( legend.position = "right",
+                              panel.grid.major = element_blank(),
+                              panel.grid.minor = element_blank()
+                          ) +
+                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+          print(g)
+          dev.off()
+        }
 
         ## sauvegarde de l'analyse
         progress$inc(6/7, detail = "Save analysis into R file 6/6")
@@ -266,10 +285,15 @@ output$err <- renderPrint({
   rv$errCal
 })
 
+output$plotALL <- renderText({
+  if (isTRUE(rv$plotALL)) 1
+  else 0
+})
+
 output$img1_2 <- renderImage({
   if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration1_2)){
     return(list(src ="",
-         alt = "plot img"))
+         alt = ""))
   }
   else{
     # Return a list containing the filename
@@ -277,14 +301,14 @@ output$img1_2 <- renderImage({
          width = 800,
          height = 800,
          filetype = "image/jpeg",
-         alt = "plot img"))
+         alt = ""))
   }
 }, deleteFile = FALSE)
 
 output$img1_3 <- renderImage({
   if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration1_3)){
     return(list(src ="",
-         alt = "plot img"))
+         alt = ""))
   }
   else{
     # Return a list containing the filename
@@ -292,14 +316,14 @@ output$img1_3 <- renderImage({
          width = 800,
          height = 800,
          filetype = "image/jpeg",
-         alt = "plot img"))
+         alt = ""))
   }
 }, deleteFile = FALSE)
 
 output$img2_3 <- renderImage({
   if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration2_3)){
     return(list(src ="",
-         alt = "plot img"))
+         alt = ""))
   }
   else{
     # Return a list containing the filename
@@ -307,7 +331,7 @@ output$img2_3 <- renderImage({
          width = 800,
          height = 800,
          filetype = "image/jpeg",
-         alt = "plot img"))
+         alt = ""))
   }
 }, deleteFile = FALSE)
 
@@ -317,6 +341,42 @@ output$table <- renderTable({
 },striped = TRUE, bordered = TRUE,
 align = 'c',
 rownames = TRUE)
+
+output$table2 <- DT::renderDataTable({
+
+  if (is.null(rv$outCalibrationTable)) return(NULL)
+  df <- as.data.frame(rv$outCalibrationTable, stringAsFactors = FALSE, rownames = TRUE)
+  brks <- quantile(df, probs = seq(.05, .95, .05), na.rm = TRUE)
+  clrs <- round(seq(255, 40, length.out = length(brks) + 1), 0) %>% {paste0("rgb(255,", ., ",", ., ")")}
+
+  DT::datatable(data = df,
+                  caption = 'Table Calibration: The values are the number of pixels.Défine class on row versus predict on columns. Source: ALAMA',
+                  class = 'dt-center compact cell-border',
+                  options = list(
+                                  columnDefs = list(list(width = '20%', targets = seq(0,length(colnames(df)),1))),
+                                  dom = 't',
+                                  style = "none",
+                                  ordering=F,
+                                  selection="none"
+                                )
+#                  extensions = c('Responsive')
+
+  ) %>%
+  formatStyle(
+    0, target = 'cell', fontWeight = 'bold'
+  ) %>%
+   formatStyle(
+    names(df), backgroundColor = styleInterval(brks, clrs)
+  )
+
+#  formatStyle(0, fontWeight = styleEqual(3, "bold"))
+
+})
+
+
+
+
+
 
 # view large plot
 observeEvent(input$img1_2_zoom_cal,

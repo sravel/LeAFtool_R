@@ -71,12 +71,18 @@ tabItem(
       condition = "output.codeAna == 1",
       box(
         title = "Calibration output", status = "success",solidHeader = TRUE, width = 12,
-
         fluidRow( class = "spaceRow",
           column(8,
                 tags$div(class = "infoDiv", "File Rdata build and mandatory for analysis images:",
-                 verbatimTextOutput("mess",placeholder = FALSE)
+                  verbatimTextOutput("mess",placeholder = FALSE)
                 )
+          )
+        ),
+        fluidRow( class = "spaceRow",
+          column(12,
+#            tags$div(class = "infoDiv","input class VS predict class:",
+                 DT::dataTableOutput("table2", width = "50%")
+#            )
           )
         ),
         fluidRow( class = "spaceRow",
@@ -86,24 +92,16 @@ tabItem(
             )
           )
         ),
-        fluidRow( class = "spaceRow",
-          column(12,
-            tags$div(class = "infoDiv","ACP build with pixel calibration:",
-                 plotOutput("img1_3", click = "img1_3_zoom_cal", width = "100%", height = "100%")
+        conditionalPanel(
+          condition = "output.plotALL == 1",
+          fluidRow( class = "spaceRow",
+            column(12,
+                   plotOutput("img1_3", click = "img1_3_zoom_cal", width = "100%", height = "100%")
             )
-          )
-        ),
-        fluidRow( class = "spaceRow",
-          column(12,
-            tags$div(class = "infoDiv","ACP build with pixel calibration:",
-                 plotOutput("img2_3", click = "img2_3_zoom_cal", width = "100%", height = "100%")
-            )
-          )
-        ),
-        fluidRow( class = "spaceRow",
-          column(12,
-            tags$div(class = "infoDiv","Table ...?:",
-                 tableOutput("table")
+          ),
+          fluidRow( class = "spaceRow",
+            column(12,
+                   plotOutput("img2_3", click = "img2_3_zoom_cal", width = "100%", height = "100%")
             )
           )
         )

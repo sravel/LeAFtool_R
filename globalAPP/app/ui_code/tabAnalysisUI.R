@@ -78,10 +78,10 @@ tabItem(
                     type = "markdown",
                     content = "blur_value")
         ),
-          checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
-            helper(icon = "question",
-                  type = "markdown",
-                  content = "rmScanLine"),
+        checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "rmScanLine"),
         ### Leaf parameters
         h4("Leaf parameters:"),
           numericInput("leaf_min_size", "Leaf min size:", value = 100, min=1,  width = "150px") %>%
@@ -131,7 +131,7 @@ tabItem(
           fluidRow( class = "colorRow",
             column(width = 6, offset = 0,
               tags$label("border"),
-              colourInput("lesion_color_border",  label = "", value = "green",
+              colourInput("lesion_color_border",  label = "", value = "blue",
                           palette = c("square", "limited"), allowedCols = NULL,
                           allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
                 helper(icon = "question",
@@ -140,7 +140,7 @@ tabItem(
             ),
             column(width = 6, offset = 0,
               tags$label("bodies"),
-              colourInput("lesion_color_bodies",  label = "", value = "green",
+              colourInput("lesion_color_bodies",  label = "", value = "#FE8E0000",
                           palette = c("square", "limited"), allowedCols = NULL,
                           allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
                 helper(icon = "question",

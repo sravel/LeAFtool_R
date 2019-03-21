@@ -144,7 +144,7 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
 
     plot(rv$zoomInitial)
     if (rv$pchOriginal == TRUE){
-      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom+200, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
+      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom+rv$zoomValue, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
     }
     points(rv$pointx, rv$pointy, pch=4, cex=3, col="tomato")
   }
@@ -239,59 +239,76 @@ observeEvent(input$plot_brush,{
   updateAll(res)
 })
 
-
+######### zoom Value
+observeEvent(input$zoomValueSlider,{
+#  rv$zoomValue <- input$zoomValueSlider
+  zoomVector <- c(500,400,300,200,100,50,20,10)
+  rv$zoomValue <- zoomVector[input$zoomValueSlider-1]
+})
 
  observeEvent(input$plot_hover, {
-   if (!is.null(input$plot_hover$x) &&!is.null(input$plot_hover$y)){
-     xleft <- input$plot_hover$x - 100
-     xright <- input$plot_hover$x + 100
-     ytop <- input$plot_hover$y - 100
-     ybottom <- input$plot_hover$y + 100
-     rv$pointy <- (ybottom-ytop)/2
-     rv$pointx <- (xright-xleft)/2
+  if (!is.null(input$plot_hover$x) &&!is.null(input$plot_hover$y)){
+    ## If image less than 200px prenvent crash on zoom plot
+    rv$sizeZoomX <- if (rv$widthSize < rv$zoomValue ) rv$widthSize/2 else  rv$zoomValue/2
+    rv$sizeZoomX2 <- rv$sizeZoomX*2
+    rv$sizeZoomY <- if (rv$heightSize < rv$zoomValue ) rv$heightSize/2 else  rv$zoomValue/2
+    rv$sizeZoomY2 <- rv$sizeZoomY*2
 
-     if (xleft <= 0 ){
-       xleft <- 1
-       xright <- 200
-       rv$pointx <- if (input$plot_hover$x <= 0 ) 1 else  input$plot_hover$x
-     }
-     else if (xright >= rv$widthSize ){
-       xright <- rv$widthSize
-       xleft <- rv$widthSize - 200
-       rv$pointx <- if (input$plot_hover$x >= rv$widthSize) rv$widthSize else  input$plot_hover$x - xleft
-     }
-     if (ytop <= 0 ){
-       ytop <- 1
-       ybottom <- 200
-       rv$pointy <- input$plot_hover$y
-     }
-     else if (ybottom >= rv$heightSize ){
-       ybottom <- rv$heightSize
-       ytop <- rv$heightSize - 200
-       rv$pointy <- input$plot_hover$y - ytop
-     }
-
-     if (is.null(rv$pointy)) rv$pointy <- (ybottom-ytop)/2
-     if (is.null(rv$pointx)) rv$pointx <- (xright-xleft)/2
-
-#     output$coor <- renderPrint(print(paste("xleft",xleft,
-#                 "xright",xright,
-#                 "ytop",ytop,
-#                 "ybottom",ybottom,
-#                 "input$plot_hover$x",input$plot_hover$x,
-#                 "input$plot_hover$y",input$plot_hover$y,
-#                 "rv$pointx",rv$pointx,
-#                 "rv$pointy",rv$pointy,
-#                 "LEFT:", rv$addleft,
-#                 "BOTTOM:",  rv$addbottom
-#                 ))
-#     )
-
+    xleft <- input$plot_hover$x - rv$sizeZoomX
+    xright <- input$plot_hover$x + rv$sizeZoomX
+    ytop <- input$plot_hover$y - rv$sizeZoomY
+    ybottom <- input$plot_hover$y + rv$sizeZoomY
+    rv$pointy <- (ybottom-ytop)/2
+    rv$pointx <- (xright-xleft)/2
     rv$addleft <- xleft
     rv$addbottom <- ybottom
 
-     rv$zoom <- rv$loadcurrentImageEdit[xleft:xright, ytop:ybottom,]
-     rv$zoomInitial <- rv$loadcurrentImageOriginaleEdit[xleft:xright, ytop:ybottom,]
+    if (xleft <= 0 ){
+     xleft <- 1
+     xright <- rv$sizeZoomX2
+     rv$addleft <- xleft
+     rv$pointx <- if (input$plot_hover$x <= 0 ) 1 else  input$plot_hover$x
+    }
+    else if (xright >= rv$widthSize ){
+     xright <- rv$widthSize
+     xleft <- rv$widthSize - rv$sizeZoomX2
+     rv$pointx <- if (input$plot_hover$x >= rv$widthSize) rv$widthSize else  input$plot_hover$x - xleft
+    }
+    if (ytop <= 0 ){
+     ytop <- 1
+     ybottom <- rv$sizeZoomY2
+     rv$addbottom <- 1
+     rv$pointy <- input$plot_hover$y
+    }
+    else if (ybottom >= rv$heightSize ){
+     ybottom <- rv$heightSize
+     rv$addbottom <- 1
+     ytop <- rv$heightSize - rv$sizeZoomY2
+     rv$pointy <- input$plot_hover$y - ytop
+    }
+
+    if (is.null(rv$pointy)) rv$pointy <- (ybottom-ytop)/2
+    if (is.null(rv$pointx)) rv$pointx <- (xright-xleft)/2
+
+
+      rv$addleft <- xleft
+      rv$addbottom <- if (ybottom == rv$heightSize) rv$zoomValue else ybottom
+
+    output$coor <-  renderText(
+              (paste("xleft",xleft,"\n",
+               "xright",xright,"\n",
+               "ytop",ytop,"\n",
+               "ybottom",ybottom,"\n",
+               "input$plot_hover$x",input$plot_hover$x,"\n",
+               "input$plot_hover$y",input$plot_hover$y,"\n",
+               "rv$pointx",rv$pointx,"\n",
+               "rv$pointy",rv$pointy,"\n",
+               "LEFT:", rv$addleft,"\n",
+               "BOTTOM:",  rv$addbottom,"\n"
+               ))
+    )
+      rv$zoom <- rv$loadcurrentImageEdit[xleft:xright, ytop:ybottom,]
+      rv$zoomInitial <- rv$loadcurrentImageOriginaleEdit[xleft:xright, ytop:ybottom,]
    }
 
  })

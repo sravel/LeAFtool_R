@@ -41,14 +41,18 @@ tabItem(
         selectInput("imageEdit", "Sample image:",NULL)
         ),
       column(width = 3,offset = 0,
-        checkboxInput("pchOriginal", "Add pch Original", value = FALSE, width = "150px") %>%
+        checkboxInput("pchOriginal", "Add lesion number", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "pchOriginal"),
-        checkboxInput("zoomOriginalCheck", "Zoom Origal Image", value = FALSE, width = "150px") %>%
+        checkboxInput("zoomOriginalCheck", "Zoom Original Image", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
-                content = "zoomOriginalCheck")
+                content = "zoomOriginalCheck"),
+        sliderInput("zoomValueSlider", "Zoom nX", min = 2, max = 9, value = 2, step = 1, width = "150px") %>%
+            helper(icon = "question",
+                  type = "markdown",
+                  content = "zoomValueSlider")
       ),
       column(width = 4, offset = 0,
         fluidRow(
@@ -57,7 +61,7 @@ tabItem(
         fluidRow( class = "colorRow",
           column(width = 6, offset = 0,
             tags$label("border"),
-            colourpicker::colourInput("lesion_color_borderEdit",  label = "", value = "green",
+            colourpicker::colourInput("lesion_color_borderEdit",  label = "", value = "blue",
                         palette = c("square", "limited"), allowedCols = NULL,
                         allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
               helper(icon = "question",
@@ -66,7 +70,7 @@ tabItem(
             ),
           column(width = 6, offset = 0,
             tags$label("bodies"),
-            colourpicker::colourInput("lesion_color_bodiesEdit",  label = "", value = "green",
+            colourpicker::colourInput("lesion_color_bodiesEdit",  label = "", value = "#FE8E0000",
                         palette = c("square", "limited"), allowedCols = NULL,
                         allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
               helper(icon = "question",
@@ -100,8 +104,8 @@ tabItem(
     box( title = "Table all lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
       fluidRow( class = "spaceRow",
         column(width = 12,offset = 0,
+#          textOutput("coor"),
           div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
-#          div(style = 'overflow-x: scroll', textOutput("coor"))
         )
       )
     ),

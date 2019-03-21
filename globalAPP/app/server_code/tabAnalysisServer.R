@@ -44,13 +44,17 @@ boundingRectangle <<- function(mask, object) {
   list(x = range.x[1]:range.x[2], y = range.y[1]:range.y[2])
 }
 
-extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
+extractLeaf <<- function(i, mask, imageBackgroundBlack, featuresLeaf) {
   ##### FOR BANANA LEAF #########################################
 #  kern = makeBrush(size = 201)
 #  opening(imageBackgroundBlack, kern)
-#  display(imageBackgroundBlack, method = "raster", all = TRUE)
+  ## DEBUG:  display(imageBackgroundBlack, method = "raster", all = TRUE)
 #  imageBackgroundBlack <- fillHull(imageBackgroundBlack)
  ################################################################
+
+  # size of leaf
+  surfaceLeaf <- featuresLeaf[row.names(featuresLeaf) %in% c(i),"s.area"]
+  leafNum <- featuresLeaf[row.names(featuresLeaf) %in% c(i),"leaf.number"]
   b <- boundingRectangle(mask, i)
   leaf <- imageBackgroundBlack[b$y, b$x,]
   mask.leaf <- mask[b$y, b$x]
@@ -58,18 +62,18 @@ extractLeaf <<- function(i, mask, imageBackgroundBlack, surfaceLeaves) {
   xCoord <- list(min = min(b$x),max = max(b$x))
   yCoord <- list(min = min(b$y),max = max(b$y))
   XYcoord <- list(x = xCoord, y = yCoord)
-#  print(paste("surface leaves EXTRACT : ", surfaceLeaves))
-  if (is.na(surfaceLeaves[i,])) i <- 1
-#  print(paste("surface leaf : ", surfaceLeaves[i,]))
-#  print(paste("leafNum : ", i))
 
-  list(b = b, XYcoord = XYcoord, leaf = leaf, leaf.surface = surfaceLeaves[i,], leafNum = i)
+  list(b = b, XYcoord = XYcoord, leaf = leaf, leaf.surface = surfaceLeaf, leafNum = leafNum)
 }
 
 ## analysis lesion for one leaf
 analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 
+#  print(paste("leafNum : ", x$leafNum, "    surface leaf : ",x$leaf.surface))
   f <- x$leaf
+
+  ## DEBUG:  display(f, method = "raster", all = TRUE)
+
   # replacement of the background by limb
   df6 <-
     data.frame(
@@ -104,17 +108,15 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   tache <- matrix(df6$tache, nrow=nrow(imageData(mask)))
   imageData(mask) <- tache
 
-  display(mask, method = "raster", all = TRUE)
+#  ## dilation
+#  brush <- makeBrush(rv$lesion_border_size, shape = 'disc')
+#  mask <- dilate(mask, brush)
 
-  ## dilation
-  brush <- makeBrush(rv$lesion_border_size, shape = 'disc')
-  mask <- dilate(mask, brush)
+#  ## empty fill
+#  mask <- fillHull(mask)
 
-  ## empty fill
-  mask <- fillHull(mask)
-
-  ## erosion
-  mask <- erode(mask, brush)
+#  ## erosion
+#  mask <- erode(mask, brush)
 
   ## segmentation
   mask[mask < 0] <- 0
@@ -129,8 +131,6 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   w.small <- which(featuresLesion[,"s.area"] < rv$lesion_min_size)
   ## search for great objects
   w.great <- which(featuresLesion[,"s.area"] > rv$lesion_max_size)
-
-    print(w.small)
 
   if (rv$rmEdge == TRUE){
     ## search objets on the edge of the image
@@ -150,8 +150,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   # apply to maskLesion
   mask[mask %in% c(w.small, w.great, w.edge, w.eccentricMin, w.eccentricMax)] <- 0
   maskLesion <- mask
-
-  display(maskLesion, method = "raster", all = TRUE)
+   ## DEBUG:display(maskLesion, method = "raster", all = TRUE)
 
   ## renumber objects
   featuresLesion <- computeFeatures.shape(maskLesion)
@@ -161,6 +160,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
 
   featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
+#  featuresLesionClean$lesion.number <- seq(1,nrow(featuresLesionClean))
 
   colnames(featuresLesionClean)[which(colnames(featuresLesionClean) %in%
       c("s.area", "s.perimeter", "s.radius.mean", "s.radius.sd", "s.radius.min", "s.radius.max") )] <-
@@ -172,6 +172,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   moments$m.cx <- moments$m.cx + x$XYcoord$y$min - 1
 
   moments$lesion.number <- as.numeric(row.names(moments))
+#  moments$lesion.number <- seq(1,nrow(moments))
   featuresLesionCleanPos <- merge(featuresLesionClean, moments)
 
   if (nrow(featuresLesionCleanPos) == 0){
@@ -212,7 +213,6 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 #  print(lesion)
 
   ## reading the source image
-
   sourceImage <- paste(pathImages, '/', imageSamples, sep = '')
   image <- readImage(sourceImage)
   widthSize = dim(image)[1]
@@ -260,9 +260,15 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
     maskLeaf[maskLeaf %in% w] <- 0
     featuresLeaf <- featuresLeaf[-w, ]
   }
+  featuresLeaf$leaf.number <- seq(1, nrow(featuresLeaf))
+  ## DEBUG:  display(maskLeaf, method = "raster", all = TRUE)
+
   # size of leafs
   surfaceLeaves <- featuresLeaf["s.area"]
+
 #  print(paste("surface leaves: ", surfaceLeaves))
+#  print(paste("as.numeric(row.names(featuresLeaf)): ", as.numeric(row.names(featuresLeaf))))
+#  print(featuresLeaf)
 
 
   ## removal of the background
@@ -271,7 +277,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 
   ## separation of leafs
   progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 3/7 : Extract leaves")
-  li <- lapply(as.numeric(row.names(featuresLeaf)), extractLeaf, maskLeaf, imageBackgroundBlack, surfaceLeaves)
+  li <- lapply(as.numeric(row.names(featuresLeaf)), extractLeaf, maskLeaf, imageBackgroundBlack, featuresLeaf)
 
   ## analyse des leafs
   progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 4/7 : Extract lesion on leaves")
@@ -363,7 +369,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 ############################################
 shinyDirChoose(
   input,'dirInSamples',
-  filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG"),
+  filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
   roots = allVolumesAvail,
   session = session,
   restrictions = system.file(package = 'base')
@@ -591,7 +597,7 @@ observeEvent(input$lesion_border_size,{
     updateNumericInput(session,"lesion_border_size", value = 3)
     rv$lesion_border_size <- 3
   }else{
-  updateNumericInput(session,"lesion_border_size", value = 1)
+  updateNumericInput(session,"lesion_border_size", value = returnInpair(as.numeric(input$lesion_border_size)))
   rv$lesion_border_size <- returnInpair(as.numeric(input$lesion_border_size))
   }
 })
