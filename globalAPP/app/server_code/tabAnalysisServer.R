@@ -108,15 +108,15 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   tache <- matrix(df6$tache, nrow=nrow(imageData(mask)))
   imageData(mask) <- tache
 
-#  ## dilation
-#  brush <- makeBrush(rv$lesion_border_size, shape = 'disc')
-#  mask <- dilate(mask, brush)
+  ## dilation
+  brush <- makeBrush(rv$lesion_border_size, shape = 'disc')
+  mask <- dilate(mask, brush)
 
-#  ## empty fill
-#  mask <- fillHull(mask)
+  ## empty fill
+  mask <- fillHull(mask)
 
-#  ## erosion
-#  mask <- erode(mask, brush)
+  ## erosion
+  mask <- erode(mask, brush)
 
   ## segmentation
   mask[mask < 0] <- 0
