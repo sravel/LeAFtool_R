@@ -30,7 +30,7 @@ tabItem(# Tab for Home input/output
   fluidRow(
     box(title = "ALAMA 	  Automatic Lesion Analysis Measure Area manual",status="success", solidHeader = TRUE, collapsible = FALSE, width = 12,
       fluidRow(column( 12, offset = 0,
-      img(src = "logo.png")
+      img(src = "logo.png", class = 'img-responsive')
 #        withTags(
 #          div( class = "home",
 ##            "http://acronymcreator.net/ace.py " ,br(),
