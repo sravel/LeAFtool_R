@@ -2,15 +2,14 @@
 
 ***
 
-The output directory with result.
-Tools build many outputs files:
+The output directory for result.
+Several output files are created per image:
 
-- original image and color lesion image
-- only color lesion image
-- table with all lesion find on all leaf
-- table with resume number lesion for leafs
-- table with all lesions find on image Sample
-- final file with concatenation of resume tables
+- original image and colored lesion image
+- only colored lesion image
+- table of detected lesions
+- Summary table of lesions by leaf
+- Combined tables file
 
 ***
-**Info**  If you rename files, you can't used tools to modifie samples
+**Info**  Renamed results files can’t be modified in the ‘Edit’ window

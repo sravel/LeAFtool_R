@@ -1,10 +1,10 @@
-## Remove edge lesion
+## Remove edge lesions
 
 ***
 
-Remove lesion on border of the leaf
+Remove lesions on border of the leaf
 
-<img src="../www/exempleBorder.jpeg" alt="">
+<img src="exempleBorder.jpeg" alt="">
 
 ***
 **Info**

@@ -2,6 +2,6 @@
 
 ***
 
-The current version accepts files with the extensions "png", "PNG","jpg","JPG","jpeg","JPEG".
+The current version accepts files with the extensions "tif", "TIF","jpg","JPG","jpeg","JPEG".
 ***
-**Info**  If you want to optimise, split image.
+**Info**  If you want to optimise, split images.

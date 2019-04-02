@@ -1,4 +1,4 @@
-## Remove Scan lines
+## Remove eccentric lesions
 
 ***
 

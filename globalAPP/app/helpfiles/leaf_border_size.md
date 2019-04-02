@@ -2,7 +2,7 @@
 
 ***
 
-Leaf border size to brush. The size is in pixel.
+Size, in pixels, of brush at leaf border.
 
 ***
-**Info**  brush is circle so program round value to impair int
+**Info**  The brush is a circle, so the values is rounded to an odd integer

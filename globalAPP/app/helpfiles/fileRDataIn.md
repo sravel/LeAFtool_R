@@ -4,4 +4,4 @@
 
 Load file .RData build on calibration step
 ***
-**Info**  you can use the same between samples series.
+**Info** The same calibration can be used for different series of analysis
