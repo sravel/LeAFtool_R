@@ -741,6 +741,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
 
     # Start parallel session
+    osSystem <- Sys.info()["sysname"]
     if (osSystem == "Darwin" || osSystem == "Linux") {
       cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK")
     }
