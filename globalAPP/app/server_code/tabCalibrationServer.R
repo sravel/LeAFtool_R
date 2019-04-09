@@ -109,7 +109,7 @@ observeEvent(
         if (length(backgroundDir)==0){backgroundDir = "background"}
         else { backgroundDir <- paste0("background/",backgroundDir)}
 
-#        print(limbDir)
+        print(limbDir)
 #        print(lesionDir)
 #        print(backgroundDir)
 
@@ -255,7 +255,7 @@ observeEvent(
       }
       else{
         # print(paste("else inputdir",rv$datapath))
-        errorMess <-tags$div("Error not find all sub-directories !!!!:",  tags$br(),
+        errorMess <-tags$div("Error not find all sub-folders !!!!:",  tags$br(),
                            tags$ul(
                              tags$li(paste("limb: ", listdirCalibration$dirlimb)),
                              tags$li(paste("background: ", listdirCalibration$dirBackground)),
@@ -418,3 +418,4 @@ observeEvent(input$img2_3_zoom_cal,
 
 
 outputOptions(output, "codeAna", suspendWhenHidden = FALSE)
+outputOptions(output, "plotALL", suspendWhenHidden = FALSE)

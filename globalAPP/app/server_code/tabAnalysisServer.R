@@ -72,7 +72,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 #  print(paste("leafNum : ", x$leafNum, "    surface leaf : ",x$leaf.surface))
   f <- x$leaf
 
-  ## DEBUG:  display(f, method = "raster", all = TRUE)
+  ## DEBUG: display(f, method = "raster", all = TRUE)
 
   # replacement of the background by limb
   df6 <-
@@ -94,7 +94,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   # end replace
 
   # blur image or not
-  if (rv$blur_value == TRUE){
+  if (rv$active_blur == TRUE){
     flo <- makeBrush(rv$blur_value, shape='disc', step=FALSE)^2
     flo <- flo/sum(flo)
     f <- filter2(f, flo)
@@ -156,11 +156,8 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   featuresLesion <- computeFeatures.shape(maskLesion)
 
   featuresLesionClean <- as.data.frame(featuresLesion)
-
   featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
-
   featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
-#  featuresLesionClean$lesion.number <- seq(1,nrow(featuresLesionClean))
 
   colnames(featuresLesionClean)[which(colnames(featuresLesionClean) %in%
       c("s.area", "s.perimeter", "s.radius.mean", "s.radius.sd", "s.radius.min", "s.radius.max") )] <-
@@ -172,8 +169,9 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   moments$m.cx <- moments$m.cx + x$XYcoord$y$min - 1
 
   moments$lesion.number <- as.numeric(row.names(moments))
-#  moments$lesion.number <- seq(1,nrow(moments))
   featuresLesionCleanPos <- merge(featuresLesionClean, moments)
+#  featuresLesionCleanPos$lesion.number <- seq(1,nrow(featuresLesionCleanPos))
+#  row.names(maskLesion) <- seq(1,nrow(maskLesion))
 
   if (nrow(featuresLesionCleanPos) == 0){
     featuresLesionCleanPos <- data.frame("lesion.number" = 0, "lesion.surface"= 0, "lesion.perimeter"= 0, "lesion.radius.mean"= 0, "lesion.radius.sd"= 0, "lesion.radius.min"= 0, "lesion.radius.max"= 0, "leaf.surface"= 0, "m.cx"= 0, "m.cy"= 0, "m.majoraxis"= 0, "m.eccentricity"= 0, "m.theta"= 0)
@@ -190,7 +188,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   if (rv$parallelMode == TRUE){
     print(paste0("RUNNING: ", imageSamples) )
   }else{
-    progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 2/7 : Read image sample and apply calibration")
+    progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 2/7 : Reading image sample and apply calibration")
   }
   if (!file.exists(pathResult))
     dir.create(pathResult)
@@ -215,6 +213,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   ## reading the source image
   sourceImage <- paste(pathImages, '/', imageSamples, sep = '')
   image <- readImage(sourceImage)
+  dataImage <<- image
   widthSize = dim(image)[1]
   heightSize = dim(image)[2]
 
@@ -285,11 +284,21 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 
   # print both sample and lesion images
   progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 5/7 : Generate output images")
-  jpeg(jpegfile,
-       width = widthSize,
-       height = heightSize*2,
-       units = "px")
-  par( mfrow = c(2,1) )
+  rv$position <- "right"
+  if (rv$position == "right"){
+    jpegfile <- paste(pathResult, '/', filename, "_right_both.jpeg", sep = '')
+    jpeg(jpegfile,
+         width = widthSize*2,
+         height = heightSize,
+         units = "px")
+    par( mfrow = c(1,2) )
+  }else if (rv$position == "bottum"){
+    jpeg(jpegfile,
+         width = widthSize,
+         height = heightSize*2,
+         units = "px")
+    par( mfrow = c(2,1) )
+  }
   display(image, method="raster")
 
   # save Analysis to RData file
@@ -320,8 +329,6 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
        units = "px")
   par( mfrow = c(1,1) )
   display(image, method = "raster")
-#  points(result$m.cx, result$m.cy, pch='+', cex=2, col="blue")
-
   dev.off()
 
   progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 6/7 : Generate ouput tables")
@@ -358,7 +365,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   if (rv$parallelMode == TRUE){
     print(paste0("FINISH: ", imageSamples) )
   }else{
-    progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 7/7 : Finish sammple")
+    progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 7/7 : Finish sample")
   }
 
 #  return(cat("FINISH: ",sourceImage,"\t",jpegfileOnly,"\n"))
@@ -421,7 +428,8 @@ updateDirOutAnalysis <- observeEvent(input$dirOut,{
 ############################################
 shinyFileChoose(input, 'fileRDataIn',
                 roots=allVolumesAvail,
-                filetypes=c('', 'rdata' , 'RData'))
+                filetypes=c('', 'rdata' , 'RData')
+                )
 
 output$fileRData <- renderText({
   rv$fileRData
@@ -509,6 +517,10 @@ observeEvent(input$blur_value,{
     updateNumericInput(session,"blur_value", value = 1)
     rv$blur_value <- 1
   }
+  else if (as.numeric(input$blur_value) > 21){
+    updateNumericInput(session,"blur_value", value = 21)
+    rv$blur_value <- 21
+  }
   else{
     rv$blur_value <- returnInpair(as.numeric(input$blur_value))
     updateNumericInput(session,"blur_value", value = returnInpair(as.numeric(input$blur_value)))
@@ -521,12 +533,12 @@ observeEvent(input$leaf_min_size,{
   feedbackDanger(
       inputId = "leaf_min_size",
       condition = is.na(input$leaf_min_size),
-      text = "Please add number 'or 100 will be use'"
+      text = "Please add number 'or 1000 will be use'"
     )
   req(input$leaf_min_size)
   if (is.na(input$leaf_min_size) || as.numeric(input$leaf_min_size) == 0){
-    updateNumericInput(session,"leaf_min_size", value = 100)
-    rv$leaf_min_size <- 100
+    updateNumericInput(session,"leaf_min_size", value = 1000)
+    rv$leaf_min_size <- 1000
   }
   else{
     rv$leaf_min_size <- as.numeric(input$leaf_min_size)
@@ -661,6 +673,29 @@ observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
 ## run analysis
 ############################################
 
+saveParameters <- function(){
+      # create config file to save input values
+    paramfilename <- paste0(rv$dirSamplesOut,"/LeAFtool-parameters-input.txt")
+    parameters <- paste0(
+              "Samples folder: ",rv$dirSamples,"\n",
+              "Output folder: ",rv$dirSamplesOut,"\n",
+              "file RData: ",rv$fileRData,"\n",
+              "Blur: ",rv$active_blur, " ",rv$blur_value,"\n",
+              "Leaf min size: ",rv$leaf_min_size,"\n",
+              "Leaf border size: ",rv$leaf_border_size,"\n",
+              "rmEdge: ",rv$rmEdge,"\n",
+              "rmEccentric: ",rv$rmEccentric, " ",rv$rmEccentricMin, " ",rv$rmEccentricMax,"\n",
+              "lesion_min_size: ", rv$lesion_min_size,"\n",
+              "lesion_max_size: ", rv$lesion_max_size,"\n",
+              "lesion_border_size: ", rv$lesion_border_size,"\n",
+              "lesion_color_border: ", rv$lesion_color_border,"\n",
+              "lesion_color_bodies: ", rv$lesion_color_bodies,"\n",
+              "parallelMode: ", rv$parallelMode, " ",rv$parallelThreadsNum,"\n"
+               )
+    cat(parameters, '\n', file = paramfilename)
+
+}
+
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   ## load values and add loading frame
   rv$exitStatusAna <- 0
@@ -674,6 +709,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
   rv$responseDataFilter <- NULL
 
+  saveParameters()
 
   ############################ RUN ANALYSIS
   # count number of Samples on input directory
@@ -705,13 +741,17 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
 
     # Start parallel session
-    cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK") # retry = 5L, sleep = 30.0
+    if (osSystem == "Darwin" || osSystem == "Linux") {
+      cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK")
+    }
+    else if (osSystem == "Windows") {
+      cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "SOCK")
+    }
     registerDoParallel(cl)
 
     # Add an entry to the log file
     cat(as.character(Sys.time()), '\n', file = logfilename,
       append = TRUE)
-
 
 #    reactive({
 #      progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaves ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = output$log)
@@ -771,8 +811,13 @@ output$analysisFinish <- renderText({
 })
 
 img_uri1 <- function(x) {
-#  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
-  sprintf("<img src='Original/%s' height='60'></img>", x)
+
+  ext <- unlist(strsplit(x, "[.]"))[2]
+  if ( ext == "tif"){
+    sprintf("Tiff not support by browser", x)
+  }else{
+    sprintf("<img src='Original/%s' height='60'></img>", x)
+  }
 }
 img_uri2 <- function(x) {
 #  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
@@ -846,11 +891,11 @@ observeEvent(input$contents_rows_selected,{
           actionButton("actionPrevious", "", icon = icon("backward"), width = "50px")
         ),
        column(width = 5, offset = 0,
-          HTML(gsub("height='60'","width='100%'",rv$responseDataFilter[imIndex,"Original"]))
+          HTML(gsub("height='60'","height='95%'",rv$responseDataFilter[imIndex,"Original"]))
 #         img(src= paste0(rv$dirSamples,"/",currentImage()),width='100%',height='100%')
        ),
         column(width = 5, offset = 0,
-           HTML(gsub("height='60'","width='100%'",rv$responseDataFilter[imIndex,"LesionColor"]))
+           HTML(gsub("height='60'","height='95%'",rv$responseDataFilter[imIndex,"LesionColor"]))
 #          img(src= paste0(rv$dirSamplesOut,"/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
 #          displayOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
         ),
