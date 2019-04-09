@@ -86,7 +86,7 @@ cat(as.character(Sys.time()), '\n', file = logfilename)
 
 # add header
 #header <- dashboardHeader(title = "ALAMA: Automatic Lesion Analysis Measure Area", titleWidth = 500
-header <- dashboardHeader(title = img(src = "logolong2.png", class = 'img-responsive'), titleWidth = 400)
+header <- dashboardHeader(title = img(src = "LeAFtool-long.png", class = 'img-responsive'), titleWidth = 400)
 
 # Sidebar for acces to tab
 sidebar <- dashboardSidebar(
@@ -148,5 +148,5 @@ body <- dashboardBody(
 
 # run UI
 shinyUI(
-  dashboardPage(title="ALAMA", skin = "yellow", header, sidebar, body)
+  dashboardPage(title="LeAFtool", skin = "yellow", header, sidebar, body)
 )

@@ -73,7 +73,7 @@ rv <<- reactiveValues(
                         codeValidationInt = 1,
                         rmScanLine = FALSE,
 
-                        leaf_min_size = 10,
+                        leaf_min_size = 1000,
                         leaf_border_size = 1,
                         lesion_min_size = 1,
                         lesion_max_size = 120000,
