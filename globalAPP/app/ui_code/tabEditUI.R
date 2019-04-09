@@ -82,41 +82,44 @@ tabItem(
     )
   ),
   # BOX EDITION
-  box( title = "Edit Selection", status = "success",solidHeader = TRUE, collapsible = FALSE, width = 12,
-    fluidRow( class = "spaceRow",
-      column(width = 4,offset = 0,
-        jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
+  conditionalPanel(
+    condition = "input.imageEdit",
+    box( title = "Edit Selection", status = "success",solidHeader = TRUE, collapsible = FALSE, width = 12,
+      fluidRow( class = "spaceRow",
+        column(width = 4,offset = 0,
+          jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
+        ),
+        column(width = 4,offset = 0,
+          jqui_resizable(
+            plotOutput("plotcurrentImageEdit",click = "plot_click",
+                      dblclick = "plot_dbclick",
+                      brush = brushOpts(id = "plot_brush", delay = 100, delayType = "debounce", resetOnNew = TRUE),
+                      hover = hoverOpts(id = "plot_hover", delay = 80, delayType = "debounce")
+            )
+          )
+        ),
+        column(width = 4,offset = 0,
+          jqui_resizable(plotOutput("zoomcurrentImageEdit"))
+        )
       ),
-      column(width = 4,offset = 0,
-        jqui_resizable(
-          plotOutput("plotcurrentImageEdit",click = "plot_click",
-                    dblclick = "plot_dbclick",
-                    brush = brushOpts(id = "plot_brush", delay = 100, delayType = "debounce", resetOnNew = TRUE),
-                    hover = hoverOpts(id = "plot_hover", delay = 80, delayType = "debounce")
+      # TABLES
+      box( title = "Table all lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
+        fluidRow( class = "spaceRow",
+          column(width = 12,offset = 0,
+  #          textOutput("coor"),
+            div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
           )
         )
       ),
-      column(width = 4,offset = 0,
-        jqui_resizable(plotOutput("zoomcurrentImageEdit"))
-      )
-    ),
-    # TABLES
-    box( title = "Table all lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
-      fluidRow( class = "spaceRow",
+      box( title = "Table merge leaf lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
         column(width = 12,offset = 0,
-#          textOutput("coor"),
-          div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
+          div(DT::dataTableOutput("AG", width = "100%"))
         )
-      )
-    ),
-    box( title = "Table merge leaf lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
-      column(width = 12,offset = 0,
-        div(DT::dataTableOutput("AG", width = "100%"))
-      )
-    ),
-    box( title = "Table all leaves lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
-      column(width = 12,offset = 0,
-        div(DT::dataTableOutput("MERGE", width = "100%"))
+      ),
+      box( title = "Table all leaves lesion", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
+        column(width = 12,offset = 0,
+          div(DT::dataTableOutput("MERGE", width = "100%"))
+        )
       )
     )
   )

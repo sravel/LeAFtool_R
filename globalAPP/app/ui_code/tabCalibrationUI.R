@@ -34,7 +34,7 @@ tabItem(
     box(
       title = "Calibration Input", status = "success", solidHeader = TRUE, collapsible = TRUE, width = 6,
       column(4,
-        tags$div(class = "calibrationTXT", "Calibration input directory must include sub-folders:",  tags$br(),
+        tags$div(class = "calibrationTXT", "Calibration input folder must include sub-folders:",  tags$br(),
           tags$ul(
             tags$li("limb"),
             tags$li("background"),
@@ -74,6 +74,7 @@ tabItem(
         fluidRow( class = "spaceRow",
           column(8,
                 tags$div(class = "infoDiv", "File Rdata build and mandatory for analysis images:",
+#                  verbatimTextOutput("plotALL",placeholder = FALSE),
                   verbatimTextOutput("mess",placeholder = FALSE)
                 )
           )

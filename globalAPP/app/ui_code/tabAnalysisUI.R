@@ -50,7 +50,7 @@ tabItem(
           verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
-          shinyFilesButton('fileRDataIn', label='Load Rdata build in Calibration', title='Please select Rdata file', multiple=T, class = "btn-default") %>%
+          shinyFilesButton('fileRDataIn', label='Load calibration file', title='Please select Rdata file', multiple=T, class = "btn-default") %>%
             helper(icon = "question",
                 type = "markdown",
                 content = "fileRDataIn"),
@@ -70,21 +70,18 @@ tabItem(
         checkboxInput("active_blur", "Apply blur on image", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
-                content = "active_blur"),
+                content = "blur_value"),
         conditionalPanel(
           condition = "input.active_blur",
-            numericInput("blur_value", "Blur image:", value = 1 , min = 1, max = 11, step = 2, width = "150px") %>%
-              helper(icon = "question",
-                    type = "markdown",
-                    content = "blur_value")
+            numericInput("blur_value", "Blur image:", value = 1 , min = 1, max = 21, step = 2, width = "150px")
         ),
-        checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
-          helper(icon = "question",
-                type = "markdown",
-                content = "rmScanLine"),
+#        checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
+#          helper(icon = "question",
+#                type = "markdown",
+#                content = "rmScanLine"),
         ### Leaf parameters
         h4("Leaf parameters:"),
-          numericInput("leaf_min_size", "Leaf min size:", value = 100, min=1,  width = "150px") %>%
+          numericInput("leaf_min_size", "Minimum leaf size:", value = 1000, min=1,  width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "leaf_min_size"),
@@ -95,8 +92,8 @@ tabItem(
       ),
       column(width = 2,offset = 0,
       ### Lesion parameters
-        h4("Lesion parameters:"),
-        checkboxInput("rmEdge", "Remove edge lesions", value = FALSE, width = "150px") %>%
+        h4("Lesions parameters:"),
+        checkboxInput("rmEdge", "Remove edge", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "rmEdge"),
@@ -106,10 +103,7 @@ tabItem(
                 content = "lesion_eccentric"),
         conditionalPanel(
           condition = "input.rmEccentric",
-            sliderInput("lesion_eccentric_slider", label = "Eccentric size", min = 0, max = 1, value = c(0, 1), step = 0.01, width = "150px") %>%
-              helper(icon = "question",
-                    type = "markdown",
-                    content = "lesion_eccentric")
+            sliderInput("lesion_eccentric_slider", label = "Eccentric size", min = 0, max = 1, value = c(0, 1), step = 0.01, width = "150px")
         ),
         numericInput("lesion_min_size", "Lesion min size:", value = 10, min=1, width = "150px") %>%
           helper(icon = "question",
