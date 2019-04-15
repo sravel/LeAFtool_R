@@ -109,7 +109,7 @@ observeEvent(
         if (length(backgroundDir)==0){backgroundDir = "background"}
         else { backgroundDir <- paste0("background/",backgroundDir)}
 
-        print(limbDir)
+#        print(limbDir)
 #        print(lesionDir)
 #        print(backgroundDir)
 
@@ -124,7 +124,6 @@ observeEvent(
 
         ## discriminant analysis
         progress$inc(4/7, detail = "Build analysis discriminante 4/6")
-#        lda1 <- lda(df2[2:4], df2$group)
         lda1 <- lda(df2[2:4], df2$group, prior=rep(1,length(group))/length(group))
 
         ## name common to the 3 output files, identical to the name of the directory
@@ -172,7 +171,7 @@ observeEvent(
                       scale_color_manual(values = c(colBack,colLimb,colLesion)) +
                       labs( x = "LD1", y = "LD2",
                               title = "Add a title above the plot",
-                              caption="Source: ALAMA", colour = "Groups"
+                              caption="Source: LeAFtool", colour = "Groups"
                           ) +
                       theme( legend.position = "right",
                               panel.grid.major = element_blank(),
@@ -188,7 +187,7 @@ observeEvent(
                       scale_color_manual(values = c(colBack,colLimb,colLesion)) +
                       labs( x = "LD1", y = "LD2",
                               title = "Add a title above the plot",
-                              caption="Source: ALAMA", colour = "Groups"
+                              caption="Source: LeAFtool", colour = "Groups"
                           ) +
                       theme( legend.position = "right",
                               panel.grid.major = element_blank(),
@@ -208,7 +207,7 @@ observeEvent(
                       scale_color_manual(values = c(colBack,colLimb,colLesion)) +
                       labs( x = "LD1", y = "LD3",
                               title = "Add a title above the plot",
-                              caption="Source: ALAMA", colour = "Groups"
+                              caption="Source: LeAFtool", colour = "Groups"
                           ) +
                       theme( legend.position = "right",
                               panel.grid.major = element_blank(),
@@ -228,7 +227,7 @@ observeEvent(
                       scale_color_manual(values = c(colBack,colLimb,colLesion)) +
                       labs( x = "LD2", y = "LD3",
                               title = "Add a title above the plot",
-                              caption="Source: ALAMA", colour = "Groups"
+                              caption="Source: LeAFtool", colour = "Groups"
                           ) +
                       theme( legend.position = "right",
                               panel.grid.major = element_blank(),
@@ -237,6 +236,13 @@ observeEvent(
                       guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
           print(g)
           dev.off()
+
+#          output$plotly <- renderPlotly({
+#          plot_ly(data = dataTest, x=dataTest$LD1, y=dataTest$LD2, z=dataTest$LD3, type="scatter3d", mode="markers", color = dataTest$group ) %>%
+#            layout(scene = list(xaxis = list(title = 'LD1'),
+#                                yaxis = list(title = 'LD2'),
+#                                zaxis = list(title = 'LD3')))
+#          })
         }
 
         ## sauvegarde de l'analyse
@@ -350,7 +356,7 @@ output$table2 <- DT::renderDataTable({
   clrs <- round(seq(255, 40, length.out = length(brks) + 1), 0) %>% {paste0("rgb(255,", ., ",", ., ")")}
 
   DT::datatable(data = df,
-                  caption = 'Table Calibration: The values are the number of pixels.Défine class on row versus predict on columns. Source: ALAMA',
+                  caption = 'Table Calibration: The values are the number of pixels.Défine class on row versus predict on columns. Source: LeAFtool',
                   class = 'dt-center compact cell-border',
                   options = list(
                                   columnDefs = list(list(width = '20%', targets = seq(0,length(colnames(df)),1))),

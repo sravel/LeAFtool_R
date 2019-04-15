@@ -213,7 +213,6 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   ## reading the source image
   sourceImage <- paste(pathImages, '/', imageSamples, sep = '')
   image <- readImage(sourceImage)
-  dataImage <<- image
   widthSize = dim(image)[1]
   heightSize = dim(image)[2]
 

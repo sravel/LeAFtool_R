@@ -44,7 +44,7 @@ tabItem(
       ),
       column(8,
         fluidRow( class = "spaceRow",
-          shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
+          shinyDirButton(id = 'dirCalibration', label = 'Select Data Folder', title = 'Please select a folder', FALSE, class = "btn-success") %>%
             helper(icon = "question",
                   type = "markdown",
                   content = "dirCalibration")
@@ -104,6 +104,11 @@ tabItem(
             column(12,
                    plotOutput("img2_3", click = "img2_3_zoom_cal", width = "100%", height = "100%")
             )
+          )
+#          fluidRow( class = "spaceRow",
+#            column(8,
+#                    plotlyOutput("plotly", width = "100%", height = "100%")
+#            )
           )
         )
       )
