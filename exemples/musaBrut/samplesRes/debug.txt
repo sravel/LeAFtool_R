@@ -1,20 +1,23 @@
-2019-02-05 11:40:01 
-starting worker pid=4633 on localhost:11145 at 11:40:01.110
-starting worker pid=4634 on localhost:11145 at 11:40:01.120
-starting worker pid=4635 on localhost:11145 at 11:40:01.129
-starting worker pid=4636 on localhost:11145 at 11:40:01.137
-starting worker pid=4637 on localhost:11145 at 11:40:01.146
-2019-02-05 11:40:01 
-testCut_2.jpg
-testCut_3.jpg
-testCut_4.jpg
-testCut_1.jpg
-testCut_0.jpg
-[1] "RUNNING: testCut_3.jpg"
-[1] "RUNNING: testCut_4.jpg"
-[1] "RUNNING: testCut_2.jpg"
-[1][1] "RUNNING: testCut_0.jpg" "RUNNING: testCut_1.jpg"
+2019-02-13 14:40:32 
+starting worker pid=25460 on localhost:11158 at 14:40:32.648
+starting worker pid=25461 on localhost:11158 at 14:40:32.705
+starting worker pid=25462 on localhost:11158 at 14:40:32.754
+starting worker pid=25463 on localhost:11158 at 14:40:32.801
+starting worker pid=25464 on localhost:11158 at 14:40:32.853
+starting worker pid=25465 on localhost:11158 at 14:40:32.900
+2019-02-13 14:40:32 
+toto_1.tif
+toto_2.tif
+toto_6.tif
+toto_4.tif
+toto_3.tif
+toto_5.tif
+[1][1][1] "RUNNING: toto_4.tif" "RUNNING: toto_6.tif"
 
+ "RUNNING: toto_1.tif"
+[1] "RUNNING: toto_3.tif"
+[1] "RUNNING: toto_2.tif"
+[1] "RUNNING: toto_5.tif"
 Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
   'size' was rounded to the next odd number:  101
 Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
@@ -25,8 +28,11 @@ Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
   'size' was rounded to the next odd number:  101
 Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
   'size' was rounded to the next odd number:  101
-[1] "FINISH: testCut_0.jpg"
-[1] "FINISH: testCut_1.jpg"
-[1] "FINISH: testCut_3.jpg"
-[1] "FINISH: testCut_2.jpg"
-[1] "FINISH: testCut_4.jpg"
+Warning in makeBrush(rv$leaf_border_size, shape = "disc") :
+  'size' was rounded to the next odd number:  101
+[1] "FINISH: toto_3.tif"
+[1] "FINISH: toto_5.tif"
+[1] "FINISH: toto_2.tif"
+[1] "FINISH: toto_1.tif"
+[1] "FINISH: toto_6.tif"
+[1] "FINISH: toto_4.tif"
