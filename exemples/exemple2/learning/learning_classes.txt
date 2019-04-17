@@ -1,4 +1,0 @@
-class	subclass
-background	background
-limb	limb
-lesion	lesion

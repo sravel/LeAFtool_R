@@ -10,6 +10,7 @@
 ## Choisir Exemple1 ou Exemple2
 path.sample <- "/media/sebastien/Bayer/ScriptsSEB/images/exemples/exemple1/learning/"
 
+library(RColorBrewer)
 library(ggplot2)
 library("plot3D")
 path.sample <- "/media/sebastien/Bayer/ScriptsSEB/images/exemples/musaBrut/learning/"

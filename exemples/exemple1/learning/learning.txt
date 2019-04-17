@@ -1,7 +1,0 @@
-
-    background           limb lesion/lesion1 lesion/lesion2 
-        275067          28868           5916           5780 
-       LD1  LD2    LD3
-red   -105   74  -4.45
-green   58 -111 -16.48
-blue    60   40   0.49

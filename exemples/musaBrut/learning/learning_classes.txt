@@ -1,8 +1,0 @@
-class	subclass
-background	background/boite
-background	background/etiquette
-background	background/fond
-limb	limb/clear
-limb	limb/dark
-lesion	lesion/clear
-lesion	lesion/dark

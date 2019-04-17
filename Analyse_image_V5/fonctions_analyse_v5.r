@@ -148,6 +148,7 @@ analyse.image.unique <- function(path.sample,path.result,path.image,file.image,s
 ##    filename <- paste0(tail(strsplit(path.sample,'/')[[1]],1),".RData")
     file.lda <- paste(path.sample,'/',filename,".RData",sep='')
     load(file.lda)
+    print("toto")
 
     file.classes <- paste(path.sample,'/',filename,"_classes.txt",sep='')
     classes <- read.table(file.classes,header=TRUE,sep='\t')

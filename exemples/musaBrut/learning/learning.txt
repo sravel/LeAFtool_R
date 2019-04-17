@@ -1,9 +1,0 @@
-
-    background/boite background/etiquette      background/fond           limb/clear            limb/dark         lesion/clear 
-               25054                 2691                 2303                10818                 8761                  281 
-         lesion/dark 
-                1572 
-              LD1       LD2        LD3
-red   -33.8262406  -7.39728  34.814167
-green  26.3282153  28.94785 -38.336847
-blue   -0.9017943 -17.61897  -4.073721

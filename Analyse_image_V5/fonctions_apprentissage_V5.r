@@ -93,31 +93,30 @@ apprentissage <- function(path.sample,fond,limbe,lesion) {
     png(file.png,width=480*6,height=480*6,res=72*6)
 
 #    print(xyplot(LD2~LD1, group=group, cex=0.8, alpha=1, pch=1, asp=1, auto.key=TRUE, data=df4))
-
-              print(
-                    ggplot( data = df4) +
-                            geom_point(aes(x = LD1, y = LD2,  shape = df4$classes.1, color = df4$group, group=df4$classes.1, fill = NULL)) +
-                            labs( x = "New x axis label", y = "New y axis label",
-                                    title = "Add a title above the plot",
-                                    caption="Source: ALAMA"
-                                ) +
-                            guides(fill=guide_legend("TITLE", ncol=3)) +
-                            theme(  legend.position = "top",
-                                    legend.key = element_rect(fill=NA),
-                                    legend.title=element_blank(),
-                                    panel.grid.major = element_blank(),
-                                    panel.grid.minor = element_blank()
-                                )+
-#                                guides(shape = FALSE, size = FALSE)+
-                                scale_colour_discrete(name  ="Groups",
-                                    breaks=df4$classes.1,
-                                    labels=df4$group) +
-                                scale_shape_discrete(name  ="Groups",
-                                   breaks=df4$group,
-                                   labels=df4$group)
-                            )
+#    print(unique(df4$classes.1))
 
 
+    colBackPalette <- c("#0000FF","#74D0F1","#26C4EC","#0F9DE8","#1560BD","#0095B6","#00CCCB","#1034A6","#0ABAB5","#1E7FCB")
+    colLimbPalette <- c("#32CD32","#9ACD32","#00FA9A","#008000","#ADFF2F","#6B8E23","#3CB371","#006400","#2E8B57","#00FF00")
+    colLesionPalette <- c("#FF0000","#DB0073","#91283B","#B82010","#FF4901","#AE4A34","#FF0921","#BC2001","#FF5E4D","#E73E01")
+
+    colBack <- colBackPalette[1:length(backgroundDir)]
+    colLimb <- colLimbPalette[1:length(limbDir)]
+    colLesion <- colLesionPalette[1:length(backgroundDir)]
+
+    g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes.1)) +
+                geom_point() +
+                scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                labs( x = "New x axis label", y = "New y axis label",
+                        title = "Add a title above the plot",
+                        caption="Source: ALAMA", colour = "Groups"
+                    ) +
+                theme( legend.position = "right",
+                        panel.grid.major = element_blank(),
+                        panel.grid.minor = element_blank()
+                    ) +
+                guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+    print(g)
     dev.off()
 
 

@@ -5,25 +5,25 @@ source("fonctions_analyse_v5.r")
 
 
 ## -------------------- Param?tres de l'analyse -----------------------------------
-surface.feuille.mini <- 10000 ## surface minimum d'une feuille
-bordure.feuille <- 100 ## ?paisseur de bordure de feuille ? supprimer
+surface.feuille.mini <- 2000 ## surface minimum d'une feuille
+bordure.feuille <- 5 ## ?paisseur de bordure de feuille ? supprimer
 bordure.lesion <- 3 ## ?paisseur de bordure de l?sion ? dilater / ?roder
 surface.lesion.mini <- 10 ## surface minimum d'une l?sion
 surface.lesion.maxi <- 120000 ## surface maximum d'une l?sion
-max.eccentricity <- 1 ## excentricit? maximum d'une l?sion
+max.eccentricity <- 0 ## excentricit? maximum d'une l?sion
 couleur.lesion <-  1 ## couleur des l?sions dans l'image analys?e (0=noir, 1=blanc)
-diametre.flou <- 2 ## flou si valeur > 1 (valeur impaire)
+diametre.flou <- 0 ## flou si valeur > 1 (valeur impaire)
 
 ## -------------------- R?pertoires et fichiers Exemple_Babeth --------------------------
-path.sample <- "../exemples/musaBrut/learning/"   ## R?pertoire de stockage des fichiers ?chantillons
-path.result <- "../exemples/musaBrut/samplesRes/"    ## R?pertoire de stockage des r?sultats d'analyse, cr?? si inexistant (peut ?tre le m?me que path.image)
-path.image <-  "../exemples/musaBrut/samples/"     ## R?pertoire de stockage des fichiers images sources
-file.image <- "test.jpeg" ## Fichier image source
+path.sample <- "/media/sebastien/Bayer/ScriptsSEB/images/exemples/riz/samples/"   ## R?pertoire de stockage des fichiers ?chantillons
+path.result <- "/media/sebastien/Bayer/ScriptsSEB/images/exemples/riz/result/"    ## R?pertoire de stockage des r?sultats d'analyse, cr?? si inexistant (peut ?tre le m?me que path.image)
+path.image <-  "/media/sebastien/Bayer/ScriptsSEB/images/exemples/riz/image/"     ## R?pertoire de stockage des fichiers images sources
+
 ## -------- Exemple analyse par passage des noms de fichier -----------------------
 analyse.image(path.sample=path.sample,
               path.result=path.result,
               path.image=path.image,
-              file.image=c(file.image), ## peut contenir plusieurs noms
+              file.image=NA, 
               surface.feuille.mini=surface.feuille.mini,
               bordure.feuille=bordure.feuille,
               bordure.lesion=bordure.lesion,
@@ -31,7 +31,7 @@ analyse.image(path.sample=path.sample,
               couleur.lesion=couleur.lesion)
 
 
-
+analyse.image()
 
 
 
