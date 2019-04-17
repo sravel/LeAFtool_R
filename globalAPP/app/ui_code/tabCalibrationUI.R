@@ -109,7 +109,7 @@ tabItem(
 #            column(8,
 #                    plotlyOutput("plotly", width = "100%", height = "100%")
 #            )
-          )
+#          )
         )
       )
     )
