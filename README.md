@@ -43,13 +43,16 @@ install_github("sravel/LeAFtool")
 
 ```
 
-#### Running LeAFtool with GUI
+## Running LeAFtool with GUI
 
   * To run the application LeAFtool
 ```
 library(LeAFtool)
 runLeAFtool()
 ```
+
+## Running LeAFtool without GUI (call direct function)
+
 
 
 ## User manual
