@@ -1,14 +1,21 @@
-Package: countLesionTools
-Type: Package
-Title: Count Lesion Tools: Tools for analysis and count lesion on images
+Package: LeAFtool
+Title: LeAFtool: Lesion Area Finding tool
 Version: 1.0.0
-Author: Sebastien RAVEL
+Date: 2019-04-24
+Authors@R: c(person("F. Bonnot", "Developer", role = c("aut"),
+                     email = "francois.bonnot@cirad.fr"),
+             person("S. Ravel", "Developer", role = c("aut", "cre"),
+	      	     email = "sebastien.ravel@cirad.fr"))
+Author: Sebastien RAVEL [aut, cre],
+  Francois BONNOT [aut],
+  Elisabeth FOURNIER [ctb]
 Maintainer: Sebastien RAVEL <sebastien.ravel@cirad.fr>
 Description: Main interface of Count Lesion Tools.
-Depends: R (>= 3.4.0), shiny, shinydashboard, shinyBS
-Imports: Biobase, DT, shinyFiles, MASS
+Depends: R (>= 3.4.0), EBImage, shiny, shinythemes, shinydashboard, shinyFiles, shinyBS, DT, shinyjs, shinyFeedback, shinyhelper, colourpicker, shinyjqui, lattice, MASS, ggplot2, foreach, future, doParallel, RCurl, rstudioapi
+Imports: EBImage, shiny, shinythemes, shinydashboard, shinyFiles, shinyBS, DT, shinyjs, shinyFeedback, shinyhelper, colourpicker, shinyjqui, lattice, MASS, ggplot2, foreach, future, doParallel, RCurl, rstudioapi
 License: GPL-3
 Encoding: UTF-8
 RoxygenNote: 6.0.1
 LazyData: true
 biocViews: Software
+URL: https://github.com/sravel/images

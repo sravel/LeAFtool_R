@@ -5,12 +5,3 @@
 exportPattern(".")
 
 # Import all packages listed as Imports or Depends
-import(
-  Biobase,
-  DT,
-  shinyFiles,
-  MASS,
-  shiny,
-  shinydashboard,
-  shinyBS
-)
