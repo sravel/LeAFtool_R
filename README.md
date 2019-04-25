@@ -30,8 +30,12 @@ list.of.packages <- c("RCurl","shiny","shinythemes","shinydashboard","shinyFiles
 #checking missing packages from list
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 
-#install missing ones
+# install missing ones
 if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+
+# install EBImage
+source("https://bioconductor.org/biocLite.R")
+biocLite("EBImage")
 
 # Install LeAFtool
 install_github("sravel/LeAFtool")
