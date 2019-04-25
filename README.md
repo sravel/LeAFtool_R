@@ -1,4 +1,3 @@
-# LeAFtool: Lesion Area Finding tool
 ![LeAFtool Logo](/inst/app/www/LeAFtool-long.png)
 
 ## About this package
