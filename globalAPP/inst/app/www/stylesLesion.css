@@ -1,0 +1,261 @@
+/*
+#####################################################################################################
+#
+# Copyright 2019 CIRAD-INRA
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, see <http://www.gnu.org/licenses/> or
+# write to the Free Software Foundation, Inc.,
+# 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
+#
+# You should have received a copy of the CeCILL-C license with this program.
+#If not see <http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt>
+#
+# Intellectual property belongs to CIRAD and South Green developpement plateform
+# Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
+#####################################################################################################
+*/
+
+.shiny-notification {
+	position:fixed;
+	top: calc(30%);
+	left: calc(40%);
+	width: 22%;
+	height: 20%;
+}
+.progress-text {
+	font-size: 20px;
+	display: block;
+}
+
+.progress-detail {
+	font-size: 18px;
+	display: block;
+
+}
+
+.calibrationTXT {
+	text-align: left;
+	font-size: medium;
+	font-family: "Times New Roman", Times, serif;
+}
+
+.infoDiv {
+	text-align: left;
+	font-size: medium;
+	font-family: "Times New Roman", Times, serif;
+}
+
+.home {
+	text-align: justify;
+	font-size: medium;
+	font-family: "Times New Roman", Times, serif;
+	margin : 20px 0px 0px 50px;
+}
+.calibrationHome {
+	text-align: justify;
+	text-indent:40px each-line;
+	font-size: medium;
+	font-family: "Times New Roman", Times, serif;
+	margin : 0px 25px 50px 50px;
+}
+
+.analysisHome {
+	text-align: justify;
+	text-indent:40px each-line;
+	font-size: medium;
+	font-family: "Times New Roman", Times, serif;
+	margin : 0px 50px 50px 25px;
+}
+
+.modal-lg {
+    width: 90%;
+}
+
+.btn-img {
+	background: #ffffff;
+	color: #444;
+	border: hidden;
+	height: 100%;
+}
+
+#loading-content {
+	position: absolute;
+	background: #000000;
+	opacity: 1;
+	z-index: 100;
+	left: 0;
+	right: 0;
+	height: 100%;
+	text-align: center;
+	color: #FFFFFF;
+}
+
+/*
+####### Ajustement des modals
+*/
+.modal-lg {
+	width: 90vw;
+	margin: 30px auto;
+}
+
+.modal-body {
+	position: relative;
+	padding: 15px;
+	height: 80vh;
+}
+.modal-dialog {
+	width: 90vw;
+	margin: 30px auto;
+}
+.sF-dirInfo > div {
+	height: 68vh;
+	border: 1px solid grey;
+	border-radius: 5px;
+	overflow: auto;
+}
+.sF-fileWindow {
+	margin-top: 10px;
+	height: 71vh;
+	border: 1px solid grey;
+	border-radius: 5px;
+	overflow: auto;
+}
+/*
+##### ajustement div space
+*/
+.spaceRow {
+	margin-bottom: 15px;
+}
+
+.colorRow {
+	margin-left: -30px;
+}
+
+.colourpicker{
+	width: 40px;
+	display:inline-block;
+}
+
+.content{
+	overflow-y: auto;
+	height: 94vh;
+}
+body{
+	overflow-y: hidden;
+}
+
+
+/* logo */
+.skin-yellow .main-header .logo {
+					  background-color: #D49A6A;
+					  background: -moz-radial-gradient(center, ellipse cover, #D49A6A 0%, #BB8A49 100%); /* FF3.6-15 */
+					  background: -webkit-radial-gradient(center, ellipse cover, #D49A6A 0%,#BB8A49 100%); /* Chrome10-25,Safari5.1-6 */
+					  background: radial-gradient(ellipse at center, #D49A6A 0%,#BB8A49 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+					  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#BB8A49', endColorstr='#D49A6A',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+					  }
+
+/* logo when hovered */
+.skin-yellow .main-header .logo:hover {
+					  background-color: #D49A6A;
+					  background: -moz-radial-gradient(center, ellipse cover, #D49A6A 0%, #BB8A49 100%); /* FF3.6-15 */
+					  background: -webkit-radial-gradient(center, ellipse cover, #D49A6A 0%,#BB8A49 100%); /* Chrome10-25,Safari5.1-6 */
+					  background: radial-gradient(ellipse at center, #D49A6A 0%,#BB8A49 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+					  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#BB8A49', endColorstr='#D49A6A',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+					  }
+
+
+/* navbar (rest of the header) */
+.skin-yellow .main-header .navbar {
+					  background-color: #D49A6A;
+					  background: -moz-radial-gradient(center, ellipse cover, #D49A6A 0%, #BB8A49 100%); /* FF3.6-15 */
+					  background: -webkit-radial-gradient(center, ellipse cover, #D49A6A 0%,#BB8A49 100%); /* Chrome10-25,Safari5.1-6 */
+					  background: radial-gradient(ellipse at center, #D49A6A 0%,#BB8A49 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+					  					  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#BB8A49', endColorstr='#D49A6A',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+					  }
+
+/* main sidebar */
+.skin-yellow .main-sidebar {
+					  background-color: #D49A6A;
+					  background: -moz-radial-gradient(center, ellipse cover, #D49A6A 0%, #BB8A49 100%); /* FF3.6-15 */
+					  background: -webkit-radial-gradient(center, ellipse cover, #D49A6A 0%,#BB8A49 100%); /* Chrome10-25,Safari5.1-6 */
+					  background: radial-gradient(ellipse at center, #D49A6A 0%,#BB8A49 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+					  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#BB8A49', endColorstr='#D49A6A',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+					  }
+
+/* active selected tab in the sidebarmenu */
+.skin-yellow .main-sidebar .sidebar .sidebar-menu .active a{
+					  background-color: #894E00;
+					  color: white;
+					  }
+
+/* other links in the sidebarmenu */
+.skin-yellow .main-sidebar .sidebar .sidebar-menu a{
+					  background-color: #BB8A49;
+					  color: #000000;
+					border: 0.5px solid #894E00;
+					border-radius: 20px;
+					  }
+
+/* other links in the sidebarmenu when hovered */
+ .skin-yellow .main-sidebar .sidebar .sidebar-menu a:hover{
+					  background-color: #D49A6A;
+					  color: #000000;
+					  border-radius: 20px;
+					  }
+
+/* toggle button when hovered  */
+ .skin-yellow .main-header .navbar .sidebar-toggle:hover{
+					  background-color: #D49A6A;
+					  color: #000000;
+					  border-radius: 20px;
+					  }
+
+.sidebar-menu {
+	list-style: none;
+	margin: 15px 10px 10px 10px;
+	padding: 0;
+}
+.sidebar-menu > li {
+	position: relative;
+	margin: 0px 0px 10px 0px;
+	padding: 0;
+}
+
+.main-header {
+	position: relative;
+	max-height: 100px;
+	z-index: 1030;
+	border-bottom: 2px solid #894E00;
+}
+
+
+.pre {
+ white-space: pre-wrap;       /* css-3 */
+ white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+ white-space: -pre-wrap;      /* Opera 4-6 */
+ white-space: -o-pre-wrap;    /* Opera 7 */
+ word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+/*
+slider color
+*/
+.js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {
+                                                  background: #00a65a;
+                                                  border-top: 1px solid #00a65a ;
+                                                  border-bottom: 1px solid #00a65a ;}
+
+                            /* changes the colour of the number tags */
+                           .irs-from, .irs-to, .irs-single { background: #00a65a }
