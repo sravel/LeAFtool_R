@@ -1,8 +1,0 @@
-## plot pixel
-
-***
-
-TODO
-
-***
-**Info**  
