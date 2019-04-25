@@ -25,7 +25,7 @@ The tools are being developed and a first functional version is available. The f
 # and choose if previously installed packages should be updated (recommended).
 
 # list of packages required
-list.of.packages <- c("RCurl","shiny","shinythemes","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
+list.of.packages <- c("devtools", "RCurl","shiny","shinythemes","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
                       "foreach","future","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "rstudioapi", "ggplot2")
 #checking missing packages from list
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -38,6 +38,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("EBImage")
 
 # Install LeAFtool
+library(devtools)
 install_github("sravel/LeAFtool")
 
 ```
