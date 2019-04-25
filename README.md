@@ -1,4 +1,5 @@
 # LeAFtool: Lesion Area Finding tool
+![LeAFtool Logo](/inst/app/www/LeAFtool-long.png)
 
 ## About this package
 
@@ -53,7 +54,7 @@ runLeAFtool()
 
 ## User manual
 
-See here: https://rawgit.com/qinzhu/PIVOT/master/inst/app/www/manual_file.html 
+See here: https://docs.google.com/document/d/1lFr8_08TGJps5lcSbY_AimstFnf0AfuOX7tY1MfkDv8/edit?usp=sharing
 
 ## Troubleshooting
 
