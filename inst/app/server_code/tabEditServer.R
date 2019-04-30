@@ -47,7 +47,7 @@ output$dirInResult <- renderText({
 observeEvent(input$dirInResult,{
   if (!is.integer(input$dirInResult))
   {
-    home <- normalizePath(allVolumesAvail[input$dirInResult$root])
+    home <- normalizePath(allVolumesAvail[input$dirInResult$root], winslash = "\\")
     rv$dirInResult <- file.path(home, paste(unlist(input$dirInResult$path[-1],"/"), collapse = .Platform$file.sep))
   }
 })

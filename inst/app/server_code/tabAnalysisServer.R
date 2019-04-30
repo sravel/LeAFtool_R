@@ -388,7 +388,7 @@ output$dirSamples <- renderText({
 updateDirAnalysis <- observeEvent(input$dirInSamples,{
   if (!is.integer(input$dirInSamples))
   {
-    home <- normalizePath(allVolumesAvail[input$dirInSamples$root])
+    home <- normalizePath(allVolumesAvail[input$dirInSamples$root], winslash = "\\")
     rv$dirSamples <- file.path(home, paste(unlist(input$dirInSamples$path[-1]), collapse = .Platform$file.sep))
     rv$exitStatusAna -1
     rv$messAna <- NULL
@@ -414,8 +414,8 @@ output$dirOutAnalysis <- renderText({
 updateDirOutAnalysis <- observeEvent(input$dirOut,{
   if (!is.integer(input$dirOut))
   {
-    home <- normalizePath(allVolumesAvail[input$dirOut$root])
-    rv$dirSamplesOut <- file.path(home, paste(unlist(input$dirOut$path[-1],"/"), collapse = .Platform$file.sep))
+    home <- normalizePath(allVolumesAvail[input$dirOut$root], winslash = "\\")
+    rv$dirSamplesOut <- file.path(home, paste(unlist(input$dirOut$path[-1]), collapse = .Platform$file.sep))
     rv$exitStatusAna <- -1
     rv$messAna <- NULL
     rv$errAna <- NULL
@@ -437,8 +437,8 @@ output$fileRData <- renderText({
 observeEvent(input$fileRDataIn,{
   if (!is.integer(input$fileRDataIn))
   {
-    rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath))
-    filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath)))
+    rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath), winslash = "\\")
+    filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath), winslash = "\\"))
 #    print(filename)
     rv$fileClass <- paste0(filename,"_classes.txt")
 #    print(rv$fileClass)

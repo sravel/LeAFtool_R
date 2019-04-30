@@ -32,9 +32,16 @@
 library(parallel)
 max_no_cores <- as.numeric(max(1, detectCores() - 2))
 
-runLeAFtool <- function(port=NULL) {
-	rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
-	gc() #free up memrory and report the memory usage.
+
+#' Launch LeAFtool GUI
+#'
+#' This function run the GUI shiny interface to run LeAFtool
+#'
+#' @examples
+#' runLeAFtool()
+runLeAFtool <- function() {
+  rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
+  gc() #free up memrory and report the memory usage.
   appDir <- system.file("app", package = "LeAFtool")
   if (appDir == "") {
     stop("Could not find myapp. Try re-installing `mypackage`.", call. = FALSE)

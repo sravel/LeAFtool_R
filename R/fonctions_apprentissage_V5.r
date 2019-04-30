@@ -33,7 +33,27 @@ load.group <- function(g,path.sample) {
     do.call(rbind, li)
 }
 
-apprentissage <- function(path.sample,fond,limbe,lesion) {
+
+#' Launch training function to build set
+#'
+#' Build the training on calibration folders.
+#'
+#' This function ...
+#' Training input folder must include sub-folders:
+#' \itemize{
+#'   \item limb
+#'   \item background
+#'   \item lesion
+#' }
+#'
+#' @param path.sample Path to folder with image for calibration
+#'
+#' @return
+#'
+#' @examples
+#' path.sample <- './Exemple2_Stella/Samples'
+#' training(path.sample)
+training <- function(path.sample) {
     ## Recherche des sous-r?pertoires de path.sample
     dirs <- list.dirs(path.sample,full.names=FALSE)[-1] ## -1 pour supprimer le premier nom (toujouts vide)
 
