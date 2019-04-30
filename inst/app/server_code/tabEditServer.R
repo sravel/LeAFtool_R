@@ -25,8 +25,6 @@
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################
 
-
-
 ############################################
 ## Output Directory path of analysis
 ############################################
@@ -37,18 +35,15 @@ shinyDirChoose(
   session = session,
   restrictions = system.file(package = 'base')
 )
-
 # To add file path in UI
 output$dirInResult <- renderText({
   rv$dirInResult
 })
-
 # extract file Path on input and update list of images
 observeEvent(input$dirInResult,{
   if (!is.integer(input$dirInResult))
   {
-    home <- normalizePath(allVolumesAvail[input$dirInResult$root], winslash = "\\")
-    rv$dirInResult <- file.path(home, paste(unlist(input$dirInResult$path[-1],"/"), collapse = .Platform$file.sep))
+    rv$dirInResult <- normalizePath(parseDirPath(ui_volumes, input$dirInResult))
   }
 })
 # Update list of image
@@ -57,6 +52,20 @@ observe({
   {
     loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
     updateSelectInput(session, "imageEdit", label = NULL, choices = loadImageEdit)
+  }
+})
+## COLOR change
+observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
+    rv$lesion_color_borderEdit <- input$lesion_color_borderEdit
+    rv$lesion_color_bodiesEdit <- input$lesion_color_bodiesEdit
+    rv$lesion_color_borderAlphaEdit <-col2rgb(input$lesion_color_borderEdit, alpha=TRUE)[4]/255
+    rv$lesion_color_bodiesAlphaEdit <-col2rgb(input$lesion_color_bodiesEdit, alpha=TRUE)[4]/255
+  #### Update color of lesion
+  if (!is.null(rv$dirInResult))# && input$imageEdit != "")
+  {
+    leaves <- rv$loadCSVcurrentImage$leaf.number
+    updateLesionColor(leaves)
+    writeImagesFile()
   }
 })
 
@@ -72,21 +81,17 @@ observeEvent(input$imageEdit, {
     baseName <- gsub("_lesion", "", lesionImg)
     rv$originalFileName <- paste0(rv$dirInResult, "/",baseName,"_lesion.jpeg")
     rv$loadcurrentImageEdit <- readImage(rv$originalFileName)
-
+    load(file = paste0(rv$dirInResult, "/.",baseName,".RData"), envir = .GlobalEnv)
+    rv$position <- filePosition
+    rv$originalFileNameBoth <- paste0(rv$dirInResult, "/",baseName,"_both.jpeg")
+    img <- readImage(rv$originalFileNameBoth)
     # test if image is right or bottum
-    loadImageEditBoth <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_both.jpeg")
-    if (grepl("right",loadImageEditBoth[1]) == TRUE){
-      rv$originalFileNameBoth <- paste0(rv$dirInResult, "/",baseName,"_right_both.jpeg")
-      img <- readImage(rv$originalFileNameBoth)
+    if (rv$position  == "right"){
       rv$widthSize = dim(img)[1]/2
       rv$heightSize = dim(img)[2]
-      rv$position <- "right"
-    }else{
-      rv$originalFileNameBoth <- paste0(rv$dirInResult, "/",baseName,"_both.jpeg")
-      img <- readImage(rv$originalFileNameBoth)
+    }else if (rv$position  == "bottum"){
       rv$widthSize = dim(img)[1]
       rv$heightSize = dim(img)[2]/2
-      rv$position <- "bottum"
     }
     rv$loadcurrentImageOriginaleEdit <- img[1:rv$widthSize,1:rv$heightSize,]
     rv$loadCSVcurrentImageName <- paste0(rv$dirInResult, "/",baseName,"_All_lesions.csv")
@@ -94,7 +99,7 @@ observeEvent(input$imageEdit, {
     rv$csv_Merge_lesionsFile <- paste(rv$dirInResult, "/",baseName,"_Merge_lesions.csv", sep = '')
     rv$AG <- read.csv(rv$csv_Merge_lesionsFile ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
     rv$MERGE <- read.csv(paste0(rv$dirInResult,"/merge_ResumeCount.csv") ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-    load(file = paste0(rv$dirInResult, "/",baseName,".RData"), envir = .GlobalEnv)
+
   }
 }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
@@ -104,7 +109,8 @@ observeEvent(input$imageEdit, {
 writeImagesFile <- function(){
   isolate({
     # print both sample and lesion images
-    print(rv$originalFileNameBoth)
+#    print(rv$originalFileNameBoth)
+#    print(rv$position)
     if (rv$position == "right"){
       jpeg(rv$originalFileNameBoth,
            width = rv$widthSize*2,
@@ -153,8 +159,9 @@ updateLesionColor <- function(leaves){
     tmpimage <- rv$loadcurrentImageOriginaleEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,]
 
     tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_borderEdit, rv$lesion_color_bodiesEdit), opac=c(rv$lesion_color_borderAlphaEdit, rv$lesion_color_bodiesAlphaEdit))
+#    display(tmpimage, method = "raster", all = TRUE)
     tmpimage <- paintObjects(maskLesionRed ,tmpimage, thick=TRUE, col=c("red", "red"), opac=c(0.3, 0))
-
+#    display(tmpimage, method = "raster", all = TRUE)
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
   }
 }
@@ -181,6 +188,7 @@ updateAll <- function(res){
   ## Update lesion color on image
   leaves <- res$leaf.number
   updateLesionColor(leaves)
+  writeImagesFile()
 
   # update aggregate table
   result <- rv$loadCSVcurrentImage[rv$loadCSVcurrentImage$lesion.status != "remove", ]
@@ -243,24 +251,6 @@ updateAll <- function(res){
     sep = '\t'
   )
 }
-
-############################################
-## OBSERVE
-############################################
-observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
-
-  #### Update color of lesion
-  if (!is.null(rv$dirInResult))# && input$imageEdit != "")
-  {
-    rv$lesion_color_borderEdit <- input$lesion_color_borderEdit
-    rv$lesion_color_bodiesEdit <- input$lesion_color_bodiesEdit
-    rv$lesion_color_borderAlphaEdit <-col2rgb(input$lesion_color_borderEdit, alpha=TRUE)[4]/255
-    rv$lesion_color_bodiesAlphaEdit <-col2rgb(input$lesion_color_bodiesEdit, alpha=TRUE)[4]/255
-    leaves <- rv$loadCSVcurrentImage$leaf.number
-    updateLesionColor(leaves)
-    writeImagesFile()
-  }
-})
 
 ############################################
 ## DISPLAY IMAGES
