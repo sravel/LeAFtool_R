@@ -195,11 +195,11 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 
   # build filename output
   filename <- strsplit(imageSamples, ".", fixed = TRUE)[[1]][1]
-  fileRData <- paste(pathResult, '/', filename, ".RData", sep = '')
-  jpegfile <- paste(pathResult, '/', filename, "_both.jpeg", sep = '')
-  jpegfileOnly <- paste(pathResult, '/', filename, "_lesion.jpeg", sep = '')
-  csv_Merge_lesionsFile <- paste(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
-  csv_All_lesionsFile <- paste(pathResult, '/', filename, "_All_lesions.csv", sep = '')
+  fileRData <- paste0(pathResult, '/.', filename, ".RData", sep = '')
+  jpegfile <- paste0(pathResult, '/', filename, "_both.jpeg", sep = '')
+  jpegfileOnly <- paste0(pathResult, '/', filename, "_lesion.jpeg", sep = '')
+  csv_Merge_lesionsFile <- paste0(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
+  csv_All_lesionsFile <- paste0(pathResult, '/', filename, "_All_lesions.csv", sep = '')
 
   background <- classes$subclass[classes$class=="background"]
   limb <- classes$subclass[classes$class=="limb"]
@@ -211,7 +211,7 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 #  print(lesion)
 
   ## reading the source image
-  sourceImage <- paste(pathImages, '/', imageSamples, sep = '')
+  sourceImage <- paste0(pathImages, '/', imageSamples, sep = '')
   image <- readImage(sourceImage)
   widthSize = dim(image)[1]
   heightSize = dim(image)[2]
@@ -283,9 +283,8 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 
   # print both sample and lesion images
   progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 5/7 : Generate output images")
-  rv$position <- "right"
+  filePosition <- rv$position
   if (rv$position == "right"){
-    jpegfile <- paste(pathResult, '/', filename, "_right_both.jpeg", sep = '')
     jpeg(jpegfile,
          width = widthSize*2,
          height = heightSize,
@@ -301,7 +300,8 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   display(image, method="raster")
 
   # save Analysis to RData file
-  save(analyse.li,li ,file=fileRData)
+  save(analyse.li,li,filePosition ,file=fileRData)
+
 
   ## sortie des résultats et coloration des lésions
   for (i in 1:length(li)){
@@ -373,16 +373,23 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 ############################################
 ## If folder already open kepp the working folder
 ############################################
-  ui_volumes <- function() {
-    sel_path <- dirname(parseDirPath(allVolumesAvail, input$dirInSamples))
-    allVolumesAvail <- getOwnVolume()
-    if (length(sel_path) > 0 && !sel_path %in% allVolumesAvail) {
-      vnames <- c(basename(sel_path), names(allVolumesAvail))
-      setNames(c(sel_path, allVolumesAvail), vnames)
-    } else {
-      allVolumesAvail
-    }
+ui_volumes <- function() {
+  sel_path <- dirname(parseDirPath(allVolumesAvail, input$dirInSamples))
+  allVolumesAvail <- getOwnVolume()
+  if (length(sel_path) > 0 && !sel_path %in% allVolumesAvail) {
+    vnames <- c(basename(sel_path), names(allVolumesAvail))
+    setNames(c(sel_path, allVolumesAvail), vnames)
+  } else {
+    allVolumesAvail
   }
+}
+
+resetRun <- function() {
+  # if reload after first run, reset value
+  rv$exitStatusAna <- -1
+  rv$messAna <- NULL
+  rv$errAna <- NULL
+}
 
 ############################################
 ## Input Directory path with images to analysis
@@ -395,17 +402,16 @@ shinyDirChoose(
   restrictions = system.file(package = 'base')
 )
 
-output$dirSamples <- renderText({
-  rv$dirSamples
-})
-
 updateDirAnalysis <- observeEvent(input$dirInSamples,{
   if (!is.integer(input$dirInSamples))
   {
-    rv$dirSamples <- parseDirPath(ui_volumes, input$dirInSamples)
-    rv$exitStatusAna -1
-    rv$messAna <- NULL
-    rv$errAna <- NULL
+    resetRun()
+    rv$dirSamples <- normalizePath(parseDirPath(ui_volumes, input$dirInSamples))
+    # render to UI
+    output$dirSamples <- renderText({
+      rv$dirSamples
+    })
+
   }
 })
 
@@ -420,17 +426,14 @@ shinyDirChoose(
   restrictions = system.file(package = 'base')
 )
 
-output$dirOutAnalysis <- renderText({
-  rv$dirSamplesOut
-})
-
 updateDirOutAnalysis <- observeEvent(input$dirOut,{
   if (!is.integer(input$dirOut))
   {
-    rv$dirSamplesOut <- parseDirPath(ui_volumes, input$dirOut)
-    rv$exitStatusAna <- -1
-    rv$messAna <- NULL
-    rv$errAna <- NULL
+    rv$dirSamplesOut <- normalizePath(parseDirPath(ui_volumes, input$dirOut))
+    # render to UI
+    output$dirOutAnalysis <- renderText({
+      rv$dirSamplesOut
+    })
   }
 })
 
@@ -440,66 +443,33 @@ updateDirOutAnalysis <- observeEvent(input$dirOut,{
 shinyFileChoose(input, 'fileRDataIn',
                 roots=ui_volumes,
                 filetypes=c('', 'rdata' , 'RData')
-                )
-
-output$fileRData <- renderText({
-  rv$fileRData
-})
+)
 
 observeEvent(input$fileRDataIn,{
   if (!is.integer(input$fileRDataIn))
   {
+    resetRun()
     rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=ui_volumes, input$fileRDataIn)$datapath), winslash = "\\")
+    if (!is.null(rv$fileRData)) {
+      load(file = rv$fileRData, envir = .GlobalEnv)
+    }
     filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=ui_volumes, input$fileRDataIn)$datapath), winslash = "\\"))
-#    print(filename)
+    output$fileRData <- renderText({
+      rv$fileRData
+    })
+
     rv$fileClass <- paste0(filename,"_classes.txt")
-#    print(rv$fileClass)
+    if (!is.null(rv$fileClass) && file.exists(rv$fileClass)) {
+      # User has not uploaded correct file yet
+      rv$classes <- read.table(rv$fileClass,header=TRUE,sep='\t')
+    }
   }
 })
 
-observe({
-  if (is.null(rv$fileRData)) {
-    # User has not uploaded correct file yet
-    return(NULL)
-  }else{
-    load(file = rv$fileRData, envir = .GlobalEnv)
-    rv$exitStatusAna <- -1
-    rv$messAna <- NULL
-    rv$errAna <- NULL
-#
-  }
-if (!is.null(rv$fileClass) && file.exists(rv$fileClass)) {
-    # User has not uploaded correct file yet
-    rv$classes <- read.table(rv$fileClass,header=TRUE,sep='\t')
-  }
-})
 
 ############################################
 ## Validate value for options
 ############################################
-
-#validate_INT <- function(inputValue,name) {
-#  if(!is.numeric(inputValue) || (inputValue <= 0) || is.na(inputValue)){
-#    rv$codeValidationInt <- 0
-#    rv$warning <- HTML(paste0("Please input a number >= 0 for <b>",name,"</b> !"))
-#    feedbackWarning(
-#      inputId = name,
-#      condition = all(c(
-#        inputValue <= 0,
-#        inputValue  %% 1 == 0
-#      )),
-#      text = "Warning please enter 0 < value"
-#    )
-#    updateNumericInput(session,name, value = 1)
-#  }else{
-#    rv$codeValidationInt <- 1
-#  }
-#  feedbackDanger(
-#      inputId = name,
-#      condition = is.na(inputValue),
-#      text = "Danger please enter number"
-#    )
-#}
 
 returnInpair <- function(value){
   if(value%%2==0){
@@ -510,8 +480,16 @@ returnInpair <- function(value){
 }
 
 ######## Image
-###### Blur image
+###### Position TOP or BOTTUM active or not (checkbox)
+observeEvent(input$outputPositionBottum,{
+  if ( input$outputPositionBottum == FALSE){
+    rv$position <- "right"
+  }else{
+    rv$position <- "bottum"
+  }
+})
 
+###### Blur image
 ###### active or not (checkbox)
 observeEvent(input$active_blur,{
   rv$active_blur <- input$active_blur
@@ -524,7 +502,7 @@ observeEvent(input$blur_value,{
       text = "Please add number 'or 1 will be use'"
     )
   req(input$blur_value)
-  if (is.na(input$blur_value) || as.numeric(input$blur_value) == 0){
+  if (is.na(input$blur_value) || as.numeric(input$blur_value) <= 0){
     updateNumericInput(session,"blur_value", value = 1)
     rv$blur_value <- 1
   }
@@ -547,7 +525,7 @@ observeEvent(input$leaf_min_size,{
       text = "Please add number 'or 1000 will be use'"
     )
   req(input$leaf_min_size)
-  if (is.na(input$leaf_min_size) || as.numeric(input$leaf_min_size) == 0){
+  if (is.na(input$leaf_min_size) || as.numeric(input$leaf_min_size) <= 0){
     updateNumericInput(session,"leaf_min_size", value = 1000)
     rv$leaf_min_size <- 1000
   }
@@ -564,7 +542,7 @@ observeEvent(input$leaf_border_size,{
       text = "Please add number 'or 5 will be use'"
     )
   req(input$leaf_border_size)
-  if (is.na(input$leaf_border_size) || as.numeric(input$leaf_border_size) == 0){
+  if (is.na(input$leaf_border_size) || as.numeric(input$leaf_border_size) <= 0){
     updateNumericInput(session,"leaf_border_size", value = 5)
     rv$leaf_border_size <- 5
   }
@@ -583,7 +561,7 @@ observeEvent(input$lesion_min_size,{
       text = "Please add number 'or 10 will be use'"
     )
   req(input$lesion_min_size)
-  if (is.na(input$lesion_min_size) || as.numeric(input$lesion_min_size) == 0){
+  if (is.na(input$lesion_min_size) || as.numeric(input$lesion_min_size) <= 0){
     updateNumericInput(session,"lesion_min_size", value = 10)
     rv$lesion_min_size <- 10
   }
@@ -600,7 +578,7 @@ observeEvent(input$lesion_max_size,{
       text = "Please add number 'or 120000 will be use'"
     )
   req(input$lesion_max_size)
-  if (is.na(input$lesion_max_size) || as.numeric(input$lesion_max_size) == 0 || input$lesion_min_size > input$lesion_max_size){
+  if (is.na(input$lesion_max_size) || as.numeric(input$lesion_max_size) <= 0 || input$lesion_min_size > input$lesion_max_size){
     updateNumericInput(session,"lesion_max_size", value = 120000)
     rv$lesion_max_size <- 120000
   }else{
@@ -616,7 +594,7 @@ observeEvent(input$lesion_border_size,{
       text = "Please add number 'or 3 will be use'"
     )
   req(input$lesion_border_size)
-  if ( is.na(input$lesion_border_size) || as.numeric(input$lesion_border_size) == 0){
+  if ( is.na(input$lesion_border_size) || as.numeric(input$lesion_border_size) <= 0){
     updateNumericInput(session,"lesion_border_size", value = 3)
     rv$lesion_border_size <- 3
   }else{
@@ -704,7 +682,7 @@ saveParameters <- function(){
               "parallelMode: ", rv$parallelMode, " ",rv$parallelThreadsNum,"\n"
                )
     cat(parameters, '\n', file = paramfilename)
-
+    close(paramfilename)
 }
 
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
@@ -757,8 +735,13 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
       cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK")
     }
     else if (osSystem == "Windows") {
-      cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "SOCK")
-      clusterExport(cl, varlist=c(".GlobalEnv", "logfilename"))
+      cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "PSOCK")
+      ## load libraries on workers
+      clusterEvalQ(cl, library(shiny))
+      clusterEvalQ(cl, library(EBImage))
+      clusterEvalQ(cl, library(MASS))
+      clusterEvalQ(cl, library(lattice))
+      clusterExport(cl, varlist=c(".GlobalEnv", "logfilename", "analyseLeaf", "analyseUniqueFile", "boundingRectangle","extractLeaf", "rangeNA", "rv", "lda1", "progress", "nbSamples"), envir=environment())
     }
     registerDoParallel(cl)
 
@@ -768,8 +751,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 #    })
     res <- foreach(imageSamples = listSamples,
             .export = c(".GlobalEnv"),
-            .combine = c,
-            .packages = 'shiny')  %dopar%
+            .combine = c)  %dopar%
             {
                 cat(paste0(imageSamples,"\n") , file = logfilename, append = TRUE) # write file to log
 #                f <- future({
@@ -777,7 +759,6 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
                   analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageSamples, rv$classes)
                 }) # use isolate to prevente error with reactive values
             }
-#    print(res)
   #  # Close cluster mode
     stopCluster(cl)
     closeAllConnections();
@@ -875,10 +856,7 @@ currentImage <- reactive({
       return("")
 
     #Load image for plot
-#    lesionImg <- strsplit(rv$responseDataFilter[imIndex,"LeafNames"], ".", fixed = TRUE)[[1]][1]
     lesionImgPath <- strsplit(rv$responseDataFilter[imIndex,"LeafNames"], ".", fixed = TRUE)[[1]][1]
-#    rv$plotcurrentImage <- readImage(paste0(rv$dirSamplesOut,"/",lesionImg,"_lesion.jpeg"))
-#    rv$loadCSVcurrentImage <- read.csv(paste0(rv$dirSamplesOut, "/",lesionImg,"_All_lesions.csv"),header = TRUE, sep = "\t", stringsAsFactors = FALSE)
     rv$responseDataFilter[imIndex,"LeafNames"]
 
 
@@ -898,12 +876,12 @@ observeEvent(input$contents_rows_selected,{
         column(width = 1, offset = 0, style = "padding-top: 35vh;",
           actionButton("actionPrevious", "", icon = icon("backward"), width = "50px")
         ),
-       column(width = 5, offset = 0,
-          HTML(gsub("height='60'","height='95%'",rv$responseDataFilter[imIndex,"Original"]))
+       column(width = 5, offset = 0, style = "height: 80vh;",
+          HTML(gsub("height='60'","class='img-responsive'",rv$responseDataFilter[imIndex,"Original"]))
 #         img(src= paste0(rv$dirSamples,"/",currentImage()),width='100%',height='100%')
        ),
-        column(width = 5, offset = 0,
-           HTML(gsub("height='60'","height='95%'",rv$responseDataFilter[imIndex,"LesionColor"]))
+        column(width = 5, offset = 0, style = "height: 80vh;",
+           HTML(gsub("height='60'","class='img-responsive'",rv$responseDataFilter[imIndex,"LesionColor"]))
 #          img(src= paste0(rv$dirSamplesOut,"/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
 #          displayOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
         ),

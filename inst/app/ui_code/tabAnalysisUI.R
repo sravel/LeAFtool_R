@@ -75,6 +75,10 @@ tabItem(
           condition = "input.active_blur",
             numericInput("blur_value", "Blur image:", value = 1 , min = 1, max = 21, step = 2, width = "150px")
         ),
+        checkboxInput("outputPositionBottum", "Both images position bottum", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "outputPositionBottum"),
 #        checkboxInput("rmScanLine", "Remove Scan line", value = FALSE, width = "150px") %>%
 #          helper(icon = "question",
 #                type = "markdown",

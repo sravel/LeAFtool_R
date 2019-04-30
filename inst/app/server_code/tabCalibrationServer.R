@@ -56,10 +56,7 @@ shinyDirChoose(
   restrictions = system.file(package = 'base')
 )
 
-# return to UI path selected for calibration
-output$dirCalibration <- renderText({
-  rv$dirCalibration
-})
+
 
 # when click to bottom update path
 observeEvent(
@@ -68,6 +65,10 @@ observeEvent(
     {
       # initialize path
       rv$dirCalibration <- parseDirPath(allVolumesAvail, input$dirCalibration)
+      # return to UI path selected for calibration
+      output$dirCalibration <- renderText({
+        rv$dirCalibration
+      })
       # if reload after first calibration, reset value
       rv$exitStatusCal <- -1
       rv$messCal <- NULL
