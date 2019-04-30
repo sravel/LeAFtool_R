@@ -67,8 +67,7 @@ observeEvent(
     if (!is.integer(input$dirCalibration))
     {
       # initialize path
-      home <- normalizePath(allVolumesAvail[input$dirCalibration$root], winslash = "\\")
-      rv$dirCalibration <- file.path(home,paste(unlist(input$dirCalibration$path[-1]), collapse = .Platform$file.sep))
+      rv$dirCalibration <- parseDirPath(allVolumesAvail, input$dirCalibration)
       # if reload after first calibration, reset value
       rv$exitStatusCal <- -1
       rv$messCal <- NULL

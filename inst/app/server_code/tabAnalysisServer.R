@@ -371,12 +371,26 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
 }
 
 ############################################
+## If folder already open kepp the working folder
+############################################
+  ui_volumes <- function() {
+    sel_path <- dirname(parseDirPath(allVolumesAvail, input$dirInSamples))
+    allVolumesAvail <- getOwnVolume()
+    if (length(sel_path) > 0 && !sel_path %in% allVolumesAvail) {
+      vnames <- c(basename(sel_path), names(allVolumesAvail))
+      setNames(c(sel_path, allVolumesAvail), vnames)
+    } else {
+      allVolumesAvail
+    }
+  }
+
+############################################
 ## Input Directory path with images to analysis
 ############################################
 shinyDirChoose(
   input,'dirInSamples',
   filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
-  roots = allVolumesAvail,
+  roots = ui_volumes,
   session = session,
   restrictions = system.file(package = 'base')
 )
@@ -388,8 +402,7 @@ output$dirSamples <- renderText({
 updateDirAnalysis <- observeEvent(input$dirInSamples,{
   if (!is.integer(input$dirInSamples))
   {
-    home <- normalizePath(allVolumesAvail[input$dirInSamples$root], winslash = "\\")
-    rv$dirSamples <- file.path(home, paste(unlist(input$dirInSamples$path[-1]), collapse = .Platform$file.sep))
+    rv$dirSamples <- parseDirPath(ui_volumes, input$dirInSamples)
     rv$exitStatusAna -1
     rv$messAna <- NULL
     rv$errAna <- NULL
@@ -402,7 +415,7 @@ updateDirAnalysis <- observeEvent(input$dirInSamples,{
 shinyDirChoose(
   input,'dirOut',
   filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
-  roots = allVolumesAvail,
+  roots = ui_volumes,
   session = session,
   restrictions = system.file(package = 'base')
 )
@@ -414,8 +427,7 @@ output$dirOutAnalysis <- renderText({
 updateDirOutAnalysis <- observeEvent(input$dirOut,{
   if (!is.integer(input$dirOut))
   {
-    home <- normalizePath(allVolumesAvail[input$dirOut$root], winslash = "\\")
-    rv$dirSamplesOut <- file.path(home, paste(unlist(input$dirOut$path[-1]), collapse = .Platform$file.sep))
+    rv$dirSamplesOut <- parseDirPath(ui_volumes, input$dirOut)
     rv$exitStatusAna <- -1
     rv$messAna <- NULL
     rv$errAna <- NULL
@@ -426,7 +438,7 @@ updateDirOutAnalysis <- observeEvent(input$dirOut,{
 ## Load RData file
 ############################################
 shinyFileChoose(input, 'fileRDataIn',
-                roots=allVolumesAvail,
+                roots=ui_volumes,
                 filetypes=c('', 'rdata' , 'RData')
                 )
 
@@ -437,8 +449,8 @@ output$fileRData <- renderText({
 observeEvent(input$fileRDataIn,{
   if (!is.integer(input$fileRDataIn))
   {
-    rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath), winslash = "\\")
-    filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=allVolumesAvail, input$fileRDataIn)$datapath), winslash = "\\"))
+    rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=ui_volumes, input$fileRDataIn)$datapath), winslash = "\\")
+    filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=ui_volumes, input$fileRDataIn)$datapath), winslash = "\\"))
 #    print(filename)
     rv$fileClass <- paste0(filename,"_classes.txt")
 #    print(rv$fileClass)
@@ -674,7 +686,7 @@ observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
 
 saveParameters <- function(){
       # create config file to save input values
-    paramfilename <- paste0(rv$dirSamplesOut,"/LeAFtool-parameters-input.txt")
+    paramfilename <- file(paste0(rv$dirSamplesOut,"/LeAFtool-parameters-input.txt"))
     parameters <- paste0(
               "Samples folder: ",rv$dirSamples,"\n",
               "Output folder: ",rv$dirSamplesOut,"\n",
@@ -728,12 +740,12 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
       updateNumericInput(session,"parallelThreadsNum", value = nbSamples)
       rv$parallelThreadsNum <- nbSamples
     }
-    # remove previous log (not working if multiple instance on same path)
-    unlink(logfilename)
+
     # create log file
     logfilename <<- paste0(rv$dirSamplesOut,"/debug.txt")
-
-
+    # remove previous log (not working if multiple instance on same path)
+    unlink(logfilename)
+    # Add an entry to the log file
     cat(as.character(Sys.time()), '\n', file = logfilename)
 
     progress$set(rv$nbSamplesAnalysis/nbSamples, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores, log file is: ", logfilename," open to see progress"))
@@ -746,12 +758,9 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     }
     else if (osSystem == "Windows") {
       cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "SOCK")
+      clusterExport(cl, varlist=c(".GlobalEnv", "logfilename"))
     }
     registerDoParallel(cl)
-
-    # Add an entry to the log file
-    cat(as.character(Sys.time()), '\n', file = logfilename,
-      append = TRUE)
 
 #    reactive({
 #      progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaves ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = output$log)
@@ -779,7 +788,6 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     progress$set(value = 0 , detail = paste("Start samples analysis with 1 cores"))
     for (imageSamples in listSamples){
       progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples, " : ",imageSamples), detail = "Step 1/7 Start function")
-      cat(paste0(imageSamples,"\n")  , file = logfilename, append = TRUE) # write file to log
       analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageSamples, rv$classes)
       rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
     }
