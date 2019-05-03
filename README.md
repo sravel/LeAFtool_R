@@ -16,17 +16,17 @@ The tools are being developed and a first functional version is available. The f
 ## Installation
 ### Regular installation
 
-  * Main Program: Please copy and paste the following command to R console. 
-  * Upgrading R and Rstudio to the latest version (R >= 3.4, Rstudio > 1.0.0) is strongly recommended. 
+  * Main Program: Please copy and paste the following command to R console.
+  * Upgrading R and Rstudio to the latest version (R >= 3.5, Rstudio > 1.0.0) is strongly recommended.
 
 ```
 # Dependecies that needs to be manually installed.
-# You may need to paste the following code line by line 
+# You may need to paste the following code line by line
 # and choose if previously installed packages should be updated (recommended).
 
 # list of packages required
-list.of.packages <- c("devtools", "RCurl","shiny","shinythemes","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
-                      "foreach","future","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "rstudioapi", "ggplot2")
+list.of.packages <- c("devtools", "RCurl","shiny","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
+                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2")
 #checking missing packages from list
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 
@@ -62,4 +62,3 @@ See here: https://docs.google.com/document/d/1lFr8_08TGJps5lcSbY_AimstFnf0AfuOX7
 ## Troubleshooting
 
 ## Citation
-

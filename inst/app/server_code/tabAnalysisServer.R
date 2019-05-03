@@ -182,14 +182,22 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   list(featuresLesion = featuresLesion, maskLesion = maskLesion, outputDF = outputDF)
 }
 
-# analysis One scan image
-analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
+writeLOG <- function(message,detail){
 
   if (rv$parallelMode == TRUE){
-    print(paste0("RUNNING: ", imageSamples) )
+    ParallelLogger::logInfo(paste0(message, detail))
   }else{
-    progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 2/7 : Reading image sample and apply calibration")
+    progress$set(value = rv$c, message = message, detail = detail)
   }
+}
+
+# analysis One scan image
+analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
+
+  message <- paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples)
+  detail <- " Step 2/7 : Reading image sample and apply calibration"
+  writeLOG(message,detail)
+
   if (!file.exists(pathResult))
     dir.create(pathResult)
 
@@ -274,15 +282,18 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   imageBackgroundBlack[maskLeaf == 0] <- 0
 
   ## separation of leafs
-  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 3/7 : Extract leaves")
+  detail <- " Step 3/7 : Extract leaves"
+  writeLOG(message,detail)
   li <- lapply(as.numeric(row.names(featuresLeaf)), extractLeaf, maskLeaf, imageBackgroundBlack, featuresLeaf)
 
   ## analyse des leafs
-  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 4/7 : Extract lesion on leaves")
+  detail <- " Step 4/7 : Extract lesion on leaves"
+  writeLOG(message,detail)
   analyse.li <- lapply(li,  analyseLeaf,  lda1 = lda1,  lesion = lesion, limb = limb, filename = filename)
 
   # print both sample and lesion images
-  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 5/7 : Generate output images")
+  detail <- " Step 5/7 : Generate output images"
+  writeLOG(message,detail)
   filePosition <- rv$position
   if (rv$position == "right"){
     jpeg(jpegfile,
@@ -330,7 +341,9 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
   display(image, method = "raster")
   dev.off()
 
-  progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 6/7 : Generate ouput tables")
+  detail <- " Step 6/7 : Generate ouput tables"
+  writeLOG(message,detail)
+
   write.table(
     result,
     file = csv_All_lesionsFile,
@@ -361,13 +374,8 @@ analyseUniqueFile <<- function(pathResult, pathImages, imageSamples, classes) {
     sep = '\t'
   )
 
-  if (rv$parallelMode == TRUE){
-    print(paste0("FINISH: ", imageSamples) )
-  }else{
-    progress$set(value = rv$c, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples), detail = "Step 7/7 : Finish sample")
-  }
-
-#  return(cat("FINISH: ",sourceImage,"\t",jpegfileOnly,"\n"))
+  detail <- " Step 7/7 : Finish sample"
+  writeLOG(message,detail)
 }
 
 ############################################
@@ -445,24 +453,23 @@ shinyFileChoose(input, 'fileRDataIn',
                 filetypes=c('', 'rdata' , 'RData')
 )
 
+# Use observe out the event open RfileData to auto load when calibration step before
+observe({
+  if (!is.null(rv$fileRData)) {
+    print("file LOAD")
+    load(file = rv$fileRData, envir = .GlobalEnv)
+    rv$classes <- classes
+    output$fileRData <- renderText({
+      rv$fileRData
+    })
+  }
+})
+
 observeEvent(input$fileRDataIn,{
   if (!is.integer(input$fileRDataIn))
   {
     resetRun()
     rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=ui_volumes, input$fileRDataIn)$datapath), winslash = "\\")
-    if (!is.null(rv$fileRData)) {
-      load(file = rv$fileRData, envir = .GlobalEnv)
-    }
-    filename <-  tools::file_path_sans_ext(normalizePath(as.character(parseFilePaths(roots=ui_volumes, input$fileRDataIn)$datapath), winslash = "\\"))
-    output$fileRData <- renderText({
-      rv$fileRData
-    })
-
-    rv$fileClass <- paste0(filename,"_classes.txt")
-    if (!is.null(rv$fileClass) && file.exists(rv$fileClass)) {
-      # User has not uploaded correct file yet
-      rv$classes <- read.table(rv$fileClass,header=TRUE,sep='\t')
-    }
   }
 })
 
@@ -685,8 +692,23 @@ saveParameters <- function(){
     close(paramfilename)
 }
 
+#observe({
+
+#  if (input$stopButtonAnalysis == 1){
+#    print("close all")
+#    if (rv$parallelMode == TRUE){
+#      try(parallel::stopCluster(cl), silent = TRUE) # Close cluster mode
+#      closeAllConnections(); # for kill all process, use to add button for stop work
+#      registerDoSEQ()
+#    }
+#  }
+#})
+
+#rv$breakLoop <- eventReactive(input$stopButtonAnalysis, {TRUE})
+
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   ## load values and add loading frame
+  disable("runButtonAnalysis")
   rv$exitStatusAna <- 0
   rv$lesion_color_border <- input$lesion_color_border
   rv$lesion_color_bodies <- input$lesion_color_bodies
@@ -700,6 +722,13 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
   saveParameters()
 
+  #### LOG FILE
+  # create log file
+  rv$logfilename <- paste0(rv$dirSamplesOut,"/debug.txt")
+  unlink(rv$logfilename)# Clean up log file from the previous example
+  clearLoggers()# Clean up the loggers from the previous example
+  addDefaultFileLogger(rv$logfilename)
+
   ############################ RUN ANALYSIS
   # count number of Samples on input directory
   listSamples <-list.files(rv$dirSamples)
@@ -707,9 +736,6 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   nbSamples <<- length(listSamples)
   rv$nbSamplesAnalysis <- 1
   show("loading-content")
-
-  progress <<- shiny::Progress$new(session, min = 1, max = nbSamples+1)
-  on.exit(progress$close())
 
   if (rv$parallelMode == TRUE){
 
@@ -719,64 +745,73 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
       rv$parallelThreadsNum <- nbSamples
     }
 
-    # create log file
-    logfilename <<- paste0(rv$dirSamplesOut,"/debug.txt")
-    # remove previous log (not working if multiple instance on same path)
-    unlink(logfilename)
-    # Add an entry to the log file
-    cat(as.character(Sys.time()), '\n', file = logfilename)
-
-    progress$set(rv$nbSamplesAnalysis/nbSamples, message = "Analysis run ", detail = paste("Start parallel analysis with ", rv$parallelThreadsNum, " cores, log file is: ", logfilename," open to see progress"))
-
+    showModal(      # Information Dialog Box
+      modalDialog(
+        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
+        size = "l",
+        easyClose = FALSE,
+        fade = FALSE,
+          h1("LOG"),
+          fluidRow(
+            column(1,
+                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
+                  selectInput("thread", label = "Thread", choices = "1"),
+                  selectInput("package", label = "Package", choices = "packages")
+                  ),
+            column(11,
+                  dataTableOutput("logTable")
+                  )
+          )
+      )
+    )
 
     # Start parallel session
-    osSystem <- Sys.info()["sysname"]
-    if (osSystem == "Darwin" || osSystem == "Linux") {
-      cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "FORK")
-    }
-    else if (osSystem == "Windows") {
-      cl <- makeCluster(rv$parallelThreadsNum, outfile = logfilename, type = "PSOCK")
-      ## load libraries on workers
-      clusterEvalQ(cl, library(shiny))
-      clusterEvalQ(cl, library(EBImage))
-      clusterEvalQ(cl, library(MASS))
-      clusterEvalQ(cl, library(lattice))
-      clusterExport(cl, varlist=c(".GlobalEnv", "logfilename", "analyseLeaf", "analyseUniqueFile", "boundingRectangle","extractLeaf", "rangeNA", "rv", "lda1", "progress", "nbSamples"), envir=environment())
-    }
+#    osSystem <- Sys.info()["sysname"]
+#    if (osSystem == "Darwin" || osSystem == "Linux") {
+    cl <- makeCluster(rv$parallelThreadsNum)
+#    }
+#    else if (osSystem == "Windows") {
+#      cl <- makeCluster(rv$parallelThreadsNum, type = "PSOCK")
+#    }
+    ## load libraries on workers
+    clusterEvalQ(cl, library(shiny))
+    clusterEvalQ(cl, library(EBImage))
+    clusterEvalQ(cl, library(MASS))
+    clusterEvalQ(cl, library(lattice))
+    clusterExport(cl, varlist=c(".GlobalEnv", "analyseLeaf", "analyseUniqueFile", "boundingRectangle","extractLeaf", "rangeNA", "rv", "lda1", "nbSamples"), envir=environment())
     registerDoParallel(cl)
 
-#    reactive({
-#      progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaves ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = output$log)
-#      progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaves ", rv$nbSamplesAnalysis, " / ", nbSamples), detail = verbatimTextOutput('log', placeholder = FALSE))
-#    })
     res <- foreach(imageSamples = listSamples,
             .export = c(".GlobalEnv"),
             .combine = c)  %dopar%
             {
-                cat(paste0(imageSamples,"\n") , file = logfilename, append = TRUE) # write file to log
-#                f <- future({
-                isolate({
-                  analyseUniqueFile(rv$dirSamplesOut,  rv$dirSamples, imageSamples, rv$classes)
-                }) # use isolate to prevente error with reactive values
+              isolate({
+                rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
+                analyseUniqueFile(imageSamples, rv$dirSamplesOut,  rv$dirSamples, rv$classes)
+              }) # use isolate to prevente error with reactive values
             }
   #  # Close cluster mode
     stopCluster(cl)
-    closeAllConnections();
+    closeAllConnections(); # for kill all process, use to add button for stop work
     registerDoSEQ()
+#    removeModal()
 
   }else{
+    progress <<- shiny::Progress$new(session, min = 1, max = nbSamples+1)
+    on.exit(progress$close())
+    rv$breakLoop <- FALSE
     # if not cluster mode do sample by sample on one core
     progress$set(value = 0 , detail = paste("Start samples analysis with 1 cores"))
     for (imageSamples in listSamples){
       progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples, " : ",imageSamples), detail = "Step 1/7 Start function")
-      analyseUniqueFile(rv$dirSamplesOut,rv$dirSamples,imageSamples, rv$classes)
+      analyseUniqueFile(imageSamples, rv$dirSamplesOut, rv$dirSamples, rv$classes)
       rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
+      if (rv$breakLoop == TRUE) break
     }
     progress$set( value = rv$nbSamplesAnalysis, message = "Analysis Finish ")
   }
 
   mymergeddata = multmerge(rv$dirSamplesOut, "*_Merge_lesions.csv")
-
   write.table(
     mymergeddata,
     file = paste0(rv$dirSamplesOut,"/merge_ResumeCount.csv"),
@@ -785,11 +820,12 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     sep = '\t'
   )
   rv$exitStatusAna <- 1
-
+  enable("runButtonAnalysis")
 
 #  ########################### END ANALYSIS
   hide(id = "loading-content", anim = TRUE, animType = "fade")
-})
+}, ignoreNULL = FALSE, ignoreInit = TRUE)
+
 
 #########################################
 ##  OUTPUT
@@ -878,12 +914,9 @@ observeEvent(input$contents_rows_selected,{
         ),
        column(width = 5, offset = 0, style = "height: 80vh;",
           HTML(gsub("height='60'","class='img-responsive'",rv$responseDataFilter[imIndex,"Original"]))
-#         img(src= paste0(rv$dirSamples,"/",currentImage()),width='100%',height='100%')
        ),
         column(width = 5, offset = 0, style = "height: 80vh;",
            HTML(gsub("height='60'","class='img-responsive'",rv$responseDataFilter[imIndex,"LesionColor"]))
-#          img(src= paste0(rv$dirSamplesOut,"/", lesionImg, "_lesion.jpeg"),width='100%',height='100%')
-#          displayOutput("plotcurrentImage") #,click = "plot_click",dblclick = "plot_dbclick", brush = "plot_brush"
         ),
         column(width = 1, offset = 0, style = "padding-top: 35vh;",
           actionButton("actionNext", "", icon = icon("forward"), width = "50px")
@@ -915,6 +948,15 @@ observeEvent(input$actionPrevious,{
   }
   dataTableProxy("contents") %>%
   selectRows(newRow)
+})
+
+### DISABLE PARALLEL FOR WINDOWS
+observe({
+  osSystem <- Sys.info()["sysname"]
+  if (osSystem == "Windows") {
+     disable("parallelMode")
+     updateCheckboxInput(session, "parallelMode", label = "Active Parallel mode not avail for Windows", value = FALSE)
+  }
 })
 
 

@@ -32,7 +32,7 @@
 load_group <- function(g) {
   path_group <- paste(rv$dirCalibration,g,sep='/')
 #  print(path_group)
-  files_group <- list.files(path_group,full.name=TRUE)
+  files_group <- list.files(path_group, full.name=TRUE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", include.dirs = FALSE, ignore.case = TRUE)
   sample <- lapply(files_group,readImage)
   ## creation of the data frame of the sampled pixels
   li <- lapply(sample, function(im) {
@@ -64,7 +64,7 @@ observeEvent(
     if (!is.integer(input$dirCalibration))
     {
       # initialize path
-      rv$dirCalibration <- parseDirPath(allVolumesAvail, input$dirCalibration)
+      rv$dirCalibration <- normalizePath(parseDirPath(allVolumesAvail, input$dirCalibration))
       # return to UI path selected for calibration
       output$dirCalibration <- renderText({
         rv$dirCalibration
@@ -248,15 +248,15 @@ observeEvent(
         ## sauvegarde de l'analyse
         progress$inc(6/7, detail = "Save analysis into R file 6/6")
         rv$fileRData <- paste(rv$dirCalibration,paste0(rv$basename,".RData"),sep='/')
-        save(lda1,file=rv$fileRData)
         rv$exitStatusCal <- 1
         rv$messCal <- rv$fileRData
         progress$inc(7/7, detail = "End of calibration 6/6")
 
        ## sauvegarde des classes
-        rv$outClassesTXT <- paste(rv$dirCalibration,paste0(rv$basename,"_classes.txt"),sep='/') ## output file csv
-        rv$outClassesTable <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
-        write.table(rv$outClassesTable,rv$outClassesTXT,row.names=FALSE,quote=FALSE,sep='\t')
+#        rv$outClassesTXT <- paste(rv$dirCalibration,paste0(rv$basename,"_classes.txt"),sep='/') ## output file csv
+        classes <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
+        save(lda1, classes,file=rv$fileRData)
+#        write.table(rv$outClassesTable,rv$outClassesTXT,row.names=FALSE,quote=FALSE,sep='\t')
 
       }
       else{

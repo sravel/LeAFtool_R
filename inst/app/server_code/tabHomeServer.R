@@ -3,16 +3,23 @@ observeEvent(input$show,
                showModal(
                  # Information Dialog Box
                  modalDialog(
-                   title = "Exemple of output file with count lesions",
+                   title = "Exemple of output file with colors lesions",
                    size = "l",
                    easyClose = TRUE,
+                     img(src = "exemple.jpeg", class='img-responsive')
+                 )
+               )
+             })
 
-                   fluidRow(column(
-                     width = 12,
-                     offset = 0,
-                     img(src = "exemple.jpeg", height = '100%')
-                   ))
-
+observeEvent(input$showInCalibration,
+             {
+               showModal(
+                 # Information Dialog Box
+                 modalDialog(
+                   title = "Exemple of input folder for calibration",
+                   size = "l",
+                   easyClose = TRUE,
+                     img(src = "calibrationFolder.png", class='img-responsive')
                  )
                )
              })
@@ -22,32 +29,22 @@ observeEvent(input$showCalibration,
                showModal(
                  # Information Dialog Box
                  modalDialog(
-                   title = "Exemple of output file for calibration",
+                   title = "Exemple of output for calibration",
                    size = "l",
                    easyClose = TRUE,
-
-                   fluidRow(column(
-                     width = 12,
-                     offset = 0,
-                     img(src = "learning.jpeg", height = '100%')
-                   ))
+                     img(src = "learning.jpeg", class='img-responsive')
                  )
                )
              })
-observeEvent(input$showInCalibration,
+observeEvent(input$showEdit,
              {
                showModal(
                  # Information Dialog Box
                  modalDialog(
-                   title = "Exemple of input folder for calibration",
+                   title = "Exemple of Edit mode",
                    size = "l",
                    easyClose = TRUE,
-
-                   fluidRow(column(
-                     width = 12,
-                     offset = 0,
-                     img(src = "calibrationFolder.png", height = '100%')
-                   ))
+                     img(src = "editMode.png", class='img-responsive')
                  )
                )
              })

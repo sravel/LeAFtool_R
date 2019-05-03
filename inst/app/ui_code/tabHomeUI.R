@@ -51,7 +51,7 @@ tabItem(# Tab for Home input/output
               p('Calibration is the first of two steps to analyse lesions present on the leaves. It begins by creating a learning game and then, carrying out a discriminant factorial analysis.'),
               p('Important note: the calibration folder must contain the sub-folder "background", "limb" and "lesion" with these names (case-sensitive).'),
               p('The current version accepts these three categories of pixels, with  no restriction for sub-categories'),
-              p('There is no constraint on the name and the number of the calibration image files (the program always reads all the files present).'),
+              p('There is no constraint on the name and the number of the calibration image files, the program always reads all .jpg, .jpeg .PNG and .tif files present (not case sensitive for extention).'),
               p('At the end of the learning phase, three files are created in the calibration folder (the first part of the name these files is the name of the folder with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
             )
           ),
@@ -91,25 +91,21 @@ tabItem(# Tab for Home input/output
         column( width = 4, offset = 0,
           withTags(
             div( class = "analysisHome",
-              h2("Edit"),
-              p("Analysis parameters:"),
+              h2("Edit mode"),
+              p("Edition availables:"),
               ul(
-                li("Samples folder: folder for storing files to be analyzed"),
-                li("Output folder: "),
-                li(".RData file: file created during the calibration phase in the calibration folder"),
-                li("Leaf min size: Minimum area of a leaf"),
-                li("Leaf border size: leaf edge thickness to be removed"),
-                li("Lesion min size: minimum area of a lesion"),
-                li("Lesion border size: thickness of lesion border to dilate / erode"),
-                li("Lesion color output: color of lesions in the analyzed image (0 = black, 1 = white)")
+                li("remove bad lesion detection (juste click)"),
+                li("remove multiple bad lesions detection (brush on image)"),
+                li("filter all lesions table with many values (for exemple size of lesion, excentricity, ...)"),
+                li("zoom on image"),
+                li("change the color of lesion on image (only on edit image not all)")
               ),
-              p("There is no constraint on the name and the number of the sample images files."),
-              p("Note: Surfaces and thicknesses are given in pixels.")
+              p("Note: if you edit the tables outside LeAFtool, they may not be compatible anymore")
             )
           ),
           tags$div(
-            tags$p("Output exemple:"),
-            actionButton( "show", class = "btn-img", img(src = "exemple.jpeg", width = '60%', height = '60%'))
+            tags$p("Exemple:"),
+            actionButton( "showEdit", class = "btn-img", img(src = "editMode.png", width = '60%', height = '60%'))
           )
         )
       )

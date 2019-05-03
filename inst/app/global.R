@@ -22,13 +22,12 @@
 #
 # You should have received a copy of the CeCILL-C license with this program.
 # If not see <http://www.cecill.info/licences/Licence_CeCILL-C_V1-en.txt>
-# 
+#
 # Intellectual property belongs to CIRAD and South Green developpement plateform
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################
 rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
 gc() #free up memrory and report the memory usage.
-
 
 
 library(parallel)

@@ -36,21 +36,21 @@ tabItem(
       column(width = 5,
       # DIRECTORIES Input
         fluidRow( class = "spaceRow",
-          shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
+          shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("leaf")) %>%
             helper(icon = "question",
                 type = "markdown",
                 content = "dirInSamples"),
           verbatimTextOutput("dirSamples", placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
-          shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
+          shinyDirButton(id = 'dirOut', label = 'Select output results folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("sign-out-alt")) %>%
             helper(icon = "question",
                 type = "markdown",
                 content = "dirOut"),
           verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
-          shinyFilesButton('fileRDataIn', label='Load calibration file', title='Please select Rdata file', multiple=T, class = "btn-default") %>%
+          shinyFilesButton('fileRDataIn', label='Load calibration file', title='Please select Rdata file', multiple=T, class = "btn-default", icon = icon("balance-scale")) %>%
             helper(icon = "question",
                 type = "markdown",
                 content = "fileRDataIn"),
@@ -59,7 +59,8 @@ tabItem(
         fluidRow( class = "spaceRow",
           conditionalPanel(
             condition = "output.dirSamples && output.dirOutAnalysis && output.fileRData && output.codeValidationInt == 1",
-            actionButton("runButtonAnalysis", "Run Analysis!")
+            actionButton("runButtonAnalysis", "Run Analysis", icon = icon("play-circle "))
+#            actionButton("stopButtonAnalysis",  label = "Stop Analysis", icon = icon("dashboard"))
 #            verbatimTextOutput('log', placeholder = FALSE)
           )
         )

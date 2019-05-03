@@ -26,8 +26,8 @@
 #####################################################################################################
 
 # list of packages required
-list.of.packages <- c("RCurl","shiny","shinythemes","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
-                      "foreach","future","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "rstudioapi", "ggplot2")
+list.of.packages <- c("RCurl","shiny","shinydashboard","shinyFiles","shinyjs", "DT","EBImage","MASS","lattice",
+                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2","ParallelLogger")
 
 
 #checking missing packages from list
@@ -44,10 +44,8 @@ if (!require('EBImage')) {
 
 #Load all library
 library(shiny)
-library(shinythemes)
 library(shinydashboard)
 library(shinyFiles)
-library(shinyBS)
 library(DT)
 library(shinyjs)
 library(shinyFeedback)
@@ -63,8 +61,8 @@ library(ggplot2)
 
 # analysis
 library(foreach)
-library(future)
 library(doParallel)
+library(ParallelLogger)
 
 #set_wd <- function() {
 #  library(rstudioapi) # make sure you have it installed
@@ -96,7 +94,8 @@ sidebar <- dashboardSidebar(
     menuItem("Calibration", tabName = "tabCalibration", icon = icon("balance-scale")),
     menuItem("Analysis", tabName = "tabAnalysis", icon = icon("pagelines")),
     menuItem("Edit", tabName = "tabEdit", icon = icon("edit")),
-    menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard"))
+#    menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard")),
+    menuItem("LOG", tabName = "tabLOG", icon = icon("file-code"))
   )
   # actionButton('close', "Close", class = "btn btn-danger",onclick = "setTimeout(function(){window.close();},500);")
 )
@@ -128,10 +127,10 @@ body <- dashboardBody(
     source(file.path("ui_code", "tabEditUI.R"), local = TRUE, chdir = TRUE)$value,
 
     # other tab
-    tabItem(
-      tabName = "tabDebug",
-      h1("DEBUG"),
-      verbatimTextOutput("debug"),
+#    tabItem(
+#      tabName = "tabDebug",
+#      h1("DEBUG"),
+#      verbatimTextOutput("debug"),
 #      verbatimTextOutput('log', placeholder = TRUE),
 #      conditionalPanel(
 #        condition = 'input.runButtonAnalysis',
@@ -141,7 +140,21 @@ body <- dashboardBody(
 #          verbatimTextOutput('log', placeholder = TRUE)
 #        )
 #      ),
-      shinythemes::themeSelector()  # <--- Add this somewhere in the UI
+#    ),
+    # other tab
+    tabItem(
+      tabName = "tabLOG",
+      h1("LOG"),
+      fluidRow(
+        column(1,
+              selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
+              selectInput("thread", label = "Thread", choices = "1"),
+              selectInput("package", label = "Package", choices = "packages")
+              ),
+        column(11,
+              dataTableOutput("logTable")
+              )
+      )
     )
   )
 )

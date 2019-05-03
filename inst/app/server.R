@@ -42,31 +42,9 @@ rv <<- reactiveValues(
                         dirCalibration = NULL, outCalibrationTable = NULL,
                         outCalibrationCSV = NULL, plotFileCalibration = NULL,
 #                        # for analysis
-#                       fileRData = paste0(currentFilePath,"/../../exemples/exemple1/learning/learning.RData"),
-#                       fileClass = paste0(currentFilePath,"/../../exemples/exemple1/learning/learning_classes.txt"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple1/samples/"),
-#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple1/results/"),
-
-#                       fileRData = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning.RData"),
-#                       fileClass = paste0(currentFilePath,"/../../exemples/exemple2/learning/learning_classes.txt"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/exemple2/samples/"),
-#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/exemple2/results/"),
-
-#                       fileRData = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning.RData"),
-#                       fileClass = paste0(currentFilePath,"/../../exemples/musaBrut/learning/learning_classes.txt"),
-#                       dirSamples = paste0(currentFilePath,"/../../exemples/musaBrut/samples/"),
-#                       dirSamplesOut = paste0(currentFilePath,"/../../exemples/musaBrut/samplesRes/"),
-
                         fileRData = NULL,
                         dirSamples = NULL,
                         dirSamplesOut = NULL,
-                        fileClass = NULL,
-
-#                        fileRData = "/media/sebastien/Bayer/ScriptsSEB/images/exemples/riz/samples/samples.RData",
-#                        dirSamples = "/home/sebastien/00-ALAMA-Exemple/riz/image/",
-#                        dirSamplesOut = "/home/sebastien/00-ALAMA-Exemple/riz/result/",
-#                        fileClass = "/media/sebastien/Bayer/ScriptsSEB/images/exemples/riz/samples/samples_classes.txt",
-
 
                         exitStatusAna = -1, messAna = NULL, errAna = NULL,
 #                        dirSamples = NULL, dirSamplesOut = NULL,
@@ -91,6 +69,7 @@ rv <<- reactiveValues(
                         parallelMode = FALSE,
                         parallelThreadsNum = max_no_cores,
                         blur_value = 0,
+                        logfilename = "debug.txt",
 
                         # edit
                         dirInResult = NULL,
@@ -187,15 +166,93 @@ shinyServer(function(input, output, session) {
   source(file.path("server_code", "tabAnalysisServer.R"), local = TRUE)$value
 
   # Load functions for tab Home
-    source(file.path("server_code", "tabHomeServer.R"), local = TRUE)$value
+  source(file.path("server_code", "tabHomeServer.R"), local = TRUE)$value
 
   # Load functions for tab Edit
-    source(file.path("server_code", "tabEditServer.R"), local = TRUE)$value
+  source(file.path("server_code", "tabEditServer.R"), local = TRUE)$value
 
 
-  # output$debug <- renderPrint({
-  #   sessionInfo()
-  # })
+  eventLog <- reactivePoll(4000, session,
+    # This function returns the time that rv$logfilename was last modified
+    checkFunc = function() {
+      if (file.exists(rv$logfilename))
+        file.info(rv$logfilename)$mtime[1]
+      else
+        ""
+    },
+    # This function returns the content of log_file
+    valueFunc = function() {
+      linesLog <- readLines(rv$logfilename)
+      rows <- strsplit(linesLog, "\t")
+      malformed <- sapply(rows, function(x) length(x) != 6)
+      rows <- rows[!malformed]
+      eventLog <- data.frame(Timestamp = as.Date(sapply(rows, function(x) x[1])),
+                           Thread = sapply(rows, function(x) x[2]),
+                           Level = sapply(rows, function(x) x[3]),
+                           Package = sapply(rows, function(x) x[4]),
+                           Function = sapply(rows, function(x) x[5]),
+                           Message = sapply(rows, function(x) x[6]))
+      matice <<- eventLog
+      rv$levels <- c("TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL")
+      updateSelectInput(session, "level", label = "Level", choices = rv$level, selected = "INFO")
+
+      threads <- as.character(unique(eventLog$Thread))
+      threads <- threads[order(threads)]
+      rv$threads <- c("All", threads)
+      updateSelectInput(session, "thread", label = "Thread", choices = rv$threads, selected = "All")
+
+      package <- as.character(unique(eventLog$Package))
+      rv$package <- c("All", package)
+      return(eventLog)
+    }
+  )
+
+observe({
+  updateSelectInput(session, "level", label = "Level", choices = rv$levels, selected = "INFO")
+})
+observe({
+  updateSelectInput(session, "thread", label = "Thread", choices = rv$threads, selected = "All")
+})
+observe({
+  updateSelectInput(session, "package", label = "package", choices = rv$package, selected = "All")
+})
+
+  output$logTable <- renderDataTable({
+    eventLog <- eventLog()
+
+    colorLevels <- c("TRACE", "DEBUG", "WARN", "ERROR", "FATAL")
+    colors <- c(rgb(0.8, 0.9, 1), rgb(0.8, 1, 0.8), rgb(1.0, 0.88, 0.7), rgb(1, 0.84, 0.8), rgb(1, 0.8, 0.94))
+
+    visibleLevels <- rv$levels[which(rv$levels == input$level):length(rv$levels)]
+
+    idx <- eventLog$Level %in% visibleLevels
+    if (input$thread != "All") {
+      idx <- idx & eventLog$Thread == input$thread
+    }
+    if (input$package != "All") {
+      idx <- idx & eventLog$Package == input$package
+    }
+    options = list(pageLength = 10000,
+                   searching = TRUE,
+                   lengthChange = FALSE,
+                   ordering = FALSE,
+                   paging = FALSE,
+                   scrollY = '75vh')
+    selection = list(mode = "single", target = "row")
+    table <- datatable(eventLog[idx, ],
+                       options = options,
+                       selection = selection,
+                       rownames = FALSE,
+                       class = "stripe nowrap compact")
+    table <- formatStyle(table = table,
+                         columns = 3,
+                         target = "row",
+                         backgroundColor = styleEqual(colorLevels, colors))
+#    print(table)
+    return(table)
+  })
+
+
 
   observeEvent(input$actu, {
     print("toto")
