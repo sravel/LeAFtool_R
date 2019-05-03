@@ -26,7 +26,7 @@ The tools are being developed and a first functional version is available. The f
 
 # list of packages required
 list.of.packages <- c("devtools", "RCurl","shiny","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
-                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2")
+                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2", "ParallelLogger")
 #checking missing packages from list
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 
