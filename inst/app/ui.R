@@ -25,44 +25,7 @@
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################
 
-# list of packages required
-list.of.packages <- c("RCurl","shiny","shinydashboard","shinyFiles","shinyjs", "DT","EBImage","MASS","lattice",
-                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2","ParallelLogger")
 
-
-#checking missing packages from list
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-
-#install missing ones
-if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
-
-#Case of EBImage
-if (!require('EBImage')) {
-  source("https://bioconductor.org/biocLite.R")
-  biocLite("EBImage")
-}
-
-#Load all library
-library(shiny)
-library(shinydashboard)
-library(shinyFiles)
-library(DT)
-library(shinyjs)
-library(shinyFeedback)
-library(shinyhelper)
-library(colourpicker)
-library(shinyjqui)
-
-# calibration
-library(EBImage)
-library(lattice)
-library(MASS)
-library(ggplot2)
-
-# analysis
-library(foreach)
-library(doParallel)
-library(ParallelLogger)
 
 #set_wd <- function() {
 #  library(rstudioapi) # make sure you have it installed
@@ -72,11 +35,6 @@ library(ParallelLogger)
 #}
 #set_wd()
 
-# create log file
-#logfilename <<- paste0(currentFilePath,"/debug.txt")
-# remove previous log (not working if multiple instance on same path)
-#unlink(logfilename)
-#cat(as.character(Sys.time()), '\n', file = logfilename)
 
 ############################################
 ## Shiny dashboard start
@@ -152,6 +110,7 @@ body <- dashboardBody(
               selectInput("package", label = "Package", choices = "packages")
               ),
         column(11,
+              verbatimTextOutput("logFilePath"),
               dataTableOutput("logTable")
               )
       )
