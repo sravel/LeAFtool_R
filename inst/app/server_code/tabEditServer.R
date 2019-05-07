@@ -96,6 +96,7 @@ observeEvent(input$imageEdit, {
     rv$loadcurrentImageOriginaleEdit <- img[1:rv$widthSize,1:rv$heightSize,]
     rv$loadCSVcurrentImageName <- paste0(rv$dirInResult, "/",baseName,"_All_lesions.csv")
     rv$loadCSVcurrentImage <- read.csv(rv$loadCSVcurrentImageName ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+    rv$selectedRows <- list(1:nrow(rv$loadCSVcurrentImage))
     rv$csv_Merge_lesionsFile <- paste(rv$dirInResult, "/",baseName,"_Merge_lesions.csv", sep = '')
     rv$AG <- read.csv(rv$csv_Merge_lesionsFile ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
     rv$MERGE <- read.csv(paste0(rv$dirInResult,"/merge_ResumeCount.csv") ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
@@ -170,7 +171,6 @@ updateLesionColor <- function(leaves){
 ############################################
 updateAll <- function(res){
   if (nrow(res) == 0) return(NULL)  # if no lesion
-
   ## If lesion near click or in brush, update status
   for (i in row.names(res)) {
     row <- as.integer(i)
@@ -255,6 +255,15 @@ updateAll <- function(res){
 ############################################
 ## DISPLAY IMAGES
 ############################################
+# cex size for plot plotCexSize
+observeEvent(input$plotCexSize,{
+  rv$plotCexSize <- input$plotCexSize
+})
+observeEvent(input$plotCexColor, {
+    rv$plotCexColor <- input$plotCexColor
+    updateColorPlotCex()
+}, ignoreInit = TRUE)
+
 # test if checkbox TRUE or FALSE for add pch to original image
 observeEvent(input$pchOriginal,{
   rv$pchOriginal <- input$pchOriginal
@@ -274,7 +283,7 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
     plot(rv$loadcurrentImageOriginaleEdit)
 
     if (rv$pchOriginal == TRUE){
-      text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
+      text(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, labels=rv$loadCSVcurrentImage$lesion.number, cex=rv$plotCexSize, col=rv$color)
     }
     points(input$plot_hover$x, input$plot_hover$y, pch=4, cex=4, col="tomato")
   }
@@ -283,7 +292,7 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
     if (is.null(rv$zoomInitial)) return(NULL)
     plot(rv$zoomInitial)
     if (rv$pchOriginal == TRUE){
-      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom+rv$zoomValue, labels=rv$loadCSVcurrentImage$lesion.number, cex=1, col=rv$color)
+      text(rv$loadCSVcurrentImage$m.cx-rv$addleft, rv$loadCSVcurrentImage$m.cy-rv$addbottom+rv$zoomValue, labels=rv$loadCSVcurrentImage$lesion.number, cex=rv$plotCexSize, col=rv$color)
     }
     points(rv$pointx, rv$pointy, pch=4, cex=4, col="tomato")
   }
@@ -294,7 +303,7 @@ output$plotcurrentImageOriginalEdit <- renderPlot({
 output$plotcurrentImageEdit <- renderPlot({
   if ( is.null(rv$loadcurrentImageEdit)) return(NULL)
   plot(rv$loadcurrentImageEdit)
-  points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=1, col=rv$color)
+  points(rv$loadCSVcurrentImage$m.cx, rv$loadCSVcurrentImage$m.cy, pch='+', cex=rv$plotCexSize, col=rv$color)
 })
 
 #### Display image lesion color ZOOM
@@ -316,7 +325,7 @@ output$results <- DT::renderDataTable({
   DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FALSE),
                                      rownames = NULL,
                                      escape=FALSE,
-                                     selection="multiple",
+                                     selection = list("multiple"),#, selected = rv$selectedRows),
                                      style = "bootstrap",
                                      filter = list(position = 'top', clear = TRUE, plain = FALSE),
                                      options = list(
@@ -329,6 +338,17 @@ output$results <- DT::renderDataTable({
   ) %>%
   formatRound(c("lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max", "m.cx", "m.cy", "m.majoraxis", "m.eccentricity", "m.theta"), 2)
 })
+
+### use proxy to modifie datatable
+proxy = dataTableProxy('results')
+
+#  observeEvent(input$select1, {
+#    proxy %>% selectRows(as.numeric(input$rows))
+#  })
+
+  observeEvent(input$deselectAll, {
+    proxy %>% selectRows(NULL)
+  })
 
 #### ALL lesion merge by leaf for selected image
 output$AG <- DT::renderDataTable({
@@ -450,40 +470,61 @@ observeEvent(c(input$plot_hover,input$zoomValueSlider), {
    }
 })
 
-########## If table filter on values, color lesion in darkorange1 on plot
-
-observeEvent(c(input$results_rows_all,input$results_rows_selected), {
-  rv$filtered_data <- rv$loadCSVcurrentImage[input$results_rows_all,]
-  rv$missing <- rv$loadCSVcurrentImage[-(input$results_rows_all),]
-
-  #### update color of lesion base on filter
-  rv$color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", "green", "red")
-  for (i in input$results_rows_selected) {
-    rv$color[i] <- "mediumorchid2"
+observeEvent(input$hideRemove,{
+  if ( input$hideRemove == FALSE){
+    rv$hideRemove <- FALSE
+  }else{
+    rv$hideRemove <- TRUE
   }
-  for (i in row.names(rv$missing)) {
-    row <- as.integer(i)
-    if (rv$color[row] != "red") rv$color[row] <- "darkorange1"
-  }
+  updateColorPlotCex()
 })
 
 
-#  output$plot_brushedpoints <- renderTable({
-#    res <- brushedPoints(rv$loadCSVcurrentImage, input$plot_brush, xvar = "m.cx", yvar = "m.cy")
-#    if (nrow(res) == 0)
-#      return()
-#    res
-#  })
+##########  if rows are selected
+rowsSelected <- reactive({!is.null(input$results_rows_selected)})
 
-#  output$infos <- renderPrint({
-#    nearPoints(rv$loadCSVcurrentImage, input$plotcurrentImageEdit, xvar = "m.cx", yvar = "m.cy", threshold = 10, maxpoints = 1)
-#  })
-#output$position <- renderText({
-#  paste0("x=", input$plotcurrentImageEdit$x, "\ny=", input$plotcurrentImageEdit$y)
+updateColorPlotCex <- function(){  #### update color of lesion base on filter
 
-#})
+  if (rv$hideRemove){removeColor <- noColor}
+  else {removeColor <- "red"}
 
-#output$brushPos <- renderPrint({
-#  paste0("x=", input$plot_brush)
+  rv$color <- ifelse(rv$loadCSVcurrentImage$lesion.status == "keep", rv$plotCexColor, removeColor)
+  # if row(s) are selected, and user change color, update color and keep selected color row
+  if (rowsSelected()){
+    for (i in input$results_rows_selected) {
+        rv$color[i] <- "mediumorchid2"
+    }
+  }
+  # if user use filter, keep color lesion darkorange1 on plot
+  if (!is.null(rv$missing)){
+    for (i in row.names(rv$missing)) {
+      row <- as.integer(i)
+      if (rv$color[row] != removeColor) rv$color[row] <- "darkorange1"
+    }
+  }
+}
 
-#})
+########## If table filter on values, color lesion in darkorange1 on plot
+observeEvent(c(input$results_rows_all,input$results_rows_selected), {
+#  rv$filtered_data <- rv$loadCSVcurrentImage[input$results_rows_all,]
+  rv$missing <- rv$loadCSVcurrentImage[-(input$results_rows_all),]
+  if(nrow(rv$missing) == 0){disable("removeFilter")}
+  else {enable("removeFilter")}
+  updateColorPlotCex()
+},ignoreNULL = TRUE, ignoreInit = TRUE)
+
+# remove filter rows -> pass keep to remove
+observeEvent(input$removeFilter,{
+  keep <-  rv$missing[(rv$missing$lesion.status=="keep"),]
+  updateAll(keep)
+})
+# keep all
+observeEvent(input$resetKeep,{
+  remove <-  rv$loadCSVcurrentImage[(rv$loadCSVcurrentImage$lesion.status=="remove"),]
+  updateAll(remove)
+})
+# remove all
+observeEvent(input$removeAll,{
+  keep <-  rv$loadCSVcurrentImage[(rv$loadCSVcurrentImage$lesion.status=="keep"),]
+  updateAll(keep)
+})

@@ -40,7 +40,7 @@ tabItem(
         verbatimTextOutput("dirInResult", placeholder = TRUE),
         selectInput("imageEdit", "Sample image:",NULL)
         ),
-      column(width = 3,offset = 0,
+      column(width = 2,offset = 0,
         checkboxInput("pchOriginal", "Add lesion number", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
@@ -54,7 +54,7 @@ tabItem(
                   type = "markdown",
                   content = "zoomValueSlider")
       ),
-      column(width = 4, offset = 0,
+      column(width = 2, offset = 0,
         fluidRow(
           tags$label("Lesions color Edit")
         ),
@@ -77,6 +77,21 @@ tabItem(
                       type = "markdown",
                       content = "lesion_color_bodiesEdit")
           )
+        )
+      ),
+      column(width = 2, offset = 0,
+        fluidRow(
+          tags$label("Plot adjust")
+        ),
+        fluidRow( class = "spaceRow",
+          sliderInput("plotCexSize", "Plot cex size", min = 1, max = 4, value = 2, step = 0.5, width = "150px"), #%>%
+#            helper(icon = "question",
+#                  type = "markdown",
+#                  content = "plotCexSize")
+          colourpicker::colourInput("plotCexColor",  label = "Plot point color", value = "green",
+                        palette = c("limited"), allowedCols = NULL,
+                        allowTransparent = FALSE, returnName = FALSE, showColour = "background"),
+          checkboxInput("hideRemove", "hide remove point", value = FALSE, width = "150px")
         )
       )
     )
@@ -107,6 +122,10 @@ tabItem(
         fluidRow( class = "spaceRow",
           column(width = 12,offset = 0,
   #          textOutput("coor"),
+            actionButton("deselectAll", strong("Deselect All")),
+            actionButton("removeFilter", strong("Remove filter")),
+            actionButton("resetKeep", strong("Keep all")),
+            actionButton("removeAll", strong("Remove all")),
             div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
           )
         )
