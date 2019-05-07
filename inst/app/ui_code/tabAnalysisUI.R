@@ -58,7 +58,7 @@ tabItem(
         ),
         fluidRow( class = "spaceRow",
           conditionalPanel(
-            condition = "output.dirSamples && output.dirOutAnalysis && output.fileRData && output.codeValidationInt == 1",
+            condition = "output.dirSamples && output.dirOutAnalysis && output.fileRData",
             actionButton("runButtonAnalysis", "Run Analysis", icon = icon("play-circle "))
 #            actionButton("stopButtonAnalysis",  label = "Stop Analysis", icon = icon("dashboard"))
 #            verbatimTextOutput('log', placeholder = FALSE)
@@ -67,7 +67,7 @@ tabItem(
       ),
       column(width = 2,
         ### Image parameters
-        h4("Image parameters:"),
+        h3("Image parameters:"),
         checkboxInput("active_blur", "Apply blur on image", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
@@ -85,7 +85,7 @@ tabItem(
 #                type = "markdown",
 #                content = "rmScanLine"),
         ### Leaf parameters
-        h4("Leaf parameters:"),
+        h3("Leaf parameters:"),
           numericInput("leaf_min_size", "Minimum leaf size:", value = 1000, min=1,  width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
@@ -97,7 +97,7 @@ tabItem(
       ),
       column(width = 2,offset = 0,
       ### Lesion parameters
-        h4("Lesions parameters:"),
+        h3("Lesions parameters:"),
         checkboxInput("rmEdge", "Remove edge", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
@@ -151,7 +151,7 @@ tabItem(
       ),
       column(width = 2, offset = 0,
       ### running parameters
-        h4("Running Mode"),
+        h3("Running Mode"),
         checkboxInput("parallelMode", "Active Parallel mode", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
