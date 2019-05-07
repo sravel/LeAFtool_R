@@ -182,15 +182,6 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   list(featuresLesion = featuresLesion, maskLesion = maskLesion, outputDF = outputDF)
 }
 
-writeLOG <- function(message,detail){
-
-  if (rv$parallelMode == TRUE){
-    ParallelLogger::logInfo(paste0(message, detail))
-  }else{
-    progress$set(value = rv$c, message = message, detail = detail)
-  }
-}
-
 # analysis One scan image
 analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
 
@@ -212,11 +203,6 @@ analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
   background <- classes$subclass[classes$class=="background"]
   limb <- classes$subclass[classes$class=="limb"]
   lesion <- classes$subclass[classes$class=="lesion"]
-
-#  print(classes)
-#  print(background)
-#  print(limb)
-#  print(lesion)
 
   ## reading the source image
   sourceImage <- paste0(pathImages, '/', imageSamples, sep = '')
@@ -378,8 +364,17 @@ analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
   writeLOG(message,detail)
 }
 
+# To write in log file or show progress if not in parallel mode
+writeLOG <- function(message,detail){
+
+  if (rv$parallelMode == TRUE){
+    ParallelLogger::logInfo(paste0(message, detail))
+  }else{
+    progress$set(value = rv$c, message = message, detail = detail)
+  }
+}
 ############################################
-## If folder already open kepp the working folder
+## If folder already open keep the working folder
 ############################################
 ui_volumes <- function() {
   sel_path <- dirname(parseDirPath(allVolumesAvail, input$dirInSamples))
@@ -395,8 +390,6 @@ ui_volumes <- function() {
 resetRun <- function() {
   # if reload after first run, reset value
   rv$exitStatusAna <- -1
-  rv$messAna <- NULL
-  rv$errAna <- NULL
 }
 
 ############################################
@@ -478,14 +471,6 @@ observeEvent(input$fileRDataIn,{
 ## Validate value for options
 ############################################
 
-returnInpair <- function(value){
-  if(value%%2==0){
-    return(value+1)
-  }else{
-    return(value)
-  }
-}
-
 ######## Image
 ###### Position TOP or BOTTUM active or not (checkbox)
 observeEvent(input$outputPositionBottum,{
@@ -518,8 +503,8 @@ observeEvent(input$blur_value,{
     rv$blur_value <- 21
   }
   else{
-    rv$blur_value <- returnInpair(as.numeric(input$blur_value))
-    updateNumericInput(session,"blur_value", value = returnInpair(as.numeric(input$blur_value)))
+    rv$blur_value <- returnOdd(as.numeric(input$blur_value))
+    updateNumericInput(session,"blur_value", value = returnOdd(as.numeric(input$blur_value)))
   }
 })
 
@@ -554,8 +539,8 @@ observeEvent(input$leaf_border_size,{
     rv$leaf_border_size <- 5
   }
   else{
-    updateNumericInput(session,"leaf_border_size", value = returnInpair(as.numeric(input$leaf_border_size)))
-    rv$leaf_border_size <- returnInpair(as.numeric(input$leaf_border_size))
+    updateNumericInput(session,"leaf_border_size", value = returnOdd(as.numeric(input$leaf_border_size)))
+    rv$leaf_border_size <- returnOdd(as.numeric(input$leaf_border_size))
   }
 })
 
@@ -605,19 +590,10 @@ observeEvent(input$lesion_border_size,{
     updateNumericInput(session,"lesion_border_size", value = 3)
     rv$lesion_border_size <- 3
   }else{
-  updateNumericInput(session,"lesion_border_size", value = returnInpair(as.numeric(input$lesion_border_size)))
-  rv$lesion_border_size <- returnInpair(as.numeric(input$lesion_border_size))
+  updateNumericInput(session,"lesion_border_size", value = returnOdd(as.numeric(input$lesion_border_size)))
+  rv$lesion_border_size <- returnOdd(as.numeric(input$lesion_border_size))
   }
 })
-
-
-output$codeValidationInt <- renderText({
-  rv$codeValidationInt
-})
-output$warning <- renderUI({
-  rv$warning
-})
-
 
 ######### parallel mode
 observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
@@ -743,6 +719,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     if ( rv$parallelThreadsNum > nbSamples){
       updateNumericInput(session,"parallelThreadsNum", value = nbSamples)
       rv$parallelThreadsNum <- nbSamples
+      warning(paste("You select more use thread than samples images. auto-ajust to", nbSamples, "Thread"))
     }
 
     showModal(      # Information Dialog Box
@@ -959,8 +936,5 @@ observe({
   }
 })
 
-
-outputOptions(output, 'codeValidationInt', suspendWhenHidden = FALSE)
 outputOptions(output, 'analysisFinish', suspendWhenHidden = FALSE)
-outputOptions(output, 'warning', suspendWhenHidden = FALSE)
 outputOptions(output, 'contents', suspendWhenHidden = FALSE)
