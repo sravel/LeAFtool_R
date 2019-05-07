@@ -29,115 +29,12 @@
 # options(shiny.port = 3838)
 # options(shiny.host = "194.254.138.139")
 
-############################################
-## Global functions
-############################################
+# Create a file logger:
+clearLoggers() # reset log file
+rv$logfilename <- tempfile()
+isolate(addDefaultFileLogger(rv$logfilename))
+logInfo("Hello to LeAFtool !!!!")
 
-# to only 2 digits after dot
-options(digits=2)
-
-rv <<- reactiveValues(
-                        # for calibration
-                        exitStatusCal = -1, messCal = NULL, errCal = NULL,
-                        dirCalibration = NULL, outCalibrationTable = NULL,
-                        outCalibrationCSV = NULL, plotFileCalibration = NULL,
-#                        # for analysis
-                        fileRData = NULL,
-                        dirSamples = NULL,
-                        dirSamplesOut = NULL,
-
-                        exitStatusAna = -1, messAna = NULL, errAna = NULL,
-#                        dirSamples = NULL, dirSamplesOut = NULL,
-                        codeValidationInt = 1,
-                        rmScanLine = FALSE,
-
-                        leaf_min_size = 1000,
-                        leaf_border_size = 1,
-                        lesion_min_size = 1,
-                        lesion_max_size = 120000,
-                        lesion_border_size = 1,
-                        lesion_color_border = "blue",
-                        lesion_color_bodies = "#FE8E0000",
-                        rmEdge = FALSE,
-                        rmEccentric = FALSE,
-                        lesion_eccentricMin = 0,
-                        lesion_eccentricMax = 1,
-                        active_blur = FALSE,
-
-                        # both
-#                       fileRData= NULL,
-                        parallelMode = FALSE,
-                        parallelThreadsNum = max_no_cores,
-                        blur_value = 0,
-                        logfilename = "debug.txt",
-
-                        # edit
-                        dirInResult = NULL,
-                        loadImageEdit = NULL
-#                        dirInResult = paste0(currentFilePath,"/../../exemples/musa/sample4Res/"),
-#                        loadImageEdit = list.files(paste0(currentFilePath,"/../../exemples/musa/sample4Res/"), full.names=FALSE, pattern = "*_lesion.jpeg")
-                        )
-
-# function derive from shinyFiles to load Home on linux and home for MACOS
-getOwnVolume <- function (exclude=NULL){
-  osSystem <- Sys.info()["sysname"]
-  if (osSystem == "Darwin") {
-    # disk <- list.files("/Volumes/", full.names = T)
-    # names(disk) <- disk
-    home <- c(home = "~")
-    # volumes <- c(home, disk)
-    volumes <- home
-  }
-  else if (osSystem == "Linux") {
-    volumes <- c(root = "/")
-    home <- c(home = "~")
-    media <- list.files("/media", full.names = T)
-    names(media) <- media
-    volumes <- c(home, media, volumes)
-  }
-  else if (osSystem == "Windows") {
-    volumes <- system("wmic logicaldisk get Caption", intern = T)
-    volumes <- sub(" *\\r$", "", volumes)
-    keep <- !tolower(volumes) %in% c("caption", "")
-    volumes <- volumes[keep]
-    volNames <- system("wmic logicaldisk get VolumeName",
-                       intern = T)
-    volNames <- sub(" *\\r$", "", volNames)
-    volNames <- volNames[keep]
-    volNames <- paste0(volNames, ifelse(volNames == "",
-                                        "", " "))
-    volNames <- paste0(volNames, "(", volumes, ")")
-    names(volumes) <- volNames
-  }
-  else {
-    stop("unsupported OS")
-  }
-  if (!is.null(exclude)) {
-    volumes <- volumes[!names(volumes) %in% exclude]
-  }
-  volumes
-}
-
-# list of volumes acces to load data
-allVolumesAvail <- getOwnVolume()
-
-# function to test if directory pass contain sub-directory limb, background lesion
-existDirCalibration <- function(dirCalibration){
-  list(
-    dirlimb = dir.exists(paste(dirCalibration,"/limb", sep = .Platform$file.sep)),
-    dirBackground = dir.exists(paste(dirCalibration,"/background", sep = .Platform$file.sep)),
-    dirLesion = dir.exists(paste(dirCalibration,"/lesion", sep = .Platform$file.sep))
-  )
-}
-
-# function to merge dataframe
-multmerge = function(mypath, pattern){
-#  print(mypath)
-  filenames=list.files(path=mypath, full.names=TRUE, pattern = pattern)
-#  print(filenames)
-  datalist = lapply(filenames, function(x){read.csv(file=x,header=T, sep="\t")})
-  Reduce(function(x,y) {rbind(x,y)}, datalist)
-}
 
 ############################################
 ## writing server function
@@ -146,18 +43,6 @@ multmerge = function(mypath, pattern){
 shinyServer(function(input, output, session) {
 
   observe_helpers() # active help icon
-
-#  fileReaderData <- reactiveFileReader(500, session,
-#                                       logfilename, readLines)
-
-#  output$log <- renderText({
-#    # Read the text, and make it a consistent number of lines so
-#    # that the output box doesn't grow in height.
-#    text <- fileReaderData()
-#    length(text) <- 100
-#    text[is.na(text)] <- ""
-#    paste(text, collapse = '\n')
-#  })
 
   # Load functions for tab calibration
   source(file.path("server_code", "tabCalibrationServer.R"), local = TRUE)$value
@@ -171,7 +56,7 @@ shinyServer(function(input, output, session) {
   # Load functions for tab Edit
   source(file.path("server_code", "tabEditServer.R"), local = TRUE)$value
 
-
+  ## LOG FILE PRINT
   eventLog <- reactivePoll(4000, session,
     # This function returns the time that rv$logfilename was last modified
     checkFunc = function() {
@@ -186,13 +71,13 @@ shinyServer(function(input, output, session) {
       rows <- strsplit(linesLog, "\t")
       malformed <- sapply(rows, function(x) length(x) != 6)
       rows <- rows[!malformed]
+      if (!length(rows)) return(NULL)
       eventLog <- data.frame(Timestamp = as.Date(sapply(rows, function(x) x[1])),
                            Thread = sapply(rows, function(x) x[2]),
                            Level = sapply(rows, function(x) x[3]),
                            Package = sapply(rows, function(x) x[4]),
                            Function = sapply(rows, function(x) x[5]),
                            Message = sapply(rows, function(x) x[6]))
-      matice <<- eventLog
       rv$levels <- c("TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL")
       updateSelectInput(session, "level", label = "Level", choices = rv$level, selected = "INFO")
 
@@ -207,18 +92,19 @@ shinyServer(function(input, output, session) {
     }
   )
 
-observe({
-  updateSelectInput(session, "level", label = "Level", choices = rv$levels, selected = "INFO")
-})
-observe({
-  updateSelectInput(session, "thread", label = "Thread", choices = rv$threads, selected = "All")
-})
-observe({
-  updateSelectInput(session, "package", label = "package", choices = rv$package, selected = "All")
-})
+  observe({
+    updateSelectInput(session, "level", label = "Level", choices = rv$levels, selected = "INFO")
+  })
+  observe({
+    updateSelectInput(session, "thread", label = "Thread", choices = rv$threads, selected = "All")
+  })
+  observe({
+    updateSelectInput(session, "package", label = "package", choices = rv$package, selected = "All")
+  })
 
   output$logTable <- renderDataTable({
     eventLog <- eventLog()
+    if (is.null(eventLog)) return(NULL)
 
     colorLevels <- c("TRACE", "DEBUG", "WARN", "ERROR", "FATAL")
     colors <- c(rgb(0.8, 0.9, 1), rgb(0.8, 1, 0.8), rgb(1.0, 0.88, 0.7), rgb(1, 0.84, 0.8), rgb(1, 0.8, 0.94))
@@ -248,31 +134,20 @@ observe({
                          columns = 3,
                          target = "row",
                          backgroundColor = styleEqual(colorLevels, colors))
-#    print(table)
     return(table)
   })
 
-
-
-  observeEvent(input$actu, {
-    print("toto")
-    showConnections(all = TRUE)
-    fileReaderData()
-  })
-
-  observeEvent(input$close, {
-#    unlink(logfilename)
-    closeAllConnections()
-    # stopCluster(cl)
-    registerDoSEQ()
-    stopApp()                             # stop shiny
-  })
+  output$logFilePath <- renderPrint ({normalizePath(rv$logfilename)})
 
   session$onSessionEnded( function() {
-#    unlink(logfilename)
-    closeAllConnections();
-    # stopCluster(cl)
-    registerDoSEQ()
+    clearLoggers() # reset log file
+    isolate(
+      if (rv$parallelMode == TRUE){
+        try(parallel::stopCluster(cl), silent = TRUE) # Close cluster mode
+        closeAllConnections(); # for kill all process, use to add button for stop work
+        registerDoSEQ()
+      }
+    )
     stopApp()
   })
 
@@ -281,8 +156,6 @@ observe({
     output$debug <- renderPrint({
       rv %>% reactiveValuesToList
     })
-
-#    rv$log <- fileReaderData()
 
   })
 })
