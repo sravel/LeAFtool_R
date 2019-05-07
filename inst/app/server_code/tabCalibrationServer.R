@@ -57,7 +57,6 @@ shinyDirChoose(
 )
 
 
-
 # when click to bottom update path
 observeEvent(
   input$dirCalibration,{
