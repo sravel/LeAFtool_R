@@ -1,3 +1,9 @@
+---
+title:"TEST"
+output:html_document
+runtime: shiny
+---
+
 ## Remove eccentric lesions
 
 ***
@@ -13,5 +19,4 @@ This parameter is useful for leaves with large dark veins, such as in banana.
 
 This parameter makes it possible to delete the elements which are very elongated and thus not to take the veins into account, as they may otherwise be mistaken for lesions due to their coloration.
 
-***
 **Info**

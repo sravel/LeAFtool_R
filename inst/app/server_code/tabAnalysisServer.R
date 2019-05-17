@@ -449,7 +449,6 @@ shinyFileChoose(input, 'fileRDataIn',
 # Use observe out the event open RfileData to auto load when calibration step before
 observe({
   if (!is.null(rv$fileRData)) {
-    print("file LOAD")
     load(file = rv$fileRData, envir = .GlobalEnv)
     rv$classes <- classes
     output$fileRData <- renderText({

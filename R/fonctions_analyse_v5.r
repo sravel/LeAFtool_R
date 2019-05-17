@@ -185,7 +185,7 @@ analyse.feuille <- function(x,lda1,lesion,limb) {
 #'               bordure.lesion=bordure.lesion,
 #'               surface.lesion.mini=surface.lesion.mini,
 #'               couleur.lesion=couleur.lesion)
-analysisSamples <- function(path.training,path.result,path.image,file.image=NA,leafMinSize,bordure.feuille,bordure.lesion,surface.lesion.mini,couleur.lesion) {
+runAnalysisSamples <- function(path.training,path.result,path.image,file.image=NA,leafMinSize,bordure.feuille,bordure.lesion,surface.lesion.mini,couleur.lesion) {
     if (is.na(file.image)) file.image <- list.files(path.image)
     for (image in file.image)
         analyse.image.unique(path.sample,path.result,path.image,image,surface.feuille.mini,bordure.feuille,bordure.lesion,surface.lesion.mini,couleur.lesion)

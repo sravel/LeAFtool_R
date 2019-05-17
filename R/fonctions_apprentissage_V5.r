@@ -53,7 +53,7 @@ load.group <- function(g,path.sample) {
 #' @examples
 #' path.sample <- './Exemple2_Stella/Samples'
 #' training(path.sample)
-training <- function(path.sample) {
+runTraining <- function(path.sample) {
     ## Recherche des sous-r?pertoires de path.sample
     dirs <- list.dirs(path.sample,full.names=FALSE)[-1] ## -1 pour supprimer le premier nom (toujouts vide)
 

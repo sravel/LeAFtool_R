@@ -64,9 +64,12 @@ library(MASS)
 library(ggplot2)
 
 # analysis
+library(future)
 library(foreach)
 library(doParallel)
 library(ParallelLogger, quietly = TRUE, warn.conflicts = FALSE)
+
+plan(multiprocess)
 
 ############################################
 ## Global functions
