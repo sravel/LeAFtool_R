@@ -34,7 +34,7 @@ load.group <- function(g,path.sample) {
 }
 
 
-#' Launch training function to build set
+#' Launch runTraining function to build set
 #'
 #' Build the training on calibration folders.
 #'
@@ -52,9 +52,9 @@ load.group <- function(g,path.sample) {
 #'
 #' @examples
 #' path.sample <- './Exemple2_Stella/Samples'
-#' training(path.sample)
+#' runTraining(path.sample)
 runTraining <- function(path.sample) {
-    ## Recherche des sous-r?pertoires de path.sample
+    ## Recherche des sous-repertoires de path.sample
     dirs <- list.dirs(path.sample,full.names=FALSE)[-1] ## -1 pour supprimer le premier nom (toujouts vide)
 
     limbDir <- list.dirs(paste0(path.sample,"limb"),full.names=FALSE)[-1]
@@ -69,11 +69,11 @@ runTraining <- function(path.sample) {
     if (length(backgroundDir)==0){backgroundDir = "background"}
     else { backgroundDir <- paste0("background/",backgroundDir)}
 
-    print(limbDir)
-    print(lesionDir)
-    print(backgroundDir)
+#    print(limbDir)
+#    print(lesionDir)
+#    print(backgroundDir)
 
-    ## v?rification de l'existence des sous-r?pertoires pass?s en argument
+    ## verification de l'existence des sous-repertoires pass?s en argument
     group <- c(backgroundDir,limbDir,lesionDir)
     nbGroups <- length(group)
     print(nbGroups)

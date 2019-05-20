@@ -142,7 +142,7 @@ analyse.feuille <- function(x,lda1,lesion,limb) {
 
 
 
-#' Launch analysis on folder
+#' Launch runAnalysisSamples on folder
 #'
 #' Description of the function
 #'
@@ -154,10 +154,10 @@ analyse.feuille <- function(x,lda1,lesion,limb) {
 #'   \item lesion
 #' }
 #'
-#' @param path.training Path to folder training
-#' @param path.result Path to folder for output
-#' @param path.image  Path to folder with all images
-#' @param file.image  path to one image, default is NA
+#' @param pathImages  Path to folder with all images
+#' @param pathResult Path to folder for output
+#' @param pathTraining Path to folder training
+
 #' @param leafMinSize  This is the minimum number of pixels (that is, the size) of a leaf that the program should consider.
 #' @param borderLeaf  When zooming in on the edge of the leaf, you might observe shadows or other anomalies.
 #'    This parameter we applies a brush that removes pixels from the edge of the leaf.
@@ -176,17 +176,16 @@ analyse.feuille <- function(x,lda1,lesion,limb) {
 #' diametre.flou <- 0 ## flou si valeur > 1 (valeur impaire)
 #' path.sample <- "/media/sebastien/Bayer/ScriptsSEB/images/exemples/mathias/Apprentissage/"
 #' path.result <- "/media/sebastien/Bayer/ScriptsSEB/images/exemples/mathias/MF_A_01/results"
-#' analyse.image(path.sample=path.sample,
+#' runAnalysisSamples(path.sample=path.sample,
 #'               path.result=path.result,
 #'               path.image=path.image,
-#'               file.image=NA, ## analyse du r?pertoire complet
 #'               surface.feuille.mini=surface.feuille.mini,
 #'               bordure.feuille=bordure.feuille,
 #'               bordure.lesion=bordure.lesion,
 #'               surface.lesion.mini=surface.lesion.mini,
 #'               couleur.lesion=couleur.lesion)
-runAnalysisSamples <- function(path.training,path.result,path.image,file.image=NA,leafMinSize,bordure.feuille,bordure.lesion,surface.lesion.mini,couleur.lesion) {
-    if (is.na(file.image)) file.image <- list.files(path.image)
+runAnalysisSamples <- function(pathTraining,path.result,path.image,leafMinSize,bordure.feuille,bordure.lesion,surface.lesion.mini,couleur.lesion) {
+    file.image <- list.files(path.image)
     for (image in file.image)
         analyse.image.unique(path.sample,path.result,path.image,image,surface.feuille.mini,bordure.feuille,bordure.lesion,surface.lesion.mini,couleur.lesion)
 }

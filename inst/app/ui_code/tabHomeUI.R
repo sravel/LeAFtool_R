@@ -28,9 +28,9 @@
 tabItem(# Tab for Home input/output
   tabName = "tabHome",
   fluidRow(
-    box(title = "LeAFtool 	  Lesion Area Finding tool", status="success", solidHeader = TRUE, collapsible = FALSE, width = 12,
+    box(title = "LeAFtool     Lesion Area Finding tool", status="success", solidHeader = TRUE, collapsible = FALSE, width = 12,
       fluidRow(column( 12, offset = 0,
-      img(src = "LeAFtool-short.png", class = 'img-responsive')
+      img(src = "LeAFtool-short.png", class = 'img-responsive', style="max-width: 50%;display: block;margin-left: auto;margin-right: auto;")
       )),
       fluidRow(
         column( width = 12, offset = 0,
@@ -73,6 +73,7 @@ tabItem(# Tab for Home input/output
                 li("Samples folder: folder for storing files to be analyzed"),
                 li("Output folder: "),
                 li(".RData file: file created during the calibration phase in the calibration folder"),
+                li("Blur image: Minimum area of a leaf"),
                 li("Leaf min size: Minimum area of a leaf"),
                 li("Leaf border size: leaf edge thickness to be removed"),
                 li("Lesion min size: minimum area of a lesion"),
@@ -106,6 +107,23 @@ tabItem(# Tab for Home input/output
           tags$div(
             tags$p("Exemple:"),
             actionButton( "showEdit", class = "btn-img", img(src = "editMode.png", width = '60%', height = '60%'))
+          )
+        )
+      ),
+      fluidRow(
+        column( width = 12, offset = 0,
+#          box(width = 12,
+          withTags(
+            footer(align='right',
+              p(align='right',
+                u("contacts :"),
+                " Sébastien RAVEL - ", a(href='mailto:sebastien.ravel@cirad.fr',"sebastien.ravel@cirad.fr")
+              ),
+              p(align='right',
+                a(href='http://umr-bgpi.cirad.fr/', img(style = 'width: 7%;', src='logo-bgpi.png')),
+                a(href='https://www.cirad.fr', img(style = 'width:8%;', src='logo-cirad.png'))
+              )
+            )
           )
         )
       )

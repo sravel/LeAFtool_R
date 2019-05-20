@@ -38,8 +38,8 @@ max_no_cores <- as.numeric(max(1, detectCores() - 2))
 #' This function run the GUI shiny interface to run LeAFtool
 #'
 #' @examples
-#' runLeAFtool()
-runLeAFtool <- function() {
+#' runLeAFtoolGUI()
+runLeAFtoolGUI <- function() {
   rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
   gc() #free up memrory and report the memory usage.
   appDir <- system.file("app", package = "LeAFtool")
