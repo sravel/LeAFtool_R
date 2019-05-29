@@ -47,7 +47,7 @@ load.subgroup <- function(sg) { ## load images from directory sg
     files.subgroup <- list.files(sg,full.name=TRUE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", include.dirs = FALSE, ignore.case = TRUE)
     li <- lapply(files.subgroup,function(file) {
         im <- readImage(file)
-        data.frame(group=lastname(file),red=as.numeric(imageData(im)[,,1]), green=as.numeric(imageData(im)[,,2]), blue=as.numeric(imageData(im)[,,3]))
+        data.frame(group=sg,red=as.numeric(imageData(im)[,,1]), green=as.numeric(imageData(im)[,,2]), blue=as.numeric(imageData(im)[,,3]))
     })
     do.call(rbind, li)
 }
@@ -111,8 +111,8 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     groups.li <- lapply(li,function(x) unique(x$group))
     classes <- rbind(data.frame(class="background",subclass=groups.li[[1]]),data.frame(class="limb",subclass=groups.li[[2]]),data.frame(class="lesion",subclass=groups.li[[3]]))
     groups <- unlist(groups.li)
-    nbGroups <- length(groups)
     if (any(duplicated(groups))) stop("Error: duplicated group names.")
+
     ## Check subDir folder
     limbDir <- list.dirs(paste0(path.training,"/limb"),full.names=FALSE)[-1]
     if (length(limbDir)==0){limbDir = "limb"}
@@ -125,7 +125,8 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     backgroundDir <- list.dirs(paste0(path.training,"/background"),full.names=FALSE)[-1]
     if (length(backgroundDir)==0){backgroundDir = "background"}
     else { backgroundDir <- paste0("background/",backgroundDir)}
-
+    group <- c(backgroundDir,limbDir,lesionDir)
+    nbGroups <- length(group)
 
 
     ## constitution of the data.frame of the pixels of the samples
@@ -187,7 +188,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     sink()
 
     df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
-    print(df4)
+    print(head(df4))
 
     ## graph of groups in the discriminant plane
     plotFileCalibration1_2 <- paste(path.training,paste0(basename,"1_2.jpeg"),sep='/') ## output file jpeg
