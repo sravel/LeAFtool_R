@@ -113,6 +113,20 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     groups <- unlist(groups.li)
     nbGroups <- length(groups)
     if (any(duplicated(groups))) stop("Error: duplicated group names.")
+    ## Check subDir folder
+    limbDir <- list.dirs(paste0(rv$dirCalibration,"/limb"),full.names=FALSE)[-1]
+    if (length(limbDir)==0){limbDir = "limb"}
+    else { limbDir <- paste0("limb/",limbDir)}
+
+    lesionDir <- list.dirs(paste0(rv$dirCalibration,"/lesion"),full.names=FALSE)[-1]
+    if (length(lesionDir)==0){lesionDir = "lesion"}
+    else { lesionDir <- paste0("lesion/",lesionDir)}
+
+    backgroundDir <- list.dirs(paste0(rv$dirCalibration,"/background"),full.names=FALSE)[-1]
+    if (length(backgroundDir)==0){backgroundDir = "background"}
+    else { backgroundDir <- paste0("background/",backgroundDir)}
+
+
 
     ## constitution of the data.frame of the pixels of the samples
     df2 <- do.call(rbind, li)
