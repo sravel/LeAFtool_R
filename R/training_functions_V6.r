@@ -63,8 +63,8 @@ load.group <- function(g) { ## load the images of group g (which can contain sub
     do.call(rbind,li)
 }
 
-load.class <- function(class,path.sample) { ## load all the training images
-    path.class <- paste(path.sample,class,sep='/')
+load.class <- function(class,path.training) { ## load all the training images
+    path.class <- paste(path.training,class,sep='/')
     if (!all(file.exists(path.class))) stop("Directory not found.")
     li <- lapply(path.class,load.group)
     do.call(rbind,li)
@@ -81,37 +81,40 @@ rgb2hsv2 <- function(rgb) { ## convert a data frame from rgb to hsv
 
 #' Compute and saves on disk the parameters of the training set
 #'
-#' @param path.sample The path of the directory containing sampled images for training. This directory must contain at least 3 directories (for background, limb, and lesion images).
-#' @param background The name of the directory in path.sample containing sampled images of the background. This directory can contain either image files or subdirectories containing different groups of image files.
-#' @param limb The name of the directory in path.sample containing sampled images of the limb. This directory can contain either image files or subdirectories containing different groups of image files.
-#' @param lesion The name of the directory in path.sample containing sampled images of lesions. This directory can contain either image files or subdirectories containing different groups of image files.
+#' @param path.training The path of the directory containing sampled images for training. This directory must contain at least 3 directories (for background, limb, and lesion images).
+#' @param background The name of the directory in path.training containing sampled images of the background. This directory can contain either image files or subdirectories containing different groups of image files.
+#' @param limb The name of the directory in path.training containing sampled images of the limb. This directory can contain either image files or subdirectories containing different groups of image files.
+#' @param lesion The name of the directory in path.training containing sampled images of lesions. This directory can contain either image files or subdirectories containing different groups of image files.
 #' @param method Method of discrimainant analysis: "lda" (default) or "qda"
 #' @param transform Function for data transformation before analysis (e.g. sqrt)
 #' @param colormodel Model of color for the analysis: "rgb" (default) or "hsv"
 #'
 #' @examples
-#' path.sample <- "../Exemple_Dominique/CLFD/Samples/Sup"
+#' path.training <- "../Exemple_Dominique/CLFD/Samples/Sup"
 #'
-#' training(.path.sample,"background","limb","lesion")
-#' training(path.sample,"background","limb","lesion",transform=function(x) log1p(x),colormodel="rgb",method="svm")
-#' training(path.sample,"background","limb","lesion",colormodel="hsv",method="lda")
-#' training(path.sample,"background","limb","lesion",transform=function(x) (sin(pi*(x-0.5))+1)/2,method="qda")
-#' training(path.sample,"background","limb","lesion",transform=function(x) asin(2*x-1)/pi+0.5)
-#' training(path.sample,"background","limb","lesion",transform=log1p)
-training <- function(path.sample,background,limb,lesion,method="lda",transform=NULL,colormodel="rgb") {
+#' training(.path.training,"background","limb","lesion")
+#' training(path.training,"background","limb","lesion",transform=function(x) log1p(x),colormodel="rgb",method="svm")
+#' training(path.training,"background","limb","lesion",colormodel="hsv",method="lda")
+#' training(path.training,"background","limb","lesion",transform=function(x) (sin(pi*(x-0.5))+1)/2,method="qda")
+#' training(path.training,"background","limb","lesion",transform=function(x) asin(2*x-1)/pi+0.5)
+#' training(path.training,"background","limb","lesion",transform=log1p)
+training <- function(path.training,background,limb,lesion,method="lda",transform=NULL,colormodel="rgb") {
     version <- "6.0"
     stopifnot(method %in% c("lda","qda","svm"))
     stopifnot(colormodel %in% c("rgb","hsv"))
-    ## search for subdirectories in path.sample
-    dirs <- list.dirs(path.sample,recursive=FALSE,full.names=FALSE)
+    ## search for subdirectories in path.training
+    dirs <- list.dirs(path.training,recursive=FALSE,full.names=FALSE)
 
     ## check the existence of the subdirectories passed in argument
     class <- c(background,limb,lesion)
-    li <- lapply(class,load.class,path.sample)
+    li <- lapply(class,load.class,path.training)
     groups.li <- lapply(li,function(x) unique(x$group))
     classes <- rbind(data.frame(class="background",subclass=groups.li[[1]]),data.frame(class="limb",subclass=groups.li[[2]]),data.frame(class="lesion",subclass=groups.li[[3]]))
     groups <- unlist(groups.li)
+    nbGroups <- length(groups)
     if (any(duplicated(groups))) stop("Error: duplicated group names.")
+
+    ## constitution of the data.frame of the pixels of the samples
     df2 <- do.call(rbind, li)
     if (colormodel=="hsv") df2 <- rgb2hsv2(df2)
     if (!is.null(transform)) df2[2:4] <- lapply(df2[2:4],transform)
@@ -126,6 +129,7 @@ training <- function(path.sample,background,limb,lesion,method="lda",transform=N
     ## compute lda1 for graphic output (even if method is not "lda")
     lda1 <- lda(df2[2:4], df2$group, prior=rep(1,length(groups))/length(groups))
     df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
+    df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
 
     if (method=="lda") {
         lda2 <- lda(df.train[2:4], df.train$group, prior=rep(1,length(groups))/length(groups))
@@ -140,10 +144,10 @@ training <- function(path.sample,background,limb,lesion,method="lda",transform=N
    }
 
     ## common name for the 3 output files, identique to the directory name
-    filename <- tail(strsplit(path.sample,'/')[[1]],1)
+    basename <- tail(strsplit(path.training,'/')[[1]],1)
 
     ## save results in text file
-    file.txt <- paste(path.sample,paste0(filename,".txt"),sep='/') ## text output file
+    file.txt <- paste(path.training,paste0(basename,".txt"),sep='/') ## text output file
     sink(file.txt)
     cat("Version",version,'\n')
     if (!is.null(transform)) {
@@ -168,13 +172,100 @@ training <- function(path.sample,background,limb,lesion,method="lda",transform=N
     cat(table2(df.test$group, df.test$predict))
     sink()
 
-    ## graph of the groups in axes 1 and 2 of discriminant analysis
-    file.png <- paste(path.sample,paste0(filename,".png"),sep='/') ## fichier de sortie png
-    png(file.png,width=480*6,height=480*6,res=72*6)
-    print(xyplot(LD2~LD1, group=group, cex=0.8, alpha=1, pch=1, asp=1, auto.key=TRUE, data=df4))
-    dev.off()
+    ## graph of groups in the discriminant plane
+    plotFileCalibration1_2 <- paste(path.training,paste0(basename,"1_2.jpeg"),sep='/') ## output file jpeg
+    plotFileCalibration1_3 <- paste(path.training,paste0(basename,"1_3.jpeg"),sep='/') ## output file jpeg
+    plotFileCalibration2_3 <- paste(path.training,paste0(basename,"2_3.jpeg"),sep='/') ## output file jpeg
+
+    # Palette color for graph
+    colBackPalette <- c("#0000FF","#74D0F1","#26C4EC","#0F9DE8","#1560BD","#0095B6","#00CCCB","#1034A6","#0ABAB5","#1E7FCB")
+    colLimbPalette <- c("#32CD32","#9ACD32","#00FA9A","#008000","#ADFF2F","#6B8E23","#3CB371","#006400","#2E8B57","#00FF00")
+    colLesionPalette <- c("#FF0000","#DB0073","#91283B","#B82010","#FF4901","#AE4A34","#FF0921","#BC2001","#FF5E4D","#E73E01")
+
+    colBack <- colBackPalette[1:length(backgroundDir)]
+    colLimb <- colLimbPalette[1:length(limbDir)]
+    colLesion <- colLesionPalette[1:length(lesionDir)]
+
+    # Save picture of Discriminent analysis
+    jpeg(plotFileCalibration1_2,
+      width = 800,
+      height = 800,
+      quality = 100,
+      units = "px")
+
+    if ( nbGroups <= 3){
+      g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes)) +
+                  geom_point() +
+                  scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                  labs( x = "LD1", y = "LD2",
+                          title = "Add a title above the plot",
+                          caption="Source: LeAFtool", colour = "Groups"
+                      ) +
+                  theme( legend.position = "right",
+                          panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()
+                      ) +
+                  guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+      print(g)
+      dev.off()
+      rv$plotALL <- FALSE
+    }else{
+      g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes.1)) +
+                  geom_point() +
+                  scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                  labs( x = "LD1", y = "LD2",
+                          title = "Add a title above the plot",
+                          caption="Source: LeAFtool", colour = "Groups"
+                      ) +
+                  theme( legend.position = "right",
+                          panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()
+                      ) +
+                  guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+      print(g)
+      dev.off()
+      # Save picture of Discriminent analysis
+      jpeg(plotFileCalibration1_3,
+        width = 800,
+        height = 800,
+        quality = 100,
+        units = "px")
+      g <- ggplot( data = df4, aes(x = LD1, y = LD3, colour = group, shape = classes.1)) +
+                  geom_point() +
+                  scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                  labs( x = "LD1", y = "LD3",
+                          title = "Add a title above the plot",
+                          caption="Source: LeAFtool", colour = "Groups"
+                      ) +
+                  theme( legend.position = "right",
+                          panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()
+                      ) +
+                  guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+      print(g)
+      dev.off()
+      # Save picture of Discriminent analysis
+      jpeg(plotFileCalibration2_3,
+        width = 800,
+        height = 800,
+        quality = 100,
+        units = "px")
+      g <- ggplot( data = df4, aes(x = LD2, y = LD3, colour = group, shape = classes.1)) +
+                  geom_point() +
+                  scale_color_manual(values = c(colBack,colLimb,colLesion)) +
+                  labs( x = "LD2", y = "LD3",
+                          title = "Add a title above the plot",
+                          caption="Source: LeAFtool", colour = "Groups"
+                      ) +
+                  theme( legend.position = "right",
+                          panel.grid.major = element_blank(),
+                          panel.grid.minor = element_blank()
+                      ) +
+                  guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
+      print(g)
+      dev.off()
 
     ## save results
-    file.train <- paste(path.sample,paste0(filename,".RData"),sep='/')
+    file.train <- paste(path.training,paste0(basename,".RData"),sep='/')
     save(train,file=file.train)
 }

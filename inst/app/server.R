@@ -32,7 +32,7 @@
 # Create a file logger:
 clearLoggers() # reset log file
 rv$logfilename <- tempfile()
-isolate(addDefaultFileLogger(rv$logfilename))
+#isolate(addDefaultFileLogger(rv$logfilename))
 logInfo("Hello to LeAFtool !!!!")
 
 
