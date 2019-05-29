@@ -264,6 +264,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
                   guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
       print(g)
       dev.off()
+    }
 
     ## save results
     file.train <- paste(path.training,paste0(basename,".RData"),sep='/')
