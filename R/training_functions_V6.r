@@ -98,7 +98,7 @@ rgb2hsv2 <- function(rgb) { ## convert a data frame from rgb to hsv
 #' training(path.sample,"background","limb","lesion",transform=function(x) (sin(pi*(x-0.5))+1)/2,method="qda")
 #' training(path.sample,"background","limb","lesion",transform=function(x) asin(2*x-1)/pi+0.5)
 #' training(path.sample,"background","limb","lesion",transform=log1p)
-(training) <- function(path.sample,background,limb,lesion,method="lda",transform=NULL,colormodel="rgb") {
+training <- function(path.sample,background,limb,lesion,method="lda",transform=NULL,colormodel="rgb") {
     version <- "6.0"
     stopifnot(method %in% c("lda","qda","svm"))
     stopifnot(colormodel %in% c("rgb","hsv"))
