@@ -45,7 +45,7 @@
 
 }
 
-.calibrationTXT {
+.TrainingTXT {
 	text-align: left;
 	font-size: medium;
 	font-family: "Times New Roman", Times, serif;
@@ -63,7 +63,7 @@
 	font-family: "Times New Roman", Times, serif;
 	margin : 20px 0px 0px 50px;
 }
-.calibrationHome {
+.TrainingHome {
 	text-align: justify;
 	text-indent:40px each-line;
 	font-size: medium;

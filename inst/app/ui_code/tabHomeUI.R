@@ -35,7 +35,7 @@ tabItem(# Tab for Home input/output
       fluidRow(
         column( width = 12, offset = 0,
           withTags(
-            div( class = "calibrationHome",
+            div( class = "TrainingHome",
               h2("About the tool"),
               p('This application was created at the UMR BGPI (Unité Mixte de Recherche Biology and Genetic of Plant-Pathogen Interaction - CIRAD, INRA and Montpellier SupAgro - Montpellier, France) in order to analyse lesions on a infected leaf. An automatic measurement of lesions makes it easier to compare the pathogenicity of pathogens, whose signs and symptoms are visible. It makes possible to analyse many images in a faster way.'),
               p('The pathogenic lesions are automatically analysed and different parameters are calculated in pixels so that the number and relative area of lesions can be calculated.')
@@ -46,22 +46,22 @@ tabItem(# Tab for Home input/output
       fluidRow(
         column( width = 4, offset = 0,
           withTags(
-            div( class = "calibrationHome",
-              h2("Calibration"),
-              p('Calibration is the first of two steps to analyse lesions present on the leaves. It begins by creating a learning game and then, carrying out a discriminant factorial analysis.'),
-              p('Important note: the calibration folder must contain the sub-folder "background", "limb" and "lesion" with these names (case-sensitive).'),
+            div( class = "TrainingHome",
+              h2("Training"),
+              p('Training is the first of two steps to analyse lesions present on the leaves. It begins by creating a learning game and then, carrying out a discriminant factorial analysis.'),
+              p('Important note: the Training folder must contain the sub-folder "background", "limb" and "lesion" with these names (case-sensitive).'),
               p('The current version accepts these three categories of pixels, with  no restriction for sub-categories'),
-              p('There is no constraint on the name and the number of the calibration image files, the program always reads all .jpg, .jpeg .PNG and .tif files present (not case sensitive for extention).'),
-              p('At the end of the learning phase, three files are created in the calibration folder (the first part of the name these files is the name of the folder with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
+              p('There is no constraint on the name and the number of the Training image files, the program always reads all .jpg, .jpeg .PNG and .tif files present (not case sensitive for extention).'),
+              p('At the end of the learning phase, three files are created in the Training folder (the first part of the name these files is the name of the folder with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
             )
           ),
           tags$div(
             tags$p("Input exemple:"),
-            actionButton( "showInCalibration", class = "btn-img", img(src = "calibrationFolder.png", width = '60%', height = '60%'))
+            actionButton( "showInTraining", class = "btn-img", img(src = "TrainingFolder.png", width = '60%', height = '60%'))
           ),
           tags$div(
             tags$p("Output exemple:"),
-            actionButton( "showCalibration", class = "btn-img", img(src = "learning.jpeg", width = '60%', height = '60%'))
+            actionButton( "showTraining", class = "btn-img", img(src = "learning.jpeg", width = '60%', height = '60%'))
           )
         ),
         column( width = 4, offset = 0,
@@ -72,7 +72,7 @@ tabItem(# Tab for Home input/output
               ul(
                 li("Samples folder: folder for storing files to be analyzed"),
                 li("Output folder: "),
-                li(".RData file: file created during the calibration phase in the calibration folder"),
+                li(".RData file: file created during the Training phase in the Training folder"),
                 li("Blur image: Minimum area of a leaf"),
                 li("Leaf min size: Minimum area of a leaf"),
                 li("Leaf border size: leaf edge thickness to be removed"),

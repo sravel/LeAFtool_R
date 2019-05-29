@@ -49,7 +49,7 @@ sidebar <- dashboardSidebar(
   width = 150,
   sidebarMenu(
     menuItem("Home", tabName = "tabHome", icon = icon("home")),
-    menuItem("Calibration", tabName = "tabCalibration", icon = icon("balance-scale")),
+    menuItem("Training", tabName = "tabTraining", icon = icon("balance-scale")),
     menuItem("Analysis", tabName = "tabAnalysis", icon = icon("pagelines")),
     menuItem("Edit", tabName = "tabEdit", icon = icon("edit")),
 #    menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard")),
@@ -75,8 +75,8 @@ body <- dashboardBody(
     # add tab for Home
     source(file.path("ui_code", "tabHomeUI.R"), local = TRUE, chdir = TRUE)$value,
 
-    # add tab for calibration
-    source(file.path("ui_code", "tabCalibrationUI.R"), local = TRUE, chdir = TRUE)$value,
+    # add tab for Training
+    source(file.path("ui_code", "tabTrainingUI.R"), local = TRUE, chdir = TRUE)$value,
 
     # add tab for analysis
     source(file.path("ui_code", "tabAnalysisUI.R"), local = TRUE, chdir = TRUE)$value,

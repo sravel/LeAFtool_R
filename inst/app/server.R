@@ -44,8 +44,8 @@ shinyServer(function(input, output, session) {
 
   observe_helpers() # active help icon
 
-  # Load functions for tab calibration
-  source(file.path("server_code", "tabCalibrationServer.R"), local = TRUE)$value
+  # Load functions for tab Training
+  source(file.path("server_code", "tabTrainingServer.R"), local = TRUE)$value
 
   # Load functions for tab analysis
   source(file.path("server_code", "tabAnalysisServer.R"), local = TRUE)$value
