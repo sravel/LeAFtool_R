@@ -103,7 +103,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     classes <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
 
     ## constitution of the data.frame of the pixels of the samples
-    li <- lapply(groups,load_group(path.training))
+    li <- lapply(groups,load_group, path.training = path.training)
     df2 <- do.call(rbind, li)
     if (colormodel=="hsv") df2 <- rgb2hsv2(df2)
     if (!is.null(transform)) df2[2:4] <- lapply(df2[2:4],transform)
