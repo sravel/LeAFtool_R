@@ -87,7 +87,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     listdirTraining <- existDirTraining(path.training)
     # if all subfolder exist run analysis
     if(listdirTraining$dirlimb == FALSE || listdirTraining$dirBackground == FALSE || listdirTraining$dirLesion == FALSE){
-        errorMess <-paste("Error not find all sub-folders !!!!:"
+        errorMess <-paste("Error not find all sub-folders !!!!:",
                      paste0("limb: ", listdirTraining$dirlimb),
                      paste0("background: ", listdirTraining$dirBackground),
                     paste0("lesion: ", listdirTraining$dirLesion),
