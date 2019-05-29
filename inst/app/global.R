@@ -195,10 +195,3 @@ returnOdd <- function(value){
 
 # no color for hide ploint of plot on edit mode
 noColor <- rgb(red = 0, green = 0, blue = 1, alpha = 0)
-
-## TO run shiny app
-runCountLesion <- function(port=NULL) {
-
-  if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)
-  runApp(appDir = getwd(),launch.browser = TRUE)
-}
