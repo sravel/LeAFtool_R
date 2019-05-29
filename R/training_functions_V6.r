@@ -143,7 +143,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     ## compute lda1 for graphic output (even if method is not "lda")
     lda1 <- lda(df2[2:4], df2$group, prior=rep(1,length(groups))/length(groups))
     df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
-    df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
+
 
     if (method=="lda") {
         lda2 <- lda(df.train[2:4], df.train$group, prior=rep(1,length(groups))/length(groups))
@@ -185,6 +185,9 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     cat('\n')
     cat(table2(df.test$group, df.test$predict))
     sink()
+
+    df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
+    print(df4)
 
     ## graph of groups in the discriminant plane
     plotFileCalibration1_2 <- paste(path.training,paste0(basename,"1_2.jpeg"),sep='/') ## output file jpeg
