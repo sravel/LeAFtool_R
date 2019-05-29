@@ -29,16 +29,50 @@
 ## CODE of function for calibration
 ###############################################
 ## function of reading images of a group; return the pixel data.frame
-load_group <- function(g) {
-  path_group <- paste(rv$dirCalibration,g,sep='/')
-#  print(path_group)
-  files_group <- list.files(path_group, full.name=TRUE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", include.dirs = FALSE, ignore.case = TRUE)
-  sample <- lapply(files_group,readImage)
-  ## creation of the data frame of the sampled pixels
-  li <- lapply(sample, function(im) {
-    data.frame(group=g,red=as.numeric(imageData(im)[,,1]), green=as.numeric(imageData(im)[,,2]), blue=as.numeric(imageData(im)[,,3]))
-  })
-  do.call(rbind, li)
+table2 <- function(x,y) {
+    ta <- table(x,y,dnn=c("group","predict"))
+    print(ta)
+    paste("\nError rate: ",round((1-sum(diag(ta))/sum(ta))*100,2),'%\n\n')
+}
+
+lastname <- function(fullname) { ## extracts directory names from full file name
+    li <- strsplit(fullname,'/')
+    tail(li[[1]],2)[1]
+}
+
+load.subgroup <- function(sg) { ## load images from directory sg
+    files.subgroup <- list.files(sg,full.name=TRUE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", include.dirs = FALSE, ignore.case = TRUE)
+    li <- lapply(files.subgroup,function(file) {
+        im <- readImage(file)
+        data.frame(group=lastname(file),red=as.numeric(imageData(im)[,,1]), green=as.numeric(imageData(im)[,,2]), blue=as.numeric(imageData(im)[,,3]))
+    })
+    do.call(rbind, li)
+}
+
+load.group <- function(g) { ## load the images of group g (which can contain subdirectories)
+    ## search for sud-directories
+    dirs <- list.dirs(g,recursive=FALSE)
+    if (length(dirs)==0) { ## no subdirectories (only files)
+        return(load.subgroup(g))
+    }
+    ## load images from subdirectories
+    li <- lapply(dirs,load.subgroup)
+    do.call(rbind,li)
+}
+
+load.class <- function(class,path.sample) { ## load all the training images
+    path.class <- paste(path.sample,class,sep='/')
+    if (!all(file.exists(path.class))) stop("Directory not found.")
+    li <- lapply(path.class,load.group)
+    do.call(rbind,li)
+}
+
+rgb2hsv2 <- function(rgb) { ## convert a data frame from rgb to hsv
+    w <- match(c("red","green","blue"),names(rgb))
+    hsv <- t(rgb2hsv(t(rgb[w])))
+    rgb[w] <- hsv
+    names(rgb)[w] <- colnames(hsv)
+    rgb
 }
 
 ###############################################
@@ -76,6 +110,8 @@ observeEvent(
 
       # test if all subfolder mandatory
       listdirCalibration <- existDirCalibration(rv$dirCalibration)
+
+      training(rv$dirCalibration,"background","limb","lesion")
 
       # if all subfolder exist run analysis
       if(listdirCalibration$dirlimb == TRUE && listdirCalibration$dirBackground == TRUE && listdirCalibration$dirLesion == TRUE){
