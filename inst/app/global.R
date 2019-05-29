@@ -124,16 +124,6 @@ rv <<- reactiveValues(
                         )
 
 
-
-# function to test if directory pass contain sub-directory limb, background lesion
-existDirCalibration <- function(dirCalibration){
-  list(
-    dirlimb = dir.exists(paste(dirCalibration,"/limb", sep = .Platform$file.sep)),
-    dirBackground = dir.exists(paste(dirCalibration,"/background", sep = .Platform$file.sep)),
-    dirLesion = dir.exists(paste(dirCalibration,"/lesion", sep = .Platform$file.sep))
-  )
-}
-
 # function to merge dataframe
 multmerge = function(mypath, pattern){
   filenames=list.files(path=mypath, full.names=TRUE, pattern = pattern)

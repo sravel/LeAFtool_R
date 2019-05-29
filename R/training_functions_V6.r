@@ -25,11 +25,6 @@
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################
 
-
-## load packages
-library(EBImage)
-library(lattice)
-library(MASS)
 ## library(e1071) only for svm (not implemented)
 
 table2 <- function(x,y) {
@@ -57,6 +52,14 @@ rgb2hsv2 <- function(rgb) { ## convert a data frame from rgb to hsv
     rgb
 }
 
+# function to test if directory pass contain sub-directory limb, background lesion
+existDirTraining <- function(dirTraining){
+  list(
+    dirlimb = dir.exists(paste(dirTraining,"/limb", sep = .Platform$file.sep)),
+    dirBackground = dir.exists(paste(dirTraining,"/background", sep = .Platform$file.sep)),
+    dirLesion = dir.exists(paste(dirTraining,"/lesion", sep = .Platform$file.sep))
+  )
+}
 
 #' Compute and saves on disk the parameters of the training set
 #'
@@ -81,6 +84,18 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     version <- "6.0"
     stopifnot(method %in% c("lda","qda","svm"))
     stopifnot(colormodel %in% c("rgb","hsv"))
+    listdirTraining <- existDirTraining(path.training)
+    # if all subfolder exist run analysis
+    if(listdirTraining$dirlimb == FALSE || listdirTraining$dirBackground == FALSE || listdirTraining$dirLesion == FALSE){
+        errorMess <-paste("Error not find all sub-folders !!!!:"
+                     paste0("limb: ", listdirTraining$dirlimb),
+                     paste0("background: ", listdirTraining$dirBackground),
+                    paste0("lesion: ", listdirTraining$dirLesion),
+                    sep="\n")
+        stop(errorMess)
+    }
+
+
     ## search for subdirectories in path.training
     dirs <- list.dirs(path.training,recursive=FALSE,full.names=FALSE)
 
@@ -165,9 +180,9 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     print(head(df4))
 
     ## graph of groups in the discriminant plane
-    plotFileCalibration1_2 <- paste(path.training,paste0(basename,"1_2.jpeg"),sep='/') ## output file jpeg
-    plotFileCalibration1_3 <- paste(path.training,paste0(basename,"1_3.jpeg"),sep='/') ## output file jpeg
-    plotFileCalibration2_3 <- paste(path.training,paste0(basename,"2_3.jpeg"),sep='/') ## output file jpeg
+    plotFileTraining1_2 <- paste(path.training,paste0(basename,"1_2.jpeg"),sep='/') ## output file jpeg
+    plotFileTraining1_3 <- paste(path.training,paste0(basename,"1_3.jpeg"),sep='/') ## output file jpeg
+    plotFileTraining2_3 <- paste(path.training,paste0(basename,"2_3.jpeg"),sep='/') ## output file jpeg
 
     # Palette color for graph
     colBackPalette <- c("#0000FF","#74D0F1","#26C4EC","#0F9DE8","#1560BD","#0095B6","#00CCCB","#1034A6","#0ABAB5","#1E7FCB")
@@ -179,7 +194,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     colLesion <- colLesionPalette[1:length(lesionDir)]
 
     # Save picture of Discriminent analysis
-    jpeg(plotFileCalibration1_2,
+    jpeg(plotFileTraining1_2,
       width = 800,
       height = 800,
       quality = 100,
@@ -217,7 +232,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
       print(g)
       dev.off()
       # Save picture of Discriminent analysis
-      jpeg(plotFileCalibration1_3,
+      jpeg(plotFileTraining1_3,
         width = 800,
         height = 800,
         quality = 100,
@@ -237,7 +252,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
       print(g)
       dev.off()
       # Save picture of Discriminent analysis
-      jpeg(plotFileCalibration2_3,
+      jpeg(plotFileTraining2_3,
         width = 800,
         height = 800,
         quality = 100,
