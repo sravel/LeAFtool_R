@@ -38,36 +38,15 @@ table2 <- function(x,y) {
     paste("\nError rate: ",round((1-sum(diag(ta))/sum(ta))*100,2),'%\n\n')
 }
 
-lastname <- function(fullname) { ## extracts directory names from full file name
-    li <- strsplit(fullname,'/')
-    tail(li[[1]],2)[1]
-}
-
-load.subgroup <- function(sg) { ## load images from directory sg
-    files.subgroup <- list.files(sg,full.name=TRUE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", include.dirs = FALSE, ignore.case = TRUE)
-    li <- lapply(files.subgroup,function(file) {
-        im <- readImage(file)
-        data.frame(group=sg,red=as.numeric(imageData(im)[,,1]), green=as.numeric(imageData(im)[,,2]), blue=as.numeric(imageData(im)[,,3]))
-    })
-    do.call(rbind, li)
-}
-
-load.group <- function(g) { ## load the images of group g (which can contain subdirectories)
-    ## search for sud-directories
-    dirs <- list.dirs(g,recursive=FALSE)
-    if (length(dirs)==0) { ## no subdirectories (only files)
-        return(load.subgroup(g))
-    }
-    ## load images from subdirectories
-    li <- lapply(dirs,load.subgroup)
-    do.call(rbind,li)
-}
-
-load.class <- function(class,path.training) { ## load all the training images
-    path.class <- paste(path.training,class,sep='/')
-    if (!all(file.exists(path.class))) stop("Directory not found.")
-    li <- lapply(path.class,load.group)
-    do.call(rbind,li)
+load_group <- function(g, path.training) {
+  path_group <- paste(path.training,g,sep='/')
+  files_group <- list.files(path_group, full.name=TRUE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", include.dirs = FALSE, ignore.case = TRUE)
+  sample <- lapply(files_group,readImage)
+  ## creation of the data frame of the sampled pixels
+  li <- lapply(sample, function(im) {
+    data.frame(group=g,red=as.numeric(imageData(im)[,,1]), green=as.numeric(imageData(im)[,,2]), blue=as.numeric(imageData(im)[,,3]))
+  })
+  do.call(rbind, li)
 }
 
 rgb2hsv2 <- function(rgb) { ## convert a data frame from rgb to hsv
@@ -106,11 +85,9 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     dirs <- list.dirs(path.training,recursive=FALSE,full.names=FALSE)
 
     ## check the existence of the subdirectories passed in argument
-    class <- c(background,limb,lesion)
-    li <- lapply(class,load.class,path.training)
-    groups.li <- lapply(li,function(x) unique(x$group))
-    classes <- rbind(data.frame(class="background",subclass=groups.li[[1]]),data.frame(class="limb",subclass=groups.li[[2]]),data.frame(class="lesion",subclass=groups.li[[3]]))
-    groups <- unlist(groups.li)
+
+
+
     if (any(duplicated(groups))) stop("Error: duplicated group names.")
 
     ## Check subDir folder
@@ -125,11 +102,13 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     backgroundDir <- list.dirs(paste0(path.training,"/background"),full.names=FALSE)[-1]
     if (length(backgroundDir)==0){backgroundDir = "background"}
     else { backgroundDir <- paste0("background/",backgroundDir)}
-    group <- c(backgroundDir,limbDir,lesionDir)
-    nbGroups <- length(group)
 
+    groups <- c(backgroundDir,limbDir,lesionDir)
+    nbGroups <- length(groups)
+    classes <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
 
     ## constitution of the data.frame of the pixels of the samples
+    li <- lapply(groups,load_group(path.training))
     df2 <- do.call(rbind, li)
     if (colormodel=="hsv") df2 <- rgb2hsv2(df2)
     if (!is.null(transform)) df2[2:4] <- lapply(df2[2:4],transform)
