@@ -85,12 +85,6 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     dirs <- list.dirs(path.training,recursive=FALSE,full.names=FALSE)
 
     ## check the existence of the subdirectories passed in argument
-
-
-
-    if (any(duplicated(groups))) stop("Error: duplicated group names.")
-
-    ## Check subDir folder
     limbDir <- list.dirs(paste0(path.training,"/limb"),full.names=FALSE)[-1]
     if (length(limbDir)==0){limbDir = "limb"}
     else { limbDir <- paste0("limb/",limbDir)}
@@ -104,6 +98,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     else { backgroundDir <- paste0("background/",backgroundDir)}
 
     groups <- c(backgroundDir,limbDir,lesionDir)
+    if (any(duplicated(groups))) stop("Error: duplicated group names.")
     nbGroups <- length(groups)
     classes <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
 
