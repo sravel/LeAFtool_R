@@ -111,8 +111,6 @@ observeEvent(
       # test if all subfolder mandatory
       listdirCalibration <- existDirCalibration(rv$dirCalibration)
 
-      training(rv$dirCalibration,"background","limb","lesion")
-
       # if all subfolder exist run analysis
       if(listdirCalibration$dirlimb == TRUE && listdirCalibration$dirBackground == TRUE && listdirCalibration$dirLesion == TRUE){
 
@@ -127,6 +125,9 @@ observeEvent(
         ###########################
         # call function calibration
         ###########################
+        training(rv$dirCalibration,"background","limb","lesion")
+
+
          ## Search subdirectories of rv $ dirCalibration
         progress$inc(2/7, detail = "Load sub-directories 2/6")
         dirs <- list.dirs(rv$dirCalibration,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
