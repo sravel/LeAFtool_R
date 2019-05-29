@@ -4,17 +4,11 @@
 \alias{training}
 \title{Compute and saves on disk the parameters of the training set}
 \usage{
-training(path.sample, background, limb, lesion, method = "lda",
-  transform = NULL, colormodel = "rgb")
+training(path.training, method = "lda", transform = NULL,
+  colormodel = "rgb")
 }
 \arguments{
-\item{path.sample}{The path of the directory containing sampled images for training. This directory must contain at least 3 directories (for background, limb, and lesion images).}
-
-\item{background}{The name of the directory in path.sample containing sampled images of the background. This directory can contain either image files or subdirectories containing different groups of image files.}
-
-\item{limb}{The name of the directory in path.sample containing sampled images of the limb. This directory can contain either image files or subdirectories containing different groups of image files.}
-
-\item{lesion}{The name of the directory in path.sample containing sampled images of lesions. This directory can contain either image files or subdirectories containing different groups of image files.}
+\item{path.training}{The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.}
 
 \item{method}{Method of discrimainant analysis: "lda" (default) or "qda"}
 
@@ -23,15 +17,20 @@ training(path.sample, background, limb, lesion, method = "lda",
 \item{colormodel}{Model of color for the analysis: "rgb" (default) or "hsv"}
 }
 \description{
-Compute and saves on disk the parameters of the training set
+Training input folder must include sub-folders:
+\itemize{
+  \item limb
+  \item background
+  \item lesion
+}
+This sub-folder can contain either image files or sub-folders containing different groups of image files
 }
 \examples{
-path.sample <- "../Exemple_Dominique/CLFD/Samples/Sup"
-
-training(.path.sample,"background","limb","lesion")
-training(path.sample,"background","limb","lesion",transform=function(x) log1p(x),colormodel="rgb",method="svm")
-training(path.sample,"background","limb","lesion",colormodel="hsv",method="lda")
-training(path.sample,"background","limb","lesion",transform=function(x) (sin(pi*(x-0.5))+1)/2,method="qda")
-training(path.sample,"background","limb","lesion",transform=function(x) asin(2*x-1)/pi+0.5)
-training(path.sample,"background","limb","lesion",transform=log1p)
+path.training <- '../Exemple_Dominique/CLFD/Samples/Sup'
+training(path.training)
+training(path.training, transform=function(x) log1p(x),colormodel='rgb', method='svm')
+training(path.training, colormodel='hsv', method='lda')
+training(path.training, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
+training(path.training, transform=function(x) asin(2*x-1)/pi+0.5)
+training(path.training, transform=log1p)
 }

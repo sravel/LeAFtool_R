@@ -52,7 +52,7 @@ rgb2hsv2 <- function(rgb) { ## convert a data frame from rgb to hsv
     rgb
 }
 
-# function to test if directory pass contain sub-directory limb, background lesion
+# function to test if folder pass contain sub-folder limb, background lesion
 existDirTraining <- function(dirTraining){
   list(
     dirlimb = dir.exists(paste(dirTraining,"/limb", sep = .Platform$file.sep)),
@@ -63,24 +63,28 @@ existDirTraining <- function(dirTraining){
 
 #' Compute and saves on disk the parameters of the training set
 #'
-#' @param path.training The path of the directory containing sampled images for training. This directory must contain at least 3 directories (for background, limb, and lesion images).
-#' @param background The name of the directory in path.training containing sampled images of the background. This directory can contain either image files or subdirectories containing different groups of image files.
-#' @param limb The name of the directory in path.training containing sampled images of the limb. This directory can contain either image files or subdirectories containing different groups of image files.
-#' @param lesion The name of the directory in path.training containing sampled images of lesions. This directory can contain either image files or subdirectories containing different groups of image files.
+#' Training input folder must include sub-folders:
+#' \itemize{
+#'   \item limb
+#'   \item background
+#'   \item lesion
+#' }
+#' This sub-folder can contain either image files or sub-folders containing different groups of image files
+#'
+#' @param path.training The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
 #' @param method Method of discrimainant analysis: "lda" (default) or "qda"
 #' @param transform Function for data transformation before analysis (e.g. sqrt)
 #' @param colormodel Model of color for the analysis: "rgb" (default) or "hsv"
 #'
 #' @examples
-#' path.training <- "../Exemple_Dominique/CLFD/Samples/Sup"
-#'
-#' training(.path.training,"background","limb","lesion")
-#' training(path.training,"background","limb","lesion",transform=function(x) log1p(x),colormodel="rgb",method="svm")
-#' training(path.training,"background","limb","lesion",colormodel="hsv",method="lda")
-#' training(path.training,"background","limb","lesion",transform=function(x) (sin(pi*(x-0.5))+1)/2,method="qda")
-#' training(path.training,"background","limb","lesion",transform=function(x) asin(2*x-1)/pi+0.5)
-#' training(path.training,"background","limb","lesion",transform=log1p)
-training <- function(path.training,background,limb,lesion,method="lda",transform=NULL,colormodel="rgb") {
+#' path.training <- '../Exemple_Dominique/CLFD/Samples/Sup'
+#' training(path.training)
+#' training(path.training, transform=function(x) log1p(x),colormodel='rgb', method='svm')
+#' training(path.training, colormodel='hsv', method='lda')
+#' training(path.training, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
+#' training(path.training, transform=function(x) asin(2*x-1)/pi+0.5)
+#' training(path.training, transform=log1p)
+training <- function(path.training,method="lda",transform=NULL,colormodel="rgb") {
     version <- "6.0"
     stopifnot(method %in% c("lda","qda","svm"))
     stopifnot(colormodel %in% c("rgb","hsv"))
@@ -88,9 +92,9 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
     # if all subfolder exist run analysis
     if(listdirTraining$dirlimb == FALSE || listdirTraining$dirBackground == FALSE || listdirTraining$dirLesion == FALSE){
         errorMess <-paste0("Error not find all sub-folders !!!!:\n",
-                                "\t-limb: ", listdirTraining$dirlimb,"\n",
-                                "\t-background: ", listdirTraining$dirBackground,"\n",
-                                "\t-lesion: ", listdirTraining$dirLesion,"\n")
+                                "\t-  limb: ", listdirTraining$dirlimb,"\n",
+                                "\t-  background: ", listdirTraining$dirBackground,"\n",
+                                "\t-  lesion: ", listdirTraining$dirLesion,"\n")
         stop(errorMess)
     }
 
@@ -146,7 +150,7 @@ training <- function(path.training,background,limb,lesion,method="lda",transform
         svm2 <- svm(group~red+green+blue, data=df.train, kernel ="radial", gamma =10, cost =1.8)
    }
 
-    ## common name for the 3 output files, identique to the directory name
+    ## common name for the 3 output files, identique to the folder name
     basename <- tail(strsplit(path.training,'/')[[1]],1)
 
     ## save results in text file
