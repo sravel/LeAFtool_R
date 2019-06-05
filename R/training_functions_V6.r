@@ -27,6 +27,25 @@
 
 ## library(e1071) only for svm (not implemented)
 
+# To write in log file or show progress if not in parallel mode
+writeLOG <- function(path = NULL, create = FALSE, message = NULL, detail = NULL){
+
+  # if not GUI mode write to log file
+  if (!is.null(path)){
+      if (create == TRUE){
+        # create log file
+        logfilename <- paste0(path,"/log.txt")
+        unlink(logfilename)# Clean up log file from the previous example
+        clearLoggers()# Clean up the loggers from the previous example
+        addDefaultFileLogger(logfilename)
+    }
+    logInfo(paste0(message, detail))
+  }
+#  }else{
+#    logInfo(paste0(message, detail))
+#  }
+}
+
 table2 <- function(x,y) {
     ta <- table(x,y,dnn=c("group","predict"))
     print(ta)
@@ -85,6 +104,7 @@ existDirTraining <- function(dirTraining){
 #' training(path.training, transform=function(x) asin(2*x-1)/pi+0.5)
 #' training(path.training, transform=log1p)
 training <- function(path.training,method="lda",transform=NULL,colormodel="rgb") {
+    writeLOG(path = path.training, create = TRUE, message = "VERSION:", detail = "1.0")
     version <- "6.0"
     stopifnot(method %in% c("lda","qda","svm"))
     stopifnot(colormodel %in% c("rgb","hsv"))
@@ -180,7 +200,6 @@ training <- function(path.training,method="lda",transform=NULL,colormodel="rgb")
     sink()
 
     df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
-    print(head(df4))
 
     ## graph of groups in the discriminant plane
     plotFileTraining1_2 <- paste(path.training,paste0(basename,"1_2.jpeg"),sep='/') ## output file jpeg

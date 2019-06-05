@@ -55,6 +55,22 @@ tabItem(
         ),
         fluidRow(
           verbatimTextOutput("dirTraining", placeholder = FALSE)
+        ),
+        fluidRow(
+          selectInput("inputMethod", "Method:",
+                c("LDA: Linear Discriminant Analysis" = "lda",
+                  "QDA: Quantitative Descriptive Analysis" = "qda")) %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "inputMethod")
+        ),
+        fluidRow(
+          selectInput("inputColorModel", "Color model:",
+                c("RGB: Red Green Blue space" = "rgb",
+                  "HSV: Hue saturation value space" = "hsv")) %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "inputColorModel")
         )
       )
     )

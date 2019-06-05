@@ -185,3 +185,12 @@ returnOdd <- function(value){
 
 # no color for hide ploint of plot on edit mode
 noColor <- rgb(red = 0, green = 0, blue = 1, alpha = 0)
+
+
+existDirTraining <- function(dirTraining){
+  list(
+    dirlimb = dir.exists(paste(dirTraining,"/limb", sep = .Platform$file.sep)),
+    dirBackground = dir.exists(paste(dirTraining,"/background", sep = .Platform$file.sep)),
+    dirLesion = dir.exists(paste(dirTraining,"/lesion", sep = .Platform$file.sep))
+  )
+}

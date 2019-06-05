@@ -28,12 +28,12 @@
 ###############################################
 ## CODE serveur
 ###############################################
-#### Calibration Directory path ####
+#### Training Directory path ####
 
-# option to load directory path bottom for calibration folder
+# option to load directory path bottom for Training folder
 shinyDirChoose(
   input,
-  'dirCalibration',
+  'dirTraining',
   filetypes = c('', 'txt', 'Rdata', "jpeg", "png", "csv", "*"),
   roots = allVolumesAvail,
   session = session,
@@ -43,55 +43,58 @@ shinyDirChoose(
 
 # when click to bottom update path
 observeEvent(
-  input$dirCalibration,{
-    if (!is.integer(input$dirCalibration))
+  input$dirTraining,{
+    if (!is.integer(input$dirTraining))
     {
       # initialize path
-      rv$dirCalibration <- normalizePath(parseDirPath(allVolumesAvail, input$dirCalibration))
-      # return to UI path selected for calibration
-      output$dirCalibration <- renderText({
-        rv$dirCalibration
+      rv$dirTraining <- normalizePath(parseDirPath(allVolumesAvail, input$dirTraining))
+      rv$inputMethod <- input$inputMethod
+      rv$inputColorModel <- input$inputColorModel
+      # return to UI path selected for Training
+      output$dirTraining <- renderText({
+        rv$dirTraining
       })
-      # if reload after first calibration, reset value
+      # if reload after first Training, reset value
       rv$exitStatusCal <- -1
       rv$messCal <- NULL
       rv$errCal <- NULL
       rv$plotALL <- TRUE
 
       # test if all subfolder mandatory
-      listdirCalibration <- existDirCalibration(rv$dirCalibration)
+      listdirTraining <- existDirTraining(rv$dirTraining)
 
       # if all subfolder exist run analysis
-      if(listdirCalibration$dirlimb == TRUE && listdirCalibration$dirBackground == TRUE && listdirCalibration$dirLesion == TRUE){
+      if(listdirTraining$dirlimb == TRUE && listdirTraining$dirBackground == TRUE && listdirTraining$dirLesion == TRUE){
 
         # hide app
         show(id = "loading-content")
         # add progress bar
         progress <- shiny::Progress$new()
         on.exit(progress$close())
-        progress$set(message = 'Making calibration, please wait\n', value = 0)
+        progress$set(message = 'Making Training, please wait\n', value = 0)
         progress$inc(1/7, detail = "Start step 1/6")
 
         ###########################
-        # call function calibration
+        # call function Training
         ###########################
-        training(rv$dirCalibration,method=, transform=NULL, colormodel=)
+        source("/media/sebastien/Bayer/ScriptsSEB/images/R/training_functions_V6.r")
+        training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel)
 
 
-         ## Search subdirectories of rv $ dirCalibration
+         ## Search sub-folders of rv$dirTraining
         progress$inc(2/7, detail = "Load sub-directories 2/6")
-        dirs <- list.dirs(rv$dirCalibration,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
+        dirs <- list.dirs(rv$dirTraining,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
 
         ## Check subDir folder
-        limbDir <- list.dirs(paste0(rv$dirCalibration,"/limb"),full.names=FALSE)[-1]
+        limbDir <- list.dirs(paste0(rv$dirTraining,"/limb"),full.names=FALSE)[-1]
         if (length(limbDir)==0){limbDir = "limb"}
         else { limbDir <- paste0("limb/",limbDir)}
 
-        lesionDir <- list.dirs(paste0(rv$dirCalibration,"/lesion"),full.names=FALSE)[-1]
+        lesionDir <- list.dirs(paste0(rv$dirTraining,"/lesion"),full.names=FALSE)[-1]
         if (length(lesionDir)==0){lesionDir = "lesion"}
         else { lesionDir <- paste0("lesion/",lesionDir)}
 
-        backgroundDir <- list.dirs(paste0(rv$dirCalibration,"/background"),full.names=FALSE)[-1]
+        backgroundDir <- list.dirs(paste0(rv$dirTraining,"/background"),full.names=FALSE)[-1]
         if (length(backgroundDir)==0){backgroundDir = "background"}
         else { backgroundDir <- paste0("background/",backgroundDir)}
 
@@ -113,25 +116,25 @@ observeEvent(
         lda1 <- lda(df2[2:4], df2$group, prior=rep(1,length(group))/length(group))
 
         ## name common to the 3 output files, identical to the name of the directory
-        rv$basename <- tail(strsplit(rv$dirCalibration,'/')[[1]],1)
+        rv$basename <- tail(strsplit(rv$dirTraining,'/')[[1]],1)
 
         ## writing the text file of the results
         progress$inc(5/7, detail = "Write output files (csv,jpeg) 5/6")
-        file.txt <- paste(rv$dirCalibration,paste0(rv$basename,".txt"),sep='/') ## output file texte
+        file.txt <- paste(rv$dirTraining,paste0(rv$basename,".txt"),sep='/') ## output file texte
         sink(file.txt)
         print(table(df2$group))
         print(lda1$scaling)
         df2$predict <- predict(lda1, df2[2:4])$class
         sink()
 
-        rv$outCalibrationCSV <- paste(rv$dirCalibration,paste0(rv$basename,"_info.csv"),sep='/') ## output file csv
-        rv$outCalibrationTable <- as.data.frame.matrix(table(df2$group, df2$predict))
-        write.csv2(rv$outCalibrationTable, file = rv$outCalibrationCSV)
+        rv$outTrainingCSV <- paste(rv$dirTraining,paste0(rv$basename,"_info.csv"),sep='/') ## output file csv
+        rv$outTrainingTable <- as.data.frame.matrix(table(df2$group, df2$predict))
+        write.csv2(rv$outTrainingTable, file = rv$outTrainingCSV)
 
         ## graph of groups in the discriminant plane
-        rv$plotFileCalibration1_2 <- paste(rv$dirCalibration,paste0(rv$basename,"1_2.jpeg"),sep='/') ## output file jpeg
-        rv$plotFileCalibration1_3 <- paste(rv$dirCalibration,paste0(rv$basename,"1_3.jpeg"),sep='/') ## output file jpeg
-        rv$plotFileCalibration2_3 <- paste(rv$dirCalibration,paste0(rv$basename,"2_3.jpeg"),sep='/') ## output file jpeg
+        rv$plotFileTraining1_2 <- paste(rv$dirTraining,paste0(rv$basename,"1_2.jpeg"),sep='/') ## output file jpeg
+        rv$plotFileTraining1_3 <- paste(rv$dirTraining,paste0(rv$basename,"1_3.jpeg"),sep='/') ## output file jpeg
+        rv$plotFileTraining2_3 <- paste(rv$dirTraining,paste0(rv$basename,"2_3.jpeg"),sep='/') ## output file jpeg
         df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
         df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
 
@@ -145,7 +148,7 @@ observeEvent(
         colLesion <- colLesionPalette[1:length(lesionDir)]
 
         # Save picture of Discriminent analysis
-        jpeg(rv$plotFileCalibration1_2,
+        jpeg(rv$plotFileTraining1_2,
           width = 800,
           height = 800,
           quality = 100,
@@ -183,7 +186,7 @@ observeEvent(
           print(g)
           dev.off()
           # Save picture of Discriminent analysis
-          jpeg(rv$plotFileCalibration1_3,
+          jpeg(rv$plotFileTraining1_3,
             width = 800,
             height = 800,
             quality = 100,
@@ -203,7 +206,7 @@ observeEvent(
           print(g)
           dev.off()
           # Save picture of Discriminent analysis
-          jpeg(rv$plotFileCalibration2_3,
+          jpeg(rv$plotFileTraining2_3,
             width = 800,
             height = 800,
             quality = 100,
@@ -233,13 +236,13 @@ observeEvent(
 
         ## sauvegarde de l'analyse
         progress$inc(6/7, detail = "Save analysis into R file 6/6")
-        rv$fileRData <- paste(rv$dirCalibration,paste0(rv$basename,".RData"),sep='/')
+        rv$fileRData <- paste(rv$dirTraining,paste0(rv$basename,".RData"),sep='/')
         rv$exitStatusCal <- 1
         rv$messCal <- rv$fileRData
-        progress$inc(7/7, detail = "End of calibration 6/6")
+        progress$inc(7/7, detail = "End of Training 6/6")
 
        ## sauvegarde des classes
-#        rv$outClassesTXT <- paste(rv$dirCalibration,paste0(rv$basename,"_classes.txt"),sep='/') ## output file csv
+#        rv$outClassesTXT <- paste(rv$dirTraining,paste0(rv$basename,"_classes.txt"),sep='/') ## output file csv
         classes <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
         save(lda1, classes,file=rv$fileRData)
 #        write.table(rv$outClassesTable,rv$outClassesTXT,row.names=FALSE,quote=FALSE,sep='\t')
@@ -249,9 +252,9 @@ observeEvent(
         # print(paste("else inputdir",rv$datapath))
         errorMess <-tags$div("Error not find all sub-folders !!!!:",  tags$br(),
                            tags$ul(
-                             tags$li(paste("limb: ", listdirCalibration$dirlimb)),
-                             tags$li(paste("background: ", listdirCalibration$dirBackground)),
-                             tags$li(paste("lesion: ", listdirCalibration$dirLesion))
+                             tags$li(paste("limb: ", listdirTraining$dirlimb)),
+                             tags$li(paste("background: ", listdirTraining$dirBackground)),
+                             tags$li(paste("lesion: ", listdirTraining$dirLesion))
                            )
         )
         rv$exitStatusCal <- 0
@@ -283,13 +286,13 @@ output$plotALL <- renderText({
 })
 
 output$img1_2 <- renderImage({
-  if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration1_2)){
+  if (rv$exitStatusCal == 0 || is.null(rv$plotFileTraining1_2)){
     return(list(src ="",
          alt = ""))
   }
   else{
     # Return a list containing the filename
-    return(list(src = rv$plotFileCalibration1_2,
+    return(list(src = rv$plotFileTraining1_2,
          width = 800,
          height = 800,
          filetype = "image/jpeg",
@@ -298,13 +301,13 @@ output$img1_2 <- renderImage({
 }, deleteFile = FALSE)
 
 output$img1_3 <- renderImage({
-  if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration1_3)){
+  if (rv$exitStatusCal == 0 || is.null(rv$plotFileTraining1_3)){
     return(list(src ="",
          alt = ""))
   }
   else{
     # Return a list containing the filename
-    return(list(src = rv$plotFileCalibration1_3,
+    return(list(src = rv$plotFileTraining1_3,
          width = 800,
          height = 800,
          filetype = "image/jpeg",
@@ -313,13 +316,13 @@ output$img1_3 <- renderImage({
 }, deleteFile = FALSE)
 
 output$img2_3 <- renderImage({
-  if (rv$exitStatusCal == 0 || is.null(rv$plotFileCalibration2_3)){
+  if (rv$exitStatusCal == 0 || is.null(rv$plotFileTraining2_3)){
     return(list(src ="",
          alt = ""))
   }
   else{
     # Return a list containing the filename
-    return(list(src = rv$plotFileCalibration2_3,
+    return(list(src = rv$plotFileTraining2_3,
          width = 800,
          height = 800,
          filetype = "image/jpeg",
@@ -328,7 +331,7 @@ output$img2_3 <- renderImage({
 }, deleteFile = FALSE)
 
 output$table <- renderTable({
-  rv$outCalibrationTable
+  rv$outTrainingTable
 
 },striped = TRUE, bordered = TRUE,
 align = 'c',
@@ -336,13 +339,13 @@ rownames = TRUE)
 
 output$table2 <- DT::renderDataTable({
 
-  if (is.null(rv$outCalibrationTable)) return(NULL)
-  df <- as.data.frame(rv$outCalibrationTable, stringAsFactors = FALSE, rownames = TRUE)
+  if (is.null(rv$outTrainingTable)) return(NULL)
+  df <- as.data.frame(rv$outTrainingTable, stringAsFactors = FALSE, rownames = TRUE)
   brks <- quantile(df, probs = seq(.05, .95, .05), na.rm = TRUE)
   clrs <- round(seq(255, 40, length.out = length(brks) + 1), 0) %>% {paste0("rgb(255,", ., ",", ., ")")}
 
   DT::datatable(data = df,
-                  caption = 'Table Calibration: The values are the number of pixels.Défine class on row versus predict on columns. Source: LeAFtool',
+                  caption = 'Table Training: The values are the number of pixels.Défine class on row versus predict on columns. Source: LeAFtool',
                   class = 'dt-center compact cell-border',
                   options = list(
                                   columnDefs = list(list(width = '20%', targets = seq(0,length(colnames(df)),1))),
@@ -373,37 +376,37 @@ output$table2 <- DT::renderDataTable({
 # view large plot
 observeEvent(input$img1_2_zoom_cal,
              {
-               addResourcePath("Calibration",rv$dirCalibration) # Images are located outside shiny App
+               addResourcePath("Training",rv$dirTraining) # Images are located outside shiny App
                showModal(      # Information Dialog Box
                  modalDialog(
-                   title = "Output calibration",
+                   title = "Output Training",
                    size = "l",
                    easyClose = TRUE,
-                   img(src=paste0('Calibration/',rv$basename,"1_2.jpeg"), height = "100%")
+                   img(src=paste0('Training/',rv$basename,"1_2.jpeg"), height = "100%")
                 )
                )
              })
 observeEvent(input$img1_3_zoom_cal,
              {
-               addResourcePath("Calibration",rv$dirCalibration) # Images are located outside shiny App
+               addResourcePath("Training",rv$dirTraining) # Images are located outside shiny App
                showModal(      # Information Dialog Box
                  modalDialog(
-                   title = "Output calibration",
+                   title = "Output Training",
                    size = "l",
                    easyClose = TRUE,
-                   img(src=paste0('Calibration/',rv$basename,"1_3.jpeg"), height = "100%")
+                   img(src=paste0('Training/',rv$basename,"1_3.jpeg"), height = "100%")
                 )
                )
              })
 observeEvent(input$img2_3_zoom_cal,
              {
-               addResourcePath("Calibration",rv$dirCalibration) # Images are located outside shiny App
+               addResourcePath("Training",rv$dirTraining) # Images are located outside shiny App
                showModal(      # Information Dialog Box
                  modalDialog(
-                   title = "Output calibration",
+                   title = "Output Training",
                    size = "l",
                    easyClose = TRUE,
-                   img(src=paste0('Calibration/',rv$basename,"2_3.jpeg"), height = "100%")
+                   img(src=paste0('Training/',rv$basename,"2_3.jpeg"), height = "100%")
                 )
                )
              })
