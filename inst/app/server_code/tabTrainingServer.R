@@ -77,7 +77,7 @@ observeEvent(
         ###########################
         # call function Training
         ###########################
-        source("/media/sebastien/Bayer/ScriptsSEB/images/R/training_functions_V6.r")
+        #source("/media/sebastien/Bayer/ScriptsSEB/images/R/training_functions_V6.r")
         training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel)
 
 
