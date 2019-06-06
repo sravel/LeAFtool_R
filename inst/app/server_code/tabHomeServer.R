@@ -11,7 +11,7 @@ observeEvent(input$show,
                )
              })
 
-observeEvent(input$showInCalibration,
+observeEvent(input$showInTraining,
              {
                showModal(
                  # Information Dialog Box
@@ -24,7 +24,7 @@ observeEvent(input$showInCalibration,
                )
              })
 
-observeEvent(input$showCalibration,
+observeEvent(input$showTraining,
              {
                showModal(
                  # Information Dialog Box
