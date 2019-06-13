@@ -85,8 +85,8 @@ max_no_cores <- as.numeric(max(1, detectCores() - 2))
 rv <<- reactiveValues(
                         # for calibration
                         exitStatusCal = -1, messCal = NULL, errCal = NULL,
-                        dirCalibration = NULL, outCalibrationTable = NULL,
-                        outCalibrationCSV = NULL, plotFileCalibration = NULL,
+                        dirTraining = NULL, outTrainingTable = NULL,
+                        outTrainingCSV = NULL, plotFileTraining = NULL,
 #                        # for analysis
                         fileRData = NULL,
                         dirSamples = NULL,

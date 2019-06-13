@@ -33,8 +33,8 @@ library(lattice)
 library(MASS)
 
 ## fonction de lecture des images d'un groupe ; retourne le data.frame des pixels
-load_group <- function(g,pathCalibration) {
-  path_group <- paste(pathCalibration,g,sep='/')
+load_group <- function(g,pathTraining) {
+  path_group <- paste(pathTraining,g,sep='/')
   files_group <- list.files(path_group,full.name=TRUE)
   sample <- lapply(files_group,readImage)
   ## constitution du data frame des pixels échantillonnés
@@ -44,11 +44,11 @@ load_group <- function(g,pathCalibration) {
   do.call(rbind, li)
 }
 
-apprentissage <- function(pathCalibration,...) {
+apprentissage <- function(pathTraining,...) {
   ## Les arguments passés dans "..." doivent être (dans cet ordre) le nom (relatif) des sous-répertoires fond, limb, lésions
-  ## Recherche des sous-répertoires de pathCalibration
+  ## Recherche des sous-répertoires de pathTraining
   progress$inc(2/7, detail = "Load sub-directories 2/6")
-  dirs <- list.dirs(pathCalibration,full.names=FALSE)[-1] ## -1 pour supprimer le premier nom (toujouts vide)
+  dirs <- list.dirs(pathTraining,full.names=FALSE)[-1] ## -1 pour supprimer le premier nom (toujouts vide)
 
   ## vérification de l'existence des sous-répertoires passés en argument
   group <- list(...)
@@ -56,7 +56,7 @@ apprentissage <- function(pathCalibration,...) {
 
   ## constitution du data.frame des pixels des échantillons
   progress$inc(3/7, detail = "Build dataframe with learning 3/6")
-  li <- lapply(group,load_group,pathCalibration)
+  li <- lapply(group,load_group,pathTraining)
   df2 <- do.call(rbind, li)
 
   ## analyse discriminante
@@ -64,34 +64,34 @@ apprentissage <- function(pathCalibration,...) {
   lda1 <- lda(df2[2:4], df2$group)
 
   ## nom commun aux 3 fichiers de sortie, identique au nom du réprtoire
-  basename <- tail(strsplit(pathCalibration,'/')[[1]],1)
+  basename <- tail(strsplit(pathTraining,'/')[[1]],1)
 
   ## écriture du fichier texte des résultats
   progress$inc(5/7, detail = "Write output files (csv,jpeg) 5/6")
-  file.txt <- paste(pathCalibration,paste0(basename,".txt"),sep='/') ## fichier de sortie texte
+  file.txt <- paste(pathTraining,paste0(basename,".txt"),sep='/') ## fichier de sortie texte
   sink(file.txt)
   print(table(df2$group))
   print(lda1$scaling)
   df2$predict <- predict(lda1, df2[2:4])$class
   sink()
 
-  outCalibrationCSV <- paste(pathCalibration,paste0(basename,"_info.csv"),sep='/') ## fichier de sortie csv
-  outCalibrationTable <- as.data.frame.matrix(table(df2$group, df2$predict))
-  write.csv2(outCalibrationTable, file = outCalibrationCSV)
+  outTrainingCSV <- paste(pathTraining,paste0(basename,"_info.csv"),sep='/') ## fichier de sortie csv
+  outTrainingTable <- as.data.frame.matrix(table(df2$group, df2$predict))
+  write.csv2(outTrainingTable, file = outTrainingCSV)
 
   ## graphe des groupes dans le plan discriminant
-  plotFileCalibration <- paste(pathCalibration,paste0(basename,".jpeg"),sep='/') ## fichier de sortie jpeg
+  plotFileTraining <- paste(pathTraining,paste0(basename,".jpeg"),sep='/') ## fichier de sortie jpeg
   df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
 
-  jpeg(plotFileCalibration)
+  jpeg(plotFileTraining)
   print(xyplot(LD2~LD1, group=group, cex=0.8, alpha=1, pch=1, asp=1, auto.key=TRUE, data=df4))
   dev.off()
 
   ## sauvegarde de l'analyse
   progress$inc(6/7, detail = "Save analysis into R file 6/6")
-  fileRData <- paste(pathCalibration,paste0(basename,".RData"),sep='/')
+  fileRData <- paste(pathTraining,paste0(basename,".RData"),sep='/')
   save(lda1,file=fileRData)
-  return(list(code = 1, mess = fileRData,outCalibrationTable = outCalibrationTable, outCalibrationCSV = outCalibrationCSV, fileRData = fileRData,plotFileCalibration = plotFileCalibration))
+  return(list(code = 1, mess = fileRData,outTrainingTable = outTrainingTable, outTrainingCSV = outTrainingCSV, fileRData = fileRData,plotFileTraining = plotFileTraining))
 }
 
 ## Fin de fichier
