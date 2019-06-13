@@ -11,28 +11,28 @@ observeEvent(input$show,
                )
              })
 
-observeEvent(input$showInCalibration,
+observeEvent(input$showInTraining,
              {
                showModal(
                  # Information Dialog Box
                  modalDialog(
-                   title = "Exemple of input folder for calibration",
+                   title = "Exemple of input folder for training",
                    size = "l",
                    easyClose = TRUE,
-                     img(src = "calibrationFolder.png", class='img-responsive')
+                     img(src = "trainingFolder.png", class='img-responsive')
                  )
                )
              })
 
-observeEvent(input$showCalibration,
+observeEvent(input$showTraining,
              {
                showModal(
                  # Information Dialog Box
                  modalDialog(
-                   title = "Exemple of output for calibration",
+                   title = "Exemple of output for training",
                    size = "l",
                    easyClose = TRUE,
-                     img(src = "learning.jpeg", class='img-responsive')
+                     img(src = "training.jpeg", class='img-responsive')
                  )
                )
              })

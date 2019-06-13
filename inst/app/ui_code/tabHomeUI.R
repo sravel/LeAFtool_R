@@ -48,20 +48,20 @@ tabItem(# Tab for Home input/output
           withTags(
             div( class = "TrainingHome",
               h2("Training"),
-              p('Training is the first of two steps to analyse lesions present on the leaves. It begins by creating a learning game and then, carrying out a discriminant factorial analysis.'),
+              p('Training is the first of two steps to analyse lesions present on the leaves. It begins by creating a training game and then, carrying out a discriminant factorial analysis.'),
               p('Important note: the Training folder must contain the sub-folder "background", "limb" and "lesion" with these names (case-sensitive).'),
               p('The current version accepts these three categories of pixels, with  no restriction for sub-categories'),
               p('There is no constraint on the name and the number of the Training image files, the program always reads all .jpg, .jpeg .PNG and .tif files present (not case sensitive for extention).'),
-              p('At the end of the learning phase, three files are created in the Training folder (the first part of the name these files is the name of the folder with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
+              p('At the end of the training phase, three files are created in the Training folder (the first part of the name these files is the name of the folder with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
             )
           ),
           tags$div(
             tags$p("Input exemple:"),
-            actionButton( "showInTraining", class = "btn-img", img(src = "TrainingFolder.png", width = '60%', height = '60%'))
+            actionButton( "showInTraining", class = "btn-img", img(src = "trainingFolder.png", width = '60%', height = '60%'))
           ),
           tags$div(
             tags$p("Output exemple:"),
-            actionButton( "showTraining", class = "btn-img", img(src = "learning.jpeg", width = '60%', height = '60%'))
+            actionButton( "showTraining", class = "btn-img", img(src = "training.jpeg", width = '60%', height = '60%'))
           )
         ),
         column( width = 4, offset = 0,

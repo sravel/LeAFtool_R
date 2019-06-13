@@ -69,183 +69,32 @@ observeEvent(
         # hide app
         show(id = "loading-content")
         # add progress bar
-        progress <- shiny::Progress$new()
-        on.exit(progress$close())
-        progress$set(message = 'Making Training, please wait\n', value = 0)
-        progress$inc(1/7, detail = "Start step 1/6")
+#        progress <- shiny::Progress$new()
+#        on.exit(progress$close())
+#        progress$set(message = 'Making Training, please wait\n', value = 0)
+#        progress$inc(1/7, detail = paste0("Start training on folder: ",rv$dirTraining, " 1/6"))
 
         ###########################
         # call function Training
         ###########################
         source("/media/sebastien/Bayer/ScriptsSEB/images/R/training_functions_V6.r")
-        training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel)
-
-
-         ## Search sub-folders of rv$dirTraining
-        progress$inc(2/7, detail = "Load sub-directories 2/6")
-        dirs <- list.dirs(rv$dirTraining,full.names=FALSE)[-1] ## -1 to delete the first name (always empty)
-
-        ## Check subDir folder
-        limbDir <- list.dirs(paste0(rv$dirTraining,"/limb"),full.names=FALSE)[-1]
-        if (length(limbDir)==0){limbDir = "limb"}
-        else { limbDir <- paste0("limb/",limbDir)}
-
-        lesionDir <- list.dirs(paste0(rv$dirTraining,"/lesion"),full.names=FALSE)[-1]
-        if (length(lesionDir)==0){lesionDir = "lesion"}
-        else { lesionDir <- paste0("lesion/",lesionDir)}
-
-        backgroundDir <- list.dirs(paste0(rv$dirTraining,"/background"),full.names=FALSE)[-1]
-        if (length(backgroundDir)==0){backgroundDir = "background"}
-        else { backgroundDir <- paste0("background/",backgroundDir)}
-
-#        print(limbDir)
-#        print(lesionDir)
-#        print(backgroundDir)
-
-        ## checking the existence of subdirectories passed as arguments
-        group <- c(backgroundDir,limbDir,lesionDir)
-        nbGroups <- length(group)
-
-        ## constitution of the data.frame of the pixels of the samples
-        progress$inc(3/7, detail = "Build dataframe with learning 3/6")
-        li <- lapply(group,load_group)
-        df2 <- do.call(rbind, li)
-
-        ## discriminant analysis
-        progress$inc(4/7, detail = "Build analysis discriminante 4/6")
-        lda1 <- lda(df2[2:4], df2$group, prior=rep(1,length(group))/length(group))
-
+        results <- training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel, mode = "GUI")
+        rv$outTrainingTable <- results$tableTrain
+        rv$errorRate <- results$errorRate
+        print(results)
+        print(rv$outTrainingTable)
+        print(rv$errorRate)
         ## name common to the 3 output files, identical to the name of the directory
         rv$basename <- tail(strsplit(rv$dirTraining,'/')[[1]],1)
-
-        ## writing the text file of the results
-        progress$inc(5/7, detail = "Write output files (csv,jpeg) 5/6")
-        file.txt <- paste(rv$dirTraining,paste0(rv$basename,".txt"),sep='/') ## output file texte
-        sink(file.txt)
-        print(table(df2$group))
-        print(lda1$scaling)
-        df2$predict <- predict(lda1, df2[2:4])$class
-        sink()
-
-        rv$outTrainingCSV <- paste(rv$dirTraining,paste0(rv$basename,"_info.csv"),sep='/') ## output file csv
-        rv$outTrainingTable <- as.data.frame.matrix(table(df2$group, df2$predict))
-        write.csv2(rv$outTrainingTable, file = rv$outTrainingCSV)
 
         ## graph of groups in the discriminant plane
         rv$plotFileTraining1_2 <- paste(rv$dirTraining,paste0(rv$basename,"1_2.jpeg"),sep='/') ## output file jpeg
         rv$plotFileTraining1_3 <- paste(rv$dirTraining,paste0(rv$basename,"1_3.jpeg"),sep='/') ## output file jpeg
         rv$plotFileTraining2_3 <- paste(rv$dirTraining,paste0(rv$basename,"2_3.jpeg"),sep='/') ## output file jpeg
-        df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4])%*%lda1$scaling))
-        df4 <- data.frame(df4, classes=do.call(rbind, strsplit(as.character(df4$group),'/',1))) ## add classes column
 
-        # Palette color for graph
-        colBackPalette <- c("#0000FF","#74D0F1","#26C4EC","#0F9DE8","#1560BD","#0095B6","#00CCCB","#1034A6","#0ABAB5","#1E7FCB")
-        colLimbPalette <- c("#32CD32","#9ACD32","#00FA9A","#008000","#ADFF2F","#6B8E23","#3CB371","#006400","#2E8B57","#00FF00")
-        colLesionPalette <- c("#FF0000","#DB0073","#91283B","#B82010","#FF4901","#AE4A34","#FF0921","#BC2001","#FF5E4D","#E73E01")
-
-        colBack <- colBackPalette[1:length(backgroundDir)]
-        colLimb <- colLimbPalette[1:length(limbDir)]
-        colLesion <- colLesionPalette[1:length(lesionDir)]
-
-        # Save picture of Discriminent analysis
-        jpeg(rv$plotFileTraining1_2,
-          width = 800,
-          height = 800,
-          quality = 100,
-          units = "px")
-
-        if ( nbGroups <= 3){
-          g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes)) +
-                      geom_point() +
-                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                      labs( x = "LD1", y = "LD2",
-                              title = "Add a title above the plot",
-                              caption="Source: LeAFtool", colour = "Groups"
-                          ) +
-                      theme( legend.position = "right",
-                              panel.grid.major = element_blank(),
-                              panel.grid.minor = element_blank()
-                          ) +
-                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
-          print(g)
-          dev.off()
-          rv$plotALL <- FALSE
-        }else{
-          g <- ggplot( data = df4, aes(x = LD1, y = LD2, colour = group, shape = classes.1)) +
-                      geom_point() +
-                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                      labs( x = "LD1", y = "LD2",
-                              title = "Add a title above the plot",
-                              caption="Source: LeAFtool", colour = "Groups"
-                          ) +
-                      theme( legend.position = "right",
-                              panel.grid.major = element_blank(),
-                              panel.grid.minor = element_blank()
-                          ) +
-                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
-          print(g)
-          dev.off()
-          # Save picture of Discriminent analysis
-          jpeg(rv$plotFileTraining1_3,
-            width = 800,
-            height = 800,
-            quality = 100,
-            units = "px")
-          g <- ggplot( data = df4, aes(x = LD1, y = LD3, colour = group, shape = classes.1)) +
-                      geom_point() +
-                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                      labs( x = "LD1", y = "LD3",
-                              title = "Add a title above the plot",
-                              caption="Source: LeAFtool", colour = "Groups"
-                          ) +
-                      theme( legend.position = "right",
-                              panel.grid.major = element_blank(),
-                              panel.grid.minor = element_blank()
-                          ) +
-                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
-          print(g)
-          dev.off()
-          # Save picture of Discriminent analysis
-          jpeg(rv$plotFileTraining2_3,
-            width = 800,
-            height = 800,
-            quality = 100,
-            units = "px")
-          g <- ggplot( data = df4, aes(x = LD2, y = LD3, colour = group, shape = classes.1)) +
-                      geom_point() +
-                      scale_color_manual(values = c(colBack,colLimb,colLesion)) +
-                      labs( x = "LD2", y = "LD3",
-                              title = "Add a title above the plot",
-                              caption="Source: LeAFtool", colour = "Groups"
-                          ) +
-                      theme( legend.position = "right",
-                              panel.grid.major = element_blank(),
-                              panel.grid.minor = element_blank()
-                          ) +
-                      guides(colour = guide_legend(override.aes = list(shape = c(rep(16,length(backgroundDir)),rep(15,length(limbDir)),rep(17,length(lesionDir))))), shape = FALSE, size = FALSE)
-          print(g)
-          dev.off()
-
-#          output$plotly <- renderPlotly({
-#          plot_ly(data = dataTest, x=dataTest$LD1, y=dataTest$LD2, z=dataTest$LD3, type="scatter3d", mode="markers", color = dataTest$group ) %>%
-#            layout(scene = list(xaxis = list(title = 'LD1'),
-#                                yaxis = list(title = 'LD2'),
-#                                zaxis = list(title = 'LD3')))
-#          })
-        }
-
-        ## sauvegarde de l'analyse
-        progress$inc(6/7, detail = "Save analysis into R file 6/6")
         rv$fileRData <- paste(rv$dirTraining,paste0(rv$basename,".RData"),sep='/')
         rv$exitStatusCal <- 1
         rv$messCal <- rv$fileRData
-        progress$inc(7/7, detail = "End of Training 6/6")
-
-       ## sauvegarde des classes
-#        rv$outClassesTXT <- paste(rv$dirTraining,paste0(rv$basename,"_classes.txt"),sep='/') ## output file csv
-        classes <- rbind(data.frame(class="background",subclass=backgroundDir),data.frame(class="limb",subclass=limbDir),data.frame(class="lesion",subclass=lesionDir))
-        save(lda1, classes,file=rv$fileRData)
-#        write.table(rv$outClassesTable,rv$outClassesTXT,row.names=FALSE,quote=FALSE,sep='\t')
 
       }
       else{

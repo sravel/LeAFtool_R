@@ -32,8 +32,7 @@
 ## (called by boundingRectangle)
 rangeNA <<- function(x, object) {
   w <- which(x == object)
-  if (length(w) == 0)
-    return(c(NA, NA))
+  if (length(w) == 0) return(c(NA, NA))
   return(range(w))
 }
 
@@ -45,13 +44,6 @@ boundingRectangle <<- function(mask, object) {
 }
 
 extractLeaf <<- function(i, mask, imageBackgroundBlack, featuresLeaf) {
-  ##### FOR BANANA LEAF #########################################
-#  kern = makeBrush(size = 201)
-#  opening(imageBackgroundBlack, kern)
-  ## DEBUG:  display(imageBackgroundBlack, method = "raster", all = TRUE)
-#  imageBackgroundBlack <- fillHull(imageBackgroundBlack)
- ################################################################
-
   # size of leaf
   surfaceLeaf <- featuresLeaf[row.names(featuresLeaf) %in% c(i),"s.area"]
   leafNum <- featuresLeaf[row.names(featuresLeaf) %in% c(i),"leaf.number"]
@@ -66,8 +58,18 @@ extractLeaf <<- function(i, mask, imageBackgroundBlack, featuresLeaf) {
   list(b = b, XYcoord = XYcoord, leaf = leaf, leaf.surface = surfaceLeaf, leafNum = leafNum)
 }
 
+predict2 <<- function(image,train) { ## returns predicted values according to train
+    df <- data.frame(red=as.numeric(imageData(image)[,,1]), green=as.numeric(imageData(image)[,,2]), blue=as.numeric(imageData(image)[,,3]))
+    if (train$colormodel=="hsv") df <- rgb2hsv2(df)
+    if (!is.null(train$transform)) df[1:3] <- lapply(df,train$transform)
+    if (train$method=="lda" || train$method=="qda")
+        return(predict(train$lda1,df)$class)
+    else if (train$method=="svm")
+        return(predict(train$svm,df))
+}
+
 ## analysis lesion for one leaf
-analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
+analyseLeaf <<- function(x, lesion, limb, filename) {
 
 #  print(paste("leafNum : ", x$leafNum, "    surface leaf : ",x$leaf.surface))
   f <- x$leaf
@@ -75,15 +77,12 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
   ## DEBUG: display(f, method = "raster", all = TRUE)
 
   # replacement of the background by limb
-  df6 <-
-    data.frame(
-      red = as.numeric(imageData(f)[, , 1]),
-      green = as.numeric(imageData(f)[, , 2]),
-      blue = as.numeric(imageData(f)[, , 3])
-    )
-  df6$predict <- predict(lda1, df6)$class
-  df.limb <- df6[df6$predict %in% limb,]
+  limb <- train$classes$subclass[train$classes$class=="limb"]
+  lesion <- train$classes$subclass[train$classes$class=="lesion"]
+  df6 <- data.frame(red=as.numeric(imageData(f)[,,1]), green=as.numeric(imageData(f)[,,2]), blue=as.numeric(imageData(f)[,,3]))
   black.background <- df6$red+df6$green+df6$blue==0
+  prediction <- predict2(f,train)
+  df.limb <- df6[prediction %in% limb & !black.background,]
   mean.limb <- apply(df.limb[1:3],2,mean)
   df6[black.background,1] <- mean.limb[1]
   df6[black.background,2] <- mean.limb[2]
@@ -98,17 +97,17 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
     flo <- makeBrush(rv$blur_value, shape='disc', step=FALSE)^2
     flo <- flo/sum(flo)
     f <- filter2(f, flo)
+    f[f<0] <- 0
   }
 
   # analysis
-  df6 <- data.frame(red=as.numeric(imageData(f)[,,1]), green=as.numeric(imageData(f)[,,2]), blue=as.numeric(imageData(f)[,,3]))
-  df6$predict <- predict(lda1, df6)$class
-  df6$tache <- as.numeric(df6$predict %in% lesion)
+  prediction <- predict2(f, train)
+  patch <- as.numeric(prediction %in% lesion)
   mask <- channel(f, "gray")
-  tache <- matrix(df6$tache, nrow=nrow(imageData(mask)))
-  imageData(mask) <- tache
+  patch.mat <- matrix(patch, nrow=nrow(imageData(mask)))
+  imageData(mask) <- patch.mat
 
-  ## dilation
+  ## dilate
   brush <- makeBrush(rv$lesion_border_size, shape = 'disc')
   mask <- dilate(mask, brush)
 
@@ -183,7 +182,7 @@ analyseLeaf <<- function(x, lda1, lesion, limb, filename) {
 }
 
 # analysis One scan image
-analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
+analyseUniqueFile <<- function(imageSamples, pathResult, pathImages) {
 
   message <- paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples)
   detail <- " Step 2/7 : Reading image sample and apply calibration"
@@ -191,6 +190,16 @@ analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
 
   if (!file.exists(pathResult))
     dir.create(pathResult)
+
+#  ## load trainig results
+#  filename <- tail(strsplit(imageSamples,'/')[[1]],1)
+#  file.train <- paste(imageSamples,'/',filename,".RData",sep='')
+#  load(file.train)
+
+  # LOAD class
+  background <- train$classes$subclass[train$classes$class=="background"]
+  limb <- train$classes$subclass[train$classes$class=="limb"]
+  lesion <- train$classes$subclass[train$classes$class=="lesion"]
 
   # build filename output
   filename <- strsplit(imageSamples, ".", fixed = TRUE)[[1]][1]
@@ -200,10 +209,6 @@ analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
   csv_Merge_lesionsFile <- paste0(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
   csv_All_lesionsFile <- paste0(pathResult, '/', filename, "_All_lesions.csv", sep = '')
 
-  background <- classes$subclass[classes$class=="background"]
-  limb <- classes$subclass[classes$class=="limb"]
-  lesion <- classes$subclass[classes$class=="lesion"]
-
   ## reading the source image
   sourceImage <- paste0(pathImages, '/', imageSamples, sep = '')
   image <- readImage(sourceImage)
@@ -211,28 +216,22 @@ analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
   heightSize = dim(image)[2]
 
   ## prediction on the image (not blurred)
-  df5 <-
-    data.frame(
-      red = as.numeric(imageData(image)[, , 1]),
-      green = as.numeric(imageData(image)[, , 2]),
-      blue = as.numeric(imageData(image)[, , 3])
-    )
-  df5$predict <- predict(lda1, df5)$class
+  prediction <- predict2(image,train)
 
-  ## creating lesions and leafs identifiers
-  df5$lesion <- as.numeric(df5$predict %in% lesion)
-  df5$leaf <- as.numeric(!(df5$predict %in% background))
+  ## create patch and leaf identifiers
+  patch <- as.numeric(prediction %in% lesion)
+  leaf <- as.numeric(!(prediction %in% background))
 
   ## mask of leafs
   maskLeaf <- channel(image, "gray")
-  leaf <- matrix(df5$leaf, nrow = nrow(imageData(maskLeaf)))
+  leaf <- matrix(leaf, nrow = nrow(imageData(maskLeaf)))
   imageData(maskLeaf) <- leaf
 
-  ## empty fill
+  ## fill empty areas
   maskLeaf <- fillHull(maskLeaf)
 
-  ## erosion border removal
-  ## note: tests and calculations are performed on eroded objects
+  ## delete border by erosion
+  ## remark: tests and computations are made with eroded objects
   brush <- makeBrush(rv$leaf_border_size,  shape = 'disc')
   ## next line added to remove parasitic lines due to scan (delete for normal scan)
   if (rv$rmScanLine == TRUE){
@@ -263,7 +262,7 @@ analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
 #  print(featuresLeaf)
 
 
-  ## removal of the background
+  ## delete background
   imageBackgroundBlack <- image
   imageBackgroundBlack[maskLeaf == 0] <- 0
 
@@ -275,7 +274,7 @@ analyseUniqueFile <<- function(imageSamples, pathResult, pathImages, classes) {
   ## analyse des leafs
   detail <- " Step 4/7 : Extract lesion on leaves"
   writeLOG(message,detail)
-  analyse.li <- lapply(li,  analyseLeaf,  lda1 = lda1,  lesion = lesion, limb = limb, filename = filename)
+  analyse.li <- lapply(li,  analyseLeaf, lesion = lesion, limb = limb, filename = filename)
 
   # print both sample and lesion images
   detail <- " Step 5/7 : Generate output images"
@@ -450,7 +449,6 @@ shinyFileChoose(input, 'fileRDataIn',
 observe({
   if (!is.null(rv$fileRData)) {
     load(file = rv$fileRData, envir = .GlobalEnv)
-    rv$classes <- classes
     output$fileRData <- renderText({
       rv$fileRData
     })
@@ -721,25 +719,25 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
       warning(paste("You select more use thread than samples images. auto-ajust to", nbSamples, "Thread"))
     }
 
-    showModal(      # Information Dialog Box
-      modalDialog(
-        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
-        size = "l",
-        easyClose = FALSE,
-        fade = FALSE,
-          h1("LOG"),
-          fluidRow(
-            column(1,
-                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
-                  selectInput("thread", label = "Thread", choices = "1"),
-                  selectInput("package", label = "Package", choices = "packages")
-                  ),
-            column(11,
-                  dataTableOutput("logTable")
-                  )
-          )
-      )
-    )
+#    showModal(      # Information Dialog Box
+#      modalDialog(
+#        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
+#        size = "l",
+#        easyClose = FALSE,
+#        fade = FALSE,
+#          h1("LOG"),
+#          fluidRow(
+#            column(1,
+#                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
+#                  selectInput("thread", label = "Thread", choices = "1"),
+#                  selectInput("package", label = "Package", choices = "packages")
+#                  ),
+#            column(11,
+#                  dataTableOutput("logTable")
+#                  )
+#          )
+#      )
+#    )
 
     # Start parallel session
 #    osSystem <- Sys.info()["sysname"]
@@ -754,7 +752,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     clusterEvalQ(cl, library(EBImage))
     clusterEvalQ(cl, library(MASS))
     clusterEvalQ(cl, library(lattice))
-    clusterExport(cl, varlist=c(".GlobalEnv", "analyseLeaf", "analyseUniqueFile", "boundingRectangle","extractLeaf", "rangeNA", "rv", "lda1", "nbSamples"), envir=environment())
+    clusterExport(cl, varlist=c(".GlobalEnv", "analyseLeaf", "analyseUniqueFile", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "rv", "train", "nbSamples"), envir=environment())
     registerDoParallel(cl)
 
     res <- foreach(imageSamples = listSamples,
@@ -763,7 +761,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
             {
               isolate({
                 rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
-                analyseUniqueFile(imageSamples, rv$dirSamplesOut,  rv$dirSamples, rv$classes)
+                analyseUniqueFile(imageSamples, rv$dirSamplesOut,  rv$dirSamples)
               }) # use isolate to prevente error with reactive values
             }
   #  # Close cluster mode
@@ -780,7 +778,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
     progress$set(value = 0 , detail = paste("Start samples analysis with 1 cores"))
     for (imageSamples in listSamples){
       progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples, " : ",imageSamples), detail = "Step 1/7 Start function")
-      analyseUniqueFile(imageSamples, rv$dirSamplesOut, rv$dirSamples, rv$classes)
+      analyseUniqueFile(imageSamples, rv$dirSamplesOut, rv$dirSamples)
       rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
       if (rv$breakLoop == TRUE) break
     }
