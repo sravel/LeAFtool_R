@@ -4,17 +4,19 @@
 \alias{training}
 \title{Compute and saves on disk the parameters of the training set}
 \usage{
-training(path.training, method = "lda", transform = NULL,
-  colormodel = "rgb")
+training(pathTraining, method = "lda", transform = NULL,
+  colormodel = "rgb", mode = "CMD")
 }
 \arguments{
-\item{path.training}{The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.}
+\item{pathTraining}{The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.}
 
 \item{method}{Method of discrimainant analysis: "lda" (default) or "qda"}
 
 \item{transform}{Function for data transformation before analysis (e.g. sqrt)}
 
 \item{colormodel}{Model of color for the analysis: "rgb" (default) or "hsv"}
+
+\item{mode}{auto selection to switch between GUI or CMD mode Default:"CMD")'.}
 }
 \description{
 Training input folder must include sub-folders:
@@ -26,11 +28,11 @@ Training input folder must include sub-folders:
 This sub-folder can contain either image files or sub-folders containing different groups of image files
 }
 \examples{
-path.training <- '../Exemple_Dominique/CLFD/Samples/Sup'
-training(path.training)
-training(path.training, transform=function(x) log1p(x),colormodel='rgb', method='svm')
-training(path.training, colormodel='hsv', method='lda')
-training(path.training, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
-training(path.training, transform=function(x) asin(2*x-1)/pi+0.5)
-training(path.training, transform=log1p)
+pathTraining <- '../Exemple_Dominique/CLFD/Samples/Sup'
+training(pathTraining)
+training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
+training(pathTraining, colormodel='hsv', method='lda')
+training(pathTraining, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
+training(pathTraining, transform=function(x) asin(2*x-1)/pi+0.5)
+training(pathTraining, transform=log1p)
 }

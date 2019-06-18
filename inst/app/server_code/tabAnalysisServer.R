@@ -28,350 +28,7 @@
 ###############################################
 ## CODE of function for analysis
 ###############################################
-## returns the extreme indices of the object value in the vector x
-## (called by boundingRectangle)
-rangeNA <<- function(x, object) {
-  w <- which(x == object)
-  if (length(w) == 0) return(c(NA, NA))
-  return(range(w))
-}
 
-boundingRectangle <<- function(mask, object) {
-  m <- imageData(mask)
-  range.x <- range(apply(m, 1, rangeNA, object), na.rm = TRUE)
-  range.y <- range(apply(m, 2, rangeNA, object), na.rm = TRUE)
-  list(x = range.x[1]:range.x[2], y = range.y[1]:range.y[2])
-}
-
-extractLeaf <<- function(i, mask, imageBackgroundBlack, featuresLeaf) {
-  # size of leaf
-  surfaceLeaf <- featuresLeaf[row.names(featuresLeaf) %in% c(i),"s.area"]
-  leafNum <- featuresLeaf[row.names(featuresLeaf) %in% c(i),"leaf.number"]
-  b <- boundingRectangle(mask, i)
-  leaf <- imageBackgroundBlack[b$y, b$x,]
-  mask.leaf <- mask[b$y, b$x]
-  leaf[mask.leaf != i] <- 0
-  xCoord <- list(min = min(b$x),max = max(b$x))
-  yCoord <- list(min = min(b$y),max = max(b$y))
-  XYcoord <- list(x = xCoord, y = yCoord)
-
-  list(b = b, XYcoord = XYcoord, leaf = leaf, leaf.surface = surfaceLeaf, leafNum = leafNum)
-}
-
-predict2 <<- function(image,train) { ## returns predicted values according to train
-    df <- data.frame(red=as.numeric(imageData(image)[,,1]), green=as.numeric(imageData(image)[,,2]), blue=as.numeric(imageData(image)[,,3]))
-    if (train$colormodel=="hsv") df <- rgb2hsv2(df)
-    if (!is.null(train$transform)) df[1:3] <- lapply(df,train$transform)
-    if (train$method=="lda" || train$method=="qda")
-        return(predict(train$lda1,df)$class)
-    else if (train$method=="svm")
-        return(predict(train$svm,df))
-}
-
-## analysis lesion for one leaf
-analyseLeaf <<- function(x, lesion, limb, filename) {
-
-#  print(paste("leafNum : ", x$leafNum, "    surface leaf : ",x$leaf.surface))
-  f <- x$leaf
-
-  ## DEBUG: display(f, method = "raster", all = TRUE)
-
-  # replacement of the background by limb
-  limb <- train$classes$subclass[train$classes$class=="limb"]
-  lesion <- train$classes$subclass[train$classes$class=="lesion"]
-  df6 <- data.frame(red=as.numeric(imageData(f)[,,1]), green=as.numeric(imageData(f)[,,2]), blue=as.numeric(imageData(f)[,,3]))
-  black.background <- df6$red+df6$green+df6$blue==0
-  prediction <- predict2(f,train)
-  df.limb <- df6[prediction %in% limb & !black.background,]
-  mean.limb <- apply(df.limb[1:3],2,mean)
-  df6[black.background,1] <- mean.limb[1]
-  df6[black.background,2] <- mean.limb[2]
-  df6[black.background,3] <- mean.limb[3]
-  imageData(f)[,,1] <- df6$red
-  imageData(f)[,,2] <- df6$green
-  imageData(f)[,,3] <- df6$blue
-  # end replace
-
-  # blur image or not
-  if (rv$active_blur == TRUE){
-    flo <- makeBrush(rv$blur_value, shape='disc', step=FALSE)^2
-    flo <- flo/sum(flo)
-    f <- filter2(f, flo)
-    f[f<0] <- 0
-  }
-
-  # analysis
-  prediction <- predict2(f, train)
-  patch <- as.numeric(prediction %in% lesion)
-  mask <- channel(f, "gray")
-  patch.mat <- matrix(patch, nrow=nrow(imageData(mask)))
-  imageData(mask) <- patch.mat
-
-  ## dilate
-  brush <- makeBrush(rv$lesion_border_size, shape = 'disc')
-  mask <- dilate(mask, brush)
-
-  ## empty fill
-  mask <- fillHull(mask)
-
-  ## erosion
-  mask <- erode(mask, brush)
-
-  ## segmentation
-  mask[mask < 0] <- 0
-  mask <- bwlabel(mask)
-  featuresLesion <- computeFeatures.shape(mask)
-  momentsLesion <- computeFeatures.moment(mask)
-
-  ## Remove objects
-  w.small <- w.great <- w.eccentricMin <- w.eccentricMax <- w.edge <- NULL
-
-  ## search for small objects
-  w.small <- which(featuresLesion[,"s.area"] < rv$lesion_min_size)
-  ## search for great objects
-  w.great <- which(featuresLesion[,"s.area"] > rv$lesion_max_size)
-
-  if (rv$rmEdge == TRUE){
-    ## search objets on the edge of the image
-    top <- unique(imageData(mask)[1,])
-    left <- unique(imageData(mask)[,1])
-    bottom <- unique(imageData(mask)[dim(mask)[1],])
-    right <- unique(imageData(mask)[,dim(mask)[2]])
-    w.edge <- unique(c(top, left, bottom, right))
-  }
-
-  # remove eccentric lesions
-  if (rv$rmEccentric == TRUE){
-    w.eccentricMin <- which(momentsLesion[,"m.eccentricity"] < rv$rmEccentricMin)
-    w.eccentricMax <- which(momentsLesion[,"m.eccentricity"] > rv$rmEccentricMax)
-  }
-
-  # apply to maskLesion
-  mask[mask %in% c(w.small, w.great, w.edge, w.eccentricMin, w.eccentricMax)] <- 0
-  maskLesion <- mask
-   ## DEBUG:display(maskLesion, method = "raster", all = TRUE)
-
-  ## renumber objects
-  featuresLesion <- computeFeatures.shape(maskLesion)
-
-  featuresLesionClean <- as.data.frame(featuresLesion)
-  featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
-  featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
-
-  colnames(featuresLesionClean)[which(colnames(featuresLesionClean) %in%
-      c("s.area", "s.perimeter", "s.radius.mean", "s.radius.sd", "s.radius.min", "s.radius.max") )] <-
-      c("lesion.surface", "lesion.perimeter", "lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max")
-
-  # correct coord if multi leaves to edit lesion
-  moments <- as.data.frame(computeFeatures.moment(maskLesion))
-  moments$m.cy <- moments$m.cy + x$XYcoord$x$min - 1
-  moments$m.cx <- moments$m.cx + x$XYcoord$y$min - 1
-
-  moments$lesion.number <- as.numeric(row.names(moments))
-  featuresLesionCleanPos <- merge(featuresLesionClean, moments)
-#  featuresLesionCleanPos$lesion.number <- seq(1,nrow(featuresLesionCleanPos))
-#  row.names(maskLesion) <- seq(1,nrow(maskLesion))
-
-  if (nrow(featuresLesionCleanPos) == 0){
-    featuresLesionCleanPos <- data.frame("lesion.number" = 0, "lesion.surface"= 0, "lesion.perimeter"= 0, "lesion.radius.mean"= 0, "lesion.radius.sd"= 0, "lesion.radius.min"= 0, "lesion.radius.max"= 0, "leaf.surface"= 0, "m.cx"= 0, "m.cy"= 0, "m.majoraxis"= 0, "m.eccentricity"= 0, "m.theta"= 0)
-  }
-
-  outputDF <- data.frame(image=filename,leaf.number = x$leafNum, lesion.status="keep", featuresLesionCleanPos, stringsAsFactors=FALSE)
-
-  list(featuresLesion = featuresLesion, maskLesion = maskLesion, outputDF = outputDF)
-}
-
-# analysis One scan image
-analyseUniqueFile <<- function(imageSamples, pathResult, pathImages) {
-
-  message <- paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples," : ", imageSamples)
-  detail <- " Step 2/7 : Reading image sample and apply calibration"
-  writeLOG(message,detail)
-
-  if (!file.exists(pathResult))
-    dir.create(pathResult)
-
-#  ## load trainig results
-#  filename <- tail(strsplit(imageSamples,'/')[[1]],1)
-#  file.train <- paste(imageSamples,'/',filename,".RData",sep='')
-#  load(file.train)
-
-  # LOAD class
-  background <- train$classes$subclass[train$classes$class=="background"]
-  limb <- train$classes$subclass[train$classes$class=="limb"]
-  lesion <- train$classes$subclass[train$classes$class=="lesion"]
-
-  # build filename output
-  filename <- strsplit(imageSamples, ".", fixed = TRUE)[[1]][1]
-  fileRData <- paste0(pathResult, '/.', filename, ".RData", sep = '')
-  jpegfile <- paste0(pathResult, '/', filename, "_both.jpeg", sep = '')
-  jpegfileOnly <- paste0(pathResult, '/', filename, "_lesion.jpeg", sep = '')
-  csv_Merge_lesionsFile <- paste0(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
-  csv_All_lesionsFile <- paste0(pathResult, '/', filename, "_All_lesions.csv", sep = '')
-
-  ## reading the source image
-  sourceImage <- paste0(pathImages, '/', imageSamples, sep = '')
-  image <- readImage(sourceImage)
-  widthSize = dim(image)[1]
-  heightSize = dim(image)[2]
-
-  ## prediction on the image (not blurred)
-  prediction <- predict2(image,train)
-
-  ## create patch and leaf identifiers
-  patch <- as.numeric(prediction %in% lesion)
-  leaf <- as.numeric(!(prediction %in% background))
-
-  ## mask of leafs
-  maskLeaf <- channel(image, "gray")
-  leaf <- matrix(leaf, nrow = nrow(imageData(maskLeaf)))
-  imageData(maskLeaf) <- leaf
-
-  ## fill empty areas
-  maskLeaf <- fillHull(maskLeaf)
-
-  ## delete border by erosion
-  ## remark: tests and computations are made with eroded objects
-  brush <- makeBrush(rv$leaf_border_size,  shape = 'disc')
-  ## next line added to remove parasitic lines due to scan (delete for normal scan)
-  if (rv$rmScanLine == TRUE){
-    brush2 <- makeBrush(rv$leaf_border_size*2+1,  shape = 'disc')
-    maskLeaf <- dilate(maskLeaf, brush2) ; maskLeaf <- erode(maskLeaf,  brush2)
-  }else{
-    maskLeaf <- erode(maskLeaf,  brush)
-  }
-
-  ## segmentation
-  maskLeaf <- bwlabel(maskLeaf)
-  featuresLeaf <- data.frame(computeFeatures.shape(maskLeaf))
-
-  ## removing objects smaller than the minimum area of a leaf
-  w <- which(featuresLeaf[, "s.area"] < rv$leaf_min_size)
-  if (length(w) > 0) {
-    maskLeaf[maskLeaf %in% w] <- 0
-    featuresLeaf <- featuresLeaf[-w, ]
-  }
-  featuresLeaf$leaf.number <- seq(1, nrow(featuresLeaf))
-  ## DEBUG:  display(maskLeaf, method = "raster", all = TRUE)
-
-  # size of leafs
-  surfaceLeaves <- featuresLeaf["s.area"]
-
-#  print(paste("surface leaves: ", surfaceLeaves))
-#  print(paste("as.numeric(row.names(featuresLeaf)): ", as.numeric(row.names(featuresLeaf))))
-#  print(featuresLeaf)
-
-
-  ## delete background
-  imageBackgroundBlack <- image
-  imageBackgroundBlack[maskLeaf == 0] <- 0
-
-  ## separation of leafs
-  detail <- " Step 3/7 : Extract leaves"
-  writeLOG(message,detail)
-  li <- lapply(as.numeric(row.names(featuresLeaf)), extractLeaf, maskLeaf, imageBackgroundBlack, featuresLeaf)
-
-  ## analyse des leafs
-  detail <- " Step 4/7 : Extract lesion on leaves"
-  writeLOG(message,detail)
-  analyse.li <- lapply(li,  analyseLeaf, lesion = lesion, limb = limb, filename = filename)
-
-  # print both sample and lesion images
-  detail <- " Step 5/7 : Generate output images"
-  writeLOG(message,detail)
-  filePosition <- rv$position
-  if (rv$position == "right"){
-    jpeg(jpegfile,
-         width = widthSize*2,
-         height = heightSize,
-         units = "px")
-    par( mfrow = c(1,2) )
-  }else if (rv$position == "bottum"){
-    jpeg(jpegfile,
-         width = widthSize,
-         height = heightSize*2,
-         units = "px")
-    par( mfrow = c(2,1) )
-  }
-  display(image, method="raster")
-
-  # save Analysis to RData file
-  save(analyse.li,li,filePosition ,file=fileRData)
-
-
-  ## sortie des résultats et coloration des lésions
-  for (i in 1:length(li)){
-    if (i == 1){
-      result <- analyse.li[[i]]$outputDF
-    }else{
-      result <- rbind( result, analyse.li[[i]]$outputDF )
-    }
-
-    maskLesion <- analyse.li[[i]][["maskLesion"]]
-    tmpimage <- image[li[[i]]$b$y, li[[i]]$b$x,]
-    tmpimage <- paintObjects(maskLesion  ,tmpimage, thick=TRUE, col=c(rv$lesion_color_border, rv$lesion_color_bodies), opac=c(rv$lesion_color_borderAlpha, rv$lesion_color_bodiesAlpha))
-    image[li[[i]]$b$y, li[[i]]$b$x,] <- tmpimage
-
-  }
-
-  display(image, method = "raster")
-  dev.off()
-
-  # print only output file image with lesion
-  jpeg(jpegfileOnly,
-       width = widthSize,
-       height = heightSize,
-       units = "px")
-  par( mfrow = c(1,1) )
-  display(image, method = "raster")
-  dev.off()
-
-  detail <- " Step 6/7 : Generate ouput tables"
-  writeLOG(message,detail)
-
-  write.table(
-    result,
-    file = csv_All_lesionsFile,
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
-
-  ag.count <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], length)
-  names(ag.count)[4] <- "lesion.nb"
-#  print(ag.count)
-
-  ag.surface <- aggregate(result$lesion.surface, result[c("image", "leaf.number", "leaf.surface")], sum)
-  names(ag.surface)[4] <- "lesion.surface"
-#  print(ag.surface)
-
- ag <- merge(ag.count, ag.surface)
-  ag$pourcent.lesions <- ag$lesion.surface / ag$leaf.surface * 100
-  ag$lesion.nb[ag$lesion.surface == 0] <- 0
-  ag$lesion.surface[ag$lesion.surface == 0] <- 0
-#  print(ag)
-
-  write.table(
-    ag[order(ag$leaf.number),],
-    file = csv_Merge_lesionsFile,
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
-
-  detail <- " Step 7/7 : Finish sample"
-  writeLOG(message,detail)
-}
-
-# To write in log file or show progress if not in parallel mode
-writeLOG <- function(message,detail){
-
-  if (rv$parallelMode == TRUE){
-    ParallelLogger::logInfo(paste0(message, detail))
-  }else{
-    progress$set(value = rv$c, message = message, detail = detail)
-  }
-}
 ############################################
 ## If folder already open keep the working folder
 ############################################
@@ -438,28 +95,33 @@ updateDirOutAnalysis <- observeEvent(input$dirOut,{
 })
 
 ############################################
-## Load RData file
+## Load Training folder
 ############################################
-shinyFileChoose(input, 'fileRDataIn',
-                roots=ui_volumes,
-                filetypes=c('', 'rdata' , 'RData')
+shinyDirChoose(
+  input, 'dirTrainingIn',
+  roots=ui_volumes,
+  filetypes=c('', 'rdata' , 'RData',"png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
+  session = session,
+  restrictions = system.file(package = 'base')
 )
 
-# Use observe out the event open RfileData to auto load when calibration step before
+# Use observe out the event open dirTraining to auto load when Training step before
 observe({
-  if (!is.null(rv$fileRData)) {
-    load(file = rv$fileRData, envir = .GlobalEnv)
-    output$fileRData <- renderText({
-      rv$fileRData
+  if (!is.null(rv$dirTraining)) {
+    output$dirTrainingIn <- renderText({
+      rv$dirTraining
     })
   }
 })
 
-observeEvent(input$fileRDataIn,{
-  if (!is.integer(input$fileRDataIn))
+observeEvent(input$dirTrainingIn,{
+  if (!is.integer(input$dirTrainingIn))
   {
     resetRun()
-    rv$fileRData <-  normalizePath(as.character(parseFilePaths(roots=ui_volumes, input$fileRDataIn)$datapath), winslash = "\\")
+    if (!is.integer(input$dirTrainingIn))
+    {
+      rv$dirTraining <- normalizePath(parseDirPath(ui_volumes, input$dirTrainingIn))
+    }
   }
 })
 
@@ -626,7 +288,6 @@ observeEvent(input$rmScanLine,{
   rv$rmScanLine <- input$rmScanLine
 })
 
-
 ######### Eccentricity
 observeEvent(input$rmEccentric,{
   rv$rmEccentric <- input$rmEccentric
@@ -641,158 +302,69 @@ observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
 ############################################
 ## run analysis
 ############################################
-
-saveParameters <- function(){
-      # create config file to save input values
-    paramfilename <- file(paste0(rv$dirSamplesOut,"/LeAFtool-parameters-input.txt"))
-    parameters <- paste0(
-              "Samples folder: ",rv$dirSamples,"\n",
-              "Output folder: ",rv$dirSamplesOut,"\n",
-              "file RData: ",rv$fileRData,"\n",
-              "Blur: ",rv$active_blur, " ",rv$blur_value,"\n",
-              "Leaf min size: ",rv$leaf_min_size,"\n",
-              "Leaf border size: ",rv$leaf_border_size,"\n",
-              "rmEdge: ",rv$rmEdge,"\n",
-              "rmEccentric: ",rv$rmEccentric, " ",rv$rmEccentricMin, " ",rv$rmEccentricMax,"\n",
-              "lesion_min_size: ", rv$lesion_min_size,"\n",
-              "lesion_max_size: ", rv$lesion_max_size,"\n",
-              "lesion_border_size: ", rv$lesion_border_size,"\n",
-              "lesion_color_border: ", rv$lesion_color_border,"\n",
-              "lesion_color_bodies: ", rv$lesion_color_bodies,"\n",
-              "parallelMode: ", rv$parallelMode, " ",rv$parallelThreadsNum,"\n"
-               )
-    cat(parameters, '\n', file = paramfilename)
-    close(paramfilename)
-}
-
-#observe({
-
-#  if (input$stopButtonAnalysis == 1){
-#    print("close all")
-#    if (rv$parallelMode == TRUE){
-#      try(parallel::stopCluster(cl), silent = TRUE) # Close cluster mode
-#      closeAllConnections(); # for kill all process, use to add button for stop work
-#      registerDoSEQ()
-#    }
-#  }
-#})
-
-#rv$breakLoop <- eventReactive(input$stopButtonAnalysis, {TRUE})
-
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   ## load values and add loading frame
   disable("runButtonAnalysis")
   rv$exitStatusAna <- 0
   rv$lesion_color_border <- input$lesion_color_border
   rv$lesion_color_bodies <- input$lesion_color_bodies
-  rv$lesion_color_borderAlpha <-col2rgb(input$lesion_color_border, alpha=TRUE)[4]/255
-  rv$lesion_color_bodiesAlpha <-col2rgb(input$lesion_color_bodies, alpha=TRUE)[4]/255
 
   displayableData <- DT::datatable(data = NULL)
   rv$dirInResult <- rv$dirSamplesOut
 
   rv$responseDataFilter <- NULL
 
-  saveParameters()
-
-  #### LOG FILE
+  # reset to 1 if not select parallel mode
+  if (rv$parallelMode == FALSE){
+    rv$parallelThreadsNum <- 1
+  }
   # create log file
-  rv$logfilename <- paste0(rv$dirSamplesOut,"/debug.txt")
-  unlink(rv$logfilename)# Clean up log file from the previous example
-  clearLoggers()# Clean up the loggers from the previous example
-  addDefaultFileLogger(rv$logfilename)
+  rv$logfilename <- paste0(rv$dirSamplesOut,"/log.txt")
 
-  ############################ RUN ANALYSIS
-  # count number of Samples on input directory
-  listSamples <-list.files(rv$dirSamples)
+  output$logfileANA <- renderText(rv$logfilename)
 
-  nbSamples <<- length(listSamples)
-  rv$nbSamplesAnalysis <- 1
   show("loading-content")
 
-  if (rv$parallelMode == TRUE){
-
-    # if less samples than threads, update number of threads to use only max samples
-    if ( rv$parallelThreadsNum > nbSamples){
-      updateNumericInput(session,"parallelThreadsNum", value = nbSamples)
-      rv$parallelThreadsNum <- nbSamples
-      warning(paste("You select more use thread than samples images. auto-ajust to", nbSamples, "Thread"))
-    }
-
-#    showModal(      # Information Dialog Box
-#      modalDialog(
-#        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
-#        size = "l",
-#        easyClose = FALSE,
-#        fade = FALSE,
-#          h1("LOG"),
-#          fluidRow(
-#            column(1,
+    showModal(      # Information Dialog Box
+      modalDialog(
+        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
+        size = "l",
+        easyClose = FALSE,
+        fade = FALSE,
+          h1("LOG"),
+          fluidRow(
+            column(12,
 #                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
 #                  selectInput("thread", label = "Thread", choices = "1"),
 #                  selectInput("package", label = "Package", choices = "packages")
 #                  ),
 #            column(11,
+                  verbatimTextOutput("logfileANA")
 #                  dataTableOutput("logTable")
-#                  )
-#          )
-#      )
-#    )
+                  )
+          )
+      )
+    )
 
-    # Start parallel session
-#    osSystem <- Sys.info()["sysname"]
-#    if (osSystem == "Darwin" || osSystem == "Linux") {
-    cl <- makeCluster(rv$parallelThreadsNum)
-#    }
-#    else if (osSystem == "Windows") {
-#      cl <- makeCluster(rv$parallelThreadsNum, type = "PSOCK")
-#    }
-    ## load libraries on workers
-    clusterEvalQ(cl, library(shiny))
-    clusterEvalQ(cl, library(EBImage))
-    clusterEvalQ(cl, library(MASS))
-    clusterEvalQ(cl, library(lattice))
-    clusterExport(cl, varlist=c(".GlobalEnv", "analyseLeaf", "analyseUniqueFile", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "rv", "train", "nbSamples"), envir=environment())
-    registerDoParallel(cl)
+#  source("/media/sebastien/Bayer/ScriptsSEB/images/R/analysis_functions_v6.r")
+  analyseImages(pathTraining = rv$dirTraining,
+                          pathResult = rv$dirSamplesOut,
+                          pathImages = rv$dirSamples,
+                          fileImage = NA,
+                          leafAreaMin = rv$leaf_min_size,
+                          leafBorder = rv$leaf_border_size,
+                          lesionBorder = rv$lesion_border_size,
+                          lesionAreaMin = rv$lesion_min_size,
+                          lesionAreaMax = rv$lesion_max_size,
+                          lesionEccentricityMin = rv$lesion_eccentricMin,
+                          lesionEccentricityMax = rv$lesion_eccentricMax,
+                          lesionColorBorder = rv$lesion_color_border,
+                          lesionColorBodies = rv$lesion_color_bodies,
+                          blurDiameter = rv$blur_value,
+                          outPosition = rv$position,
+                          parallelThreadsNum = rv$parallelThreadsNum,
+                          mode="GUI")
 
-    res <- foreach(imageSamples = listSamples,
-            .export = c(".GlobalEnv"),
-            .combine = c)  %dopar%
-            {
-              isolate({
-                rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
-                analyseUniqueFile(imageSamples, rv$dirSamplesOut,  rv$dirSamples)
-              }) # use isolate to prevente error with reactive values
-            }
-  #  # Close cluster mode
-    stopCluster(cl)
-    closeAllConnections(); # for kill all process, use to add button for stop work
-    registerDoSEQ()
-#    removeModal()
-
-  }else{
-    progress <<- shiny::Progress$new(session, min = 1, max = nbSamples+1)
-    on.exit(progress$close())
-    rv$breakLoop <- FALSE
-    # if not cluster mode do sample by sample on one core
-    progress$set(value = 0 , detail = paste("Start samples analysis with 1 cores"))
-    for (imageSamples in listSamples){
-      progress$set(value = rv$nbSamplesAnalysis, message = paste("Analysis leaf ", rv$nbSamplesAnalysis, " / ", nbSamples, " : ",imageSamples), detail = "Step 1/7 Start function")
-      analyseUniqueFile(imageSamples, rv$dirSamplesOut, rv$dirSamples)
-      rv$nbSamplesAnalysis <- rv$nbSamplesAnalysis + 1
-      if (rv$breakLoop == TRUE) break
-    }
-    progress$set( value = rv$nbSamplesAnalysis, message = "Analysis Finish ")
-  }
-
-  mymergeddata = multmerge(rv$dirSamplesOut, "*_Merge_lesions.csv")
-  write.table(
-    mymergeddata,
-    file = paste0(rv$dirSamplesOut,"/merge_ResumeCount.csv"),
-    quote = FALSE,
-    row.names = FALSE,
-    sep = '\t'
-  )
   rv$exitStatusAna <- 1
   enable("runButtonAnalysis")
 
@@ -819,8 +391,12 @@ img_uri1 <- function(x) {
   }
 }
 img_uri2 <- function(x) {
+
+  x <- base64enc::dataURI(file = x, mime = "image/jpeg")
+  print(x)
+  x
 #  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
-  sprintf("<img src='LesionColor/%s' height='60'></img>", x)
+#  sprintf("<img src='LesionColor/%s' height='60'></img>", x)
 }
 
 
@@ -830,7 +406,6 @@ output$contents <- DT::renderDataTable({
   if (rv$exitStatusAna == 1){
 
     LeafNames <- list.files(rv$dirSamples, full.names=FALSE)
-
     rv$LeafNamesFull <-  unlist(lapply(list.files(rv$dirSamples, full.names=FALSE),img_uri1), use.names=FALSE)
     LeafNames2 <- list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg")
     rv$LeafNames2Full <-  unlist(lapply(list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg"),img_uri2), use.names=FALSE)

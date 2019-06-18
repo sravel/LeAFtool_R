@@ -88,7 +88,6 @@ rv <<- reactiveValues(
                         dirTraining = NULL, outTrainingTable = NULL,
                         outTrainingCSV = NULL, plotFileTraining = NULL,
 #                        # for analysis
-                        fileRData = NULL,
                         dirSamples = NULL,
                         dirSamplesOut = NULL,
 
@@ -122,14 +121,6 @@ rv <<- reactiveValues(
                         plotCexColor = "green",
                         selectedRows = 0
                         )
-
-
-# function to merge dataframe
-multmerge = function(mypath, pattern){
-  filenames=list.files(path=mypath, full.names=TRUE, pattern = pattern)
-  datalist = lapply(filenames, function(x){read.csv(file=x,header=T, sep="\t")})
-  Reduce(function(x,y) {rbind(x,y)}, datalist)
-}
 
 # function derive from shinyFiles to load Home on linux and home for MACOS
 getOwnVolume <- function (exclude=NULL){

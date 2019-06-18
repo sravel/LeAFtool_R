@@ -13,7 +13,7 @@ Author: Sebastien RAVEL [aut, cre],
 Maintainer: Sebastien RAVEL <sebastien.ravel@cirad.fr>
 Description: Main interface of Count Lesion Tools.
 Depends: R (>= 3.4.0), EBImage, shiny, shinydashboard, shinyFiles, DT, shinyjs, shinyFeedback, shinyhelper, colourpicker, shinyjqui, lattice, MASS, ggplot2, foreach, doParallel, RCurl, ParallelLogger
-License: LGPL-3.0 | LICENCE file
+License: LGPL-3 | file LICENSE
 Encoding: UTF-8
 RoxygenNote: 6.1.1
 LazyData: true

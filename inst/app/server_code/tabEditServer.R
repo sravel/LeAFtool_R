@@ -28,6 +28,14 @@
 ############################################
 ## Output Directory path of analysis
 ############################################
+
+# function to merge dataframe
+multmerge = function(mypath, pattern){
+  filenames=list.files(path=mypath, full.names=TRUE, pattern = pattern)
+  datalist = lapply(filenames, function(x){read.csv(file=x,header=T, sep="\t")})
+  Reduce(function(x,y) {rbind(x,y)}, datalist)
+}
+
 shinyDirChoose(
   input,'dirInResult',
   filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG"),

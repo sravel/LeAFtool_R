@@ -8,8 +8,6 @@ runtime: shiny
 
 ***
 
-<script src='http://mathscribe.com/mathscribe/jqmath-etc-0.4.0.min.js?config=default'></script>
-
 Elliptical eccentricity defined by
 $${√(1-{minoraxis^2}/{majoraxis^2})}$$
 

@@ -42,7 +42,7 @@ logInfo("Hello to LeAFtool !!!!")
 
 shinyServer(function(input, output, session) {
 
-  observe_helpers() # active help icon
+  observe_helpers(withMathJax = TRUE) # active help icon
 
   # Load functions for tab Training
   source(file.path("server_code", "tabTrainingServer.R"), local = TRUE)$value

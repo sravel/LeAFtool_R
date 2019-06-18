@@ -50,15 +50,15 @@ tabItem(
           verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
-          shinyFilesButton('fileRDataIn', label='Load calibration file', title='Please select Rdata file', multiple=T, class = "btn-default", icon = icon("balance-scale")) %>%
+          shinyDirButton('dirTrainingIn', label='Load training folder', title='Please select training file', FALSE, class = "btn-default", icon = icon("balance-scale")) %>%
             helper(icon = "question",
                 type = "markdown",
-                content = "fileRDataIn"),
-          verbatimTextOutput('fileRData', placeholder = TRUE)
+                content = "dirTrainingIn"),
+          verbatimTextOutput('dirTrainingIn', placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
           conditionalPanel(
-            condition = "output.dirSamples && output.dirOutAnalysis && output.fileRData",
+            condition = "output.dirSamples && output.dirOutAnalysis && output.dirTrainingIn",
             actionButton("runButtonAnalysis", "Run Analysis", icon = icon("play-circle "))
 #            actionButton("stopButtonAnalysis",  label = "Stop Analysis", icon = icon("dashboard"))
 #            verbatimTextOutput('log', placeholder = FALSE)

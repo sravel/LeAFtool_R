@@ -48,5 +48,5 @@ runLeAFtoolGUI <- function() {
   }
 
   if(Sys.getenv('SHINY_PORT') == "") options(shiny.maxRequestSize=10000*1024^2)
-  runApp(appDir = appDir,launch.browser = TRUE)
+  shiny::runApp(appDir = appDir,launch.browser = TRUE)
 }

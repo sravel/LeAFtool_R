@@ -78,13 +78,10 @@ observeEvent(
         # call function Training
         ###########################
 
-        source("/media/sebastien/Bayer/ScriptsSEB/images/R/training_functions_V6.r")
+#        source("/media/sebastien/Bayer/ScriptsSEB/images/R/training_functions_V6.r")
         results <- training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel, mode = "GUI")
         rv$outTrainingTable <- results$tableTrain
         rv$errorRate <- results$errorRate
-        #print(results)
-        #print(rv$outTrainingTable)
-        #print(rv$errorRate)
 
         ## name common to the 3 output files, identical to the name of the directory
         rv$basename <- tail(strsplit(rv$dirTraining,'/')[[1]],1)
