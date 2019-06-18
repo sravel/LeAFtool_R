@@ -387,16 +387,13 @@ img_uri1 <- function(x) {
   if ( ext == "tif"){
     sprintf("Tiff not support by browser", x)
   }else{
-    sprintf("<img src='Original/%s' height='60'></img>", x)
+  sprintf("<img src='%s/%s' height='60'></img>", rv$randomNameOriginal, x)
   }
 }
 img_uri2 <- function(x) {
 
-  x <- base64enc::dataURI(file = x, mime = "image/jpeg")
-  print(x)
-  x
 #  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
-#  sprintf("<img src='LesionColor/%s' height='60'></img>", x)
+  sprintf("<img src='%s/%s' height='60'></img>", rv$randomNameLesionColor, x)
 }
 
 
@@ -405,15 +402,17 @@ output$contents <- DT::renderDataTable({
 
   if (rv$exitStatusAna == 1){
 
+    rv$randomNameOriginal <- paste0("Original",runif(1, min=0, max=999))
+    rv$randomNameLesionColor <- paste0("LesionColor",runif(1, min=0, max=999))
     LeafNames <- list.files(rv$dirSamples, full.names=FALSE)
     rv$LeafNamesFull <-  unlist(lapply(list.files(rv$dirSamples, full.names=FALSE),img_uri1), use.names=FALSE)
     LeafNames2 <- list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg")
     rv$LeafNames2Full <-  unlist(lapply(list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg"),img_uri2), use.names=FALSE)
 
-
     if (LeafNames != '' && LeafNames2 != '' && length(LeafNames) == length(LeafNames2)){
-      addResourcePath("Original",rv$dirSamples) # Images are located outside shiny App
-      addResourcePath("LesionColor",rv$dirSamplesOut) # Images are located outside shiny App
+
+      addResourcePath(rv$randomNameOriginal,rv$dirSamples) # Images are located outside shiny App
+      addResourcePath(rv$randomNameLesionColor,rv$dirSamplesOut) # Images are located outside shiny App
 
       rv$responseDataFilter <- data.frame(LeafNames = LeafNames,
                               Original = rv$LeafNamesFull,
