@@ -221,8 +221,8 @@ multmerge = function(mypath, pattern){
 #' @param pathImages The path of the directory containing the images to analyse.
 #' @param fileImage A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).
 #' @param leafAreaMin The minimum area of a leaf (in pixels) Default:1000.
-#' @param leafBorder The diameter of the brush (in pixels) used to erode the leafBorder Default:5.
-#' @param lesionBorder The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.
+#' @param leafBorder The diameter of the brush (in pixels) used to erode the leafBorder  odd number Default:5.
+#' @param lesionBorder The diameter of the brush (in pixels) used to erode the lesionBorder  odd number Default:3.
 #' @param lesionAreaMin The minimum area of a lesion (in pixels) Default:10.
 #' @param lesionAreaMax The maximum area of a lesion (in pixels) Default:120000.
 #' @param lesionEccentricityMin The minimum eccentricity of a lesion Default:0.
