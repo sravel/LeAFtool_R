@@ -346,7 +346,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
       )
     )
 
-#  source("/media/sebastien/Bayer/ScriptsSEB/images/R/analysis_functions_v6.r")
+  source("../../R/analysis_functions_v6.r")
   analyseImages(pathTraining = rv$dirTraining,
                           pathResult = rv$dirSamplesOut,
                           pathImages = rv$dirSamples,
