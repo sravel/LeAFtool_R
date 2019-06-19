@@ -78,7 +78,7 @@ observeEvent(
         # call function Training
         ###########################
 
-        source("../../R/training_functions_V6.r")
+#        source("../../R/training_functions_V6.r")
         results <- training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel, mode = "GUI")
         rv$outTrainingTable <- results$tableTrain
         rv$errorRate <- results$errorRate
