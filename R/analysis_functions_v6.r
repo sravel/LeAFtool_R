@@ -177,7 +177,7 @@ analyseLeaf <- function(x,train,lesionBorder,lesionAreaMin,lesionAreaMax,lesionE
   featuresLesion <- EBImage::computeFeatures.shape(maskLesion)
 
   featuresLesionClean <- as.data.frame(featuresLesion)
-  featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
+#  featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
   featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
 
   colnames(featuresLesionClean)[which(colnames(featuresLesionClean) %in%
@@ -195,10 +195,10 @@ analyseLeaf <- function(x,train,lesionBorder,lesionAreaMin,lesionAreaMax,lesionE
   #  row.names(maskLesion) <- seq(1,nrow(maskLesion))
 
   if (nrow(featuresLesionCleanPos) == 0){
-    featuresLesionCleanPos <- data.frame("lesion.number" = 0, "lesion.surface"= 0, "lesion.perimeter"= 0, "lesion.radius.mean"= 0, "lesion.radius.sd"= 0, "lesion.radius.min"= 0, "lesion.radius.max"= 0, "leaf.surface"= 0, "m.cx"= 0, "m.cy"= 0, "m.majoraxis"= 0, "m.eccentricity"= 0, "m.theta"= 0)
+    featuresLesionCleanPos <- data.frame("lesion.number" = 0, "lesion.surface"= 0, "lesion.perimeter"= 0, "lesion.radius.mean"= 0, "lesion.radius.sd"= 0, "lesion.radius.min"= 0, "lesion.radius.max"= 0, "m.cx"= 0, "m.cy"= 0, "m.majoraxis"= 0, "m.eccentricity"= 0, "m.theta"= 0)
   }
 
-  outputDF <- data.frame(image=filename,leaf.number = x$leafNum, lesion.status="keep", featuresLesionCleanPos, stringsAsFactors=FALSE)
+  outputDF <- data.frame(image=filename,leaf.number = x$leafNum, leaf.surface = x$leaf.surface, lesion.status="keep", featuresLesionCleanPos, stringsAsFactors=FALSE)
 
   list(featuresLesion = featuresLesion, maskLesion = maskLesion, outputDF = outputDF)
 }
@@ -301,7 +301,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
     # Start parallel session
     osSystem <- Sys.info()["sysname"]
     if (osSystem == "Darwin" || osSystem == "Linux") {
-      cl <- ParallelLogger::makeCluster(parallelThreadsNum)
+      cl <- parallel::makeCluster(parallelThreadsNum, type="FORK")
     }
     else if (osSystem == "Windows") {
       warning(paste("You run parallel mode but on windows you can't', so run with 1 thread"))
