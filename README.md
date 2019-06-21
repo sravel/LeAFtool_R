@@ -53,7 +53,69 @@ runLeAFtool()
 
 ## Running LeAFtool without GUI (call direct function)
 
+### Training
+```
+library(LeAFtool)
+training(pathTraining, method = "lda", transform = NULL,
+  colormodel = "rgb")
+```
+* pathTraining	The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
+* method	Method of discrimainant analysis: "lda" (default) or "qda"
+* transform	 transformation before analysis (e.g. sqrt)
+* colormodel	 Model of color for the analysis: "rgb" (default) or "hsv"
 
+```
+## Examples
+
+pathTraining <- '../Exemple_Dominique/CLFD/Samples/Sup'
+training(pathTraining)
+training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
+training(pathTraining, colormodel='hsv', method='lda')
+training(pathTraining, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
+training(pathTraining, transform=function(x) asin(2*x-1)/pi+0.5)
+training(pathTraining, transform=log1p)
+```
+
+### Analysis
+```
+library(LeAFtool)
+analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
+  leafAreaMin = 1000, leafBorder = 5, lesionBorder = 3,
+  lesionAreaMin = 10, lesionAreaMax = 120000,
+  lesionEccentricityMin = 0, lesionEccentricityMax = 1,
+  lesionColorBorder = "#0000FF11", lesionColorBodies = "#FE8E0000",
+  blurDiameter = 0, outPosition = "right", parallelThreadsNum = 1)
+```
+* pathTraining	The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.
+* pathResult	The path of the directory where to store the result files (created by the function if it does not exist).
+* pathImages	The path of the directory containing the images to analyse.
+* fileImage	A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).
+* leafAreaMin	The minimum area of a leaf (in pixels) Default:1000.
+* leafBorder	The diameter of the brush (in pixels) used to erode the leafBorder Default:5.
+* lesionBorder	The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.
+* lesionAreaMin	The minimum area of a lesion (in pixels) Default:10.
+* lesionAreaMax	The maximum area of a lesion (in pixels) Default:120000.
+* lesionEccentricityMin	The minimum eccentricity of a lesion Default:0.
+* lesionEccentricityMax	The maximum eccentricity of a lesion Default:1.
+* lesionColorBorder	hexadecimal code for output fill color for lesion in the output image Default:#0000FF (blue).
+* lesionColorBodies	hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).
+* blurDiameter	The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.
+* outPosition	join origale and color lesion image at right or buttom Default:right)'.
+* parallelThreadsNum	number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
+
+```
+## Examples
+
+analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
+             pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
+             pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=22)
+
+analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
+              pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
+              pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples",
+              leafAreaMin = 600,
+              leafBorder = 130,
+              parallelThreadsNum = 22)
 
 ## User manual
 
