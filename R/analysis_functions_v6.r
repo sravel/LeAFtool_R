@@ -28,6 +28,7 @@
 ## load packages
 library(EBImage)
 library(MASS)
+library(doParallel)
 ## library(e1071) only for svm (not implemented)
 
 # To write in log file or show progress if not in parallel mode
@@ -301,28 +302,32 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
     # Start parallel session
     osSystem <- Sys.info()["sysname"]
     if (osSystem == "Darwin" || osSystem == "Linux") {
-      cl <- parallel::makeCluster(parallelThreadsNum, type="FORK")
+      cl <- parallel::makeForkCluster(parallelThreadsNum)
     }
     else if (osSystem == "Windows") {
       warning(paste("You run parallel mode but on windows you can't', so run with 1 thread"))
-      cl <- ParallelLogger::makeCluster(parallelThreadsNum)
+      parallelThreadsNum <- 1
+      for (fileImage in listSamples){
+        analyseImageUnique(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum)
+        nbSamplesAnalysis <- nbSamplesAnalysis + 1
+      }
     }
     ## load libraries on workers
-    parallel::clusterEvalQ(cl, library(shiny))
-    parallel::clusterEvalQ(cl, library(EBImage))
-    parallel::clusterEvalQ(cl, library(MASS))
-    parallel::clusterEvalQ(cl, library(lattice))
-    parallel::clusterExport(cl, varlist=c(".GlobalEnv", "analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
+#    parallel::clusterEvalQ(cl, library(shiny))
+#    parallel::clusterEvalQ(cl, library(EBImage))
+#    parallel::clusterEvalQ(cl, library(MASS))
+#    parallel::clusterEvalQ(cl, library(lattice))
+#    parallel::clusterExport(cl, varlist=c(".GlobalEnv", "analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
     doParallel::registerDoParallel(cl)
 
     res <- foreach::foreach(fileImage = listSamples,
-            .export = c(".GlobalEnv"),
+#            .export = c(".GlobalEnv"),
             .combine = c)  %dopar%
             {
               analyseImageUnique(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum)
             }
   #  # Close cluster mode
-    ParallelLogger::stopCluster(cl)
+    parallel::stopCluster(cl)
     closeAllConnections(); # for kill all process, use to add button for stop work
     foreach::registerDoSEQ()
     parallelThreadsNum <- 1
