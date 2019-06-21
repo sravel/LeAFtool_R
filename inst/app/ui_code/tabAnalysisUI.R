@@ -98,10 +98,10 @@ tabItem(
       column(width = 2,offset = 0,
       ### Lesion parameters
         h3("Lesions parameters:"),
-        checkboxInput("rmEdge", "Remove edge", value = FALSE, width = "150px") %>%
-          helper(icon = "question",
-                type = "markdown",
-                content = "rmEdge"),
+#        checkboxInput("rmEdge", "Remove edge", value = FALSE, width = "150px") %>%
+#          helper(icon = "question",
+#                type = "markdown",
+#                content = "rmEdge"),
         checkboxInput("rmEccentric", "Remove eccentric", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",
