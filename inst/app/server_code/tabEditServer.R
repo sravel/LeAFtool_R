@@ -330,33 +330,60 @@ output$zoomcurrentImageEdit <- renderPlot({
 output$results <- DT::renderDataTable({
 
   if (is.null(rv$loadCSVcurrentImage)) return(NULL)
+
+  # a custom table container
+  sketch = htmltools::withTags(table(
+    class = 'display',
+    thead(
+      tr(
+        th(rowspan = 2, 'Image'),
+        th(colspan = 2, 'Leaf'),
+        th(colspan = 14, 'Lesion')
+      ),
+      tr(
+        th('Number'),
+        th('Surface'),
+        th('Status'),
+        th('Number'),
+        th('Surface'),
+        th('Perimeter'),
+        th('Radius Mean'),
+        th('Radius  SD'),
+        th('Radius Min'),
+        th('Radius Max'),
+        th('Coord x'),
+        th('Coord y'),
+        th('Major axis'),
+        th('Eccentricity'),
+        th('Theta')
+      )
+    )
+  ))
+#  print(sketch)
+
+
   DT::datatable(data = as.data.frame(rv$loadCSVcurrentImage, stringAsFactors = FALSE),
                                      rownames = NULL,
+                                     container = sketch,
                                      escape=FALSE,
                                      selection = list("multiple"),#, selected = rv$selectedRows),
-                                     style = "bootstrap",
-                                     filter = list(position = 'top', clear = TRUE, plain = FALSE),
+                                     style = 'bootstrap', class = 'table-condensed ',
+                                     filter = list(position = 'top', clear = FALSE, plain = TRUE),
                                      options = list(
                                        paging=TRUE,searching = TRUE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
-                                     )
+#                                        dom = 'Bfrtip'
+                                      )
+
+
   ) %>%
   formatStyle(
     'lesion.status',
     backgroundColor = styleEqual(c("keep","remove"), c('green', 'red'))
   ) %>%
-  formatRound(c("lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max", "m.cx", "m.cy", "m.majoraxis", "m.eccentricity", "m.theta"), 2)
+  formatRound(c("lesion.radius.mean", "lesion.radius.sd", "lesion.radius.min", "lesion.radius.max", "m.cx", "m.cy", "m.majoraxis", "m.theta"), 2
+  ) %>%
+  formatRound(c("m.eccentricity"), 4)
 })
-
-### use proxy to modifie datatable
-proxy = dataTableProxy('results')
-
-#  observeEvent(input$select1, {
-#    proxy %>% selectRows(as.numeric(input$rows))
-#  })
-
-  observeEvent(input$deselectAll, {
-    proxy %>% selectRows(NULL)
-  })
 
 #### ALL lesion merge by leaf for selected image
 output$AG <- DT::renderDataTable({
@@ -518,6 +545,17 @@ observeEvent(c(input$results_rows_all,input$results_rows_selected), {
   rv$missing <- rv$loadCSVcurrentImage[-(input$results_rows_all),]
   if(nrow(rv$missing) == 0){disable("removeFilter")}
   else {enable("removeFilter")}
+
+  rv$select <- rv$loadCSVcurrentImage[input$results_rows_selected,]
+  if(nrow(rv$select) == 0){
+    disable("removeSelect")
+    disable("keepSelect")
+  }
+  else {
+    enable("removeSelect")
+    enable("keepSelect")
+  }
+
   updateColorPlotCex()
 },ignoreNULL = TRUE, ignoreInit = TRUE)
 
@@ -535,4 +573,31 @@ observeEvent(input$resetKeep,{
 observeEvent(input$removeAll,{
   keep <-  rv$loadCSVcurrentImage[(rv$loadCSVcurrentImage$lesion.status=="keep"),]
   updateAll(keep)
+})
+
+### use proxy to modifie datatable
+proxy = dataTableProxy('results')
+
+#  observeEvent(input$select1, {
+#    proxy %>% selectRows(as.numeric(input$rows))
+#  })
+
+## debug
+#output$info = renderPrint({
+#  list(rows = input$results_rows_selected, columns = input$results_columns_selected, MAT = rv$loadCSVcurrentImage[input$results_rows_selected,])
+#})
+
+#use to remove selection on table
+observeEvent(input$removeSelect, {
+  toRemove <-  rv$select[(rv$select$lesion.status=="keep"),]
+  updateAll(toRemove)
+})
+#use to kepp selection on table
+observeEvent(input$keepSelect, {
+  toKeep <-  rv$select[(rv$select$lesion.status=="remove"),]
+  updateAll(toKeep)
+})
+
+observeEvent(input$deselectAll, {
+proxy %>% selectRows(NULL)
 })

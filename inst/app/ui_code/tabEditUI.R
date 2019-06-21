@@ -109,7 +109,7 @@ tabItem(
             plotOutput("plotcurrentImageEdit",click = "plot_click",
                       dblclick = "plot_dbclick",
                       brush = brushOpts(id = "plot_brush", delay = 10000, delayType = "debounce", resetOnNew = TRUE),
-                      hover = hoverOpts(id = "plot_hover", delay = 800, delayType = "debounce")
+                      hover = hoverOpts(id = "plot_hover", delay = 400, delayType = "debounce")
             )
           )
         ),
@@ -122,10 +122,13 @@ tabItem(
         fluidRow( class = "spaceRow",
           column(width = 12,offset = 0,
   #          textOutput("coor"),
+            actionButton("removeSelect", strong("Remove Select")),
+            actionButton("keepSelect", strong("Keep Select")),
             actionButton("deselectAll", strong("Deselect All")),
             actionButton("removeFilter", strong("Remove filter")),
             actionButton("resetKeep", strong("Keep all")),
             actionButton("removeAll", strong("Remove all")),
+#            verbatimTextOutput('info'),
             div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
           )
         )
