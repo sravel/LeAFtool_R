@@ -67,7 +67,7 @@ training(pathTraining, method = "lda", transform = NULL,
 ```
 ## Examples
 
-pathTraining <- '../Exemple_Dominique/CLFD/Samples/Sup'
+pathTraining <- '/media/sebastien/LaAFtool/exemples/exemple1/learning'
 training(pathTraining)
 training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
 training(pathTraining, colormodel='hsv', method='lda')
@@ -106,13 +106,13 @@ analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
 ```
 ## Examples
 
-analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
-             pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
-             pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=22)
+analyseImages(pathTraining = "/media/sebastien/LaAFtool/exemples/exemple1/learning",
+             pathResult = "/media/sebastien/LaAFtool/exemples/exemple1/results",
+             pathImages = "/media/sebastien/LaAFtool/exemples/exemple1/samples", parallelThreadsNum=22)
 
-analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
-              pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
-              pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples",
+analyseImages(pathTraining = "/media/sebastien/LaAFtool/exemples/exemple1/learning",
+              pathResult = "/media/sebastien/LaAFtool/exemples/exemple1/results",
+              pathImages = "/media/sebastien/LaAFtool/exemples/exemple1/samples",
               leafAreaMin = 600,
               leafBorder = 130,
               parallelThreadsNum = 22)
