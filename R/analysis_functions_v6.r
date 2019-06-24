@@ -210,6 +210,11 @@ multmerge = function(mypath, pattern){
   Reduce(function(x,y) {rbind(x,y)}, datalist)
 }
 
+checkParameters <- function(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition){
+
+
+}
+
 
 #' Analyse an image or a set of images
 #'
@@ -269,22 +274,25 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
              )
-    cmd <- paste0("pathTraining=",pathTraining,"pathResult=",pathResult,"pathImages=",pathImages,
-                "leafAreaMin=",leafAreaMin,
-                "leafBorder=",leafBorder,
-                "lesionBorder=",lesionBorder,
-                "lesionAreaMin=",lesionAreaMin,
-                "lesionAreaMax=",lesionAreaMax,
-                "lesionEccentricityMin=",lesionEccentricityMin,
-                "lesionEccentricityMax=",lesionEccentricityMax,
-                "lesionColorBorder=",lesionColorBorder,
-                "lesionColorBodies=",lesionColorBodies,
-                "blurDiameter=",blurDiameter,
-                "outPosition=",outPosition,
-                "parallelThreadsNum=",parallelThreadsNum)
-  cat(parameters, '\n', file = paramfilename)
-  cat(cmd, '\n', file = paramfilename)
+    cmd <- paste0("pathTraining = ",pathTraining,", pathResult = ",pathResult,", pathImages = ",pathImages,
+                ", leafAreaMin = ",leafAreaMin,
+                ", leafBorder = ",leafBorder,
+                ", lesionBorder = ",lesionBorder,
+                ", lesionAreaMin = ",lesionAreaMin,
+                ", lesionAreaMax = ",lesionAreaMax,
+                ", lesionEccentricityMin = ",lesionEccentricityMin,
+                ", lesionEccentricityMax = ",lesionEccentricityMax,
+                ", lesionColorBorder = ",lesionColorBorder,
+                ", lesionColorBodies = ",lesionColorBodies,
+                ", blurDiameter = ",blurDiameter,
+                ", outPosition = ",outPosition,
+                ", parallelThreadsNum = ",parallelThreadsNum)
+  cat(paste0(parameters,"\n",cmd), '\n', file = paramfilename)
   close(paramfilename)
+  ############################ Check parameters
+  # count number of Samples on input directory
+
+
 
   ############################ RUN ANALYSIS
   # count number of Samples on input directory
@@ -315,7 +323,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
     # Start parallel session
     osSystem <- Sys.info()["sysname"]
     if (osSystem == "Darwin" || osSystem == "Linux") {
-      cl <- parallel::makeForkCluster(parallelThreadsNum)
+      cl <- ParallelLogger::makeForkCluster(parallelThreadsNum)
     }
     else if (osSystem == "Windows") {
       warning(paste("You run parallel mode but on windows you can't', so run with 1 thread"))
@@ -340,7 +348,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
               analyseImageUnique(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum)
             }
   #  # Close cluster mode
-    parallel::stopCluster(cl)
+    stopCluster(cl)
     closeAllConnections(); # for kill all process, use to add button for stop work
     foreach::registerDoSEQ()
     parallelThreadsNum <- 1
