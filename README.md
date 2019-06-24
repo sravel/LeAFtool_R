@@ -116,6 +116,7 @@ analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple
               leafAreaMin = 600,
               leafBorder = 130,
               parallelThreadsNum = 22)
+```
 
 ## User manual
 
