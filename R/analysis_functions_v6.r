@@ -28,7 +28,6 @@
 ## load packages
 library(EBImage)
 library(MASS)
-library(doParallel)
 ## library(e1071) only for svm (not implemented)
 
 # To write in log file or show progress if not in parallel mode
@@ -270,7 +269,21 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
              )
+    cmd <- paste0("pathTraining=",pathTraining,"pathResult="pathResult,"pathImages=",pathImages,
+                "leafAreaMin="leafAreaMin,
+                "leafBorder="leafBorder,
+                "lesionBorder="lesionBorder,
+                "lesionAreaMin="lesionAreaMin,
+                "lesionAreaMax="lesionAreaMax,
+                "lesionEccentricityMin="lesionEccentricityMin,
+                "lesionEccentricityMax="lesionEccentricityMax,
+                "lesionColorBorder="lesionColorBorder,
+                "lesionColorBodies="lesionColorBodies,
+                "blurDiameter="blurDiameter,
+                "outPosition="outPosition,
+                "parallelThreadsNum="parallelThreadsNum))
   cat(parameters, '\n', file = paramfilename)
+  cat(cmd, '\n', file = paramfilename)
   close(paramfilename)
 
   ############################ RUN ANALYSIS
