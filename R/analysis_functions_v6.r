@@ -270,18 +270,18 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
             "parallelMode: ", parallelThreadsNum,"\n"
              )
     cmd <- paste0("pathTraining=",pathTraining,"pathResult="pathResult,"pathImages=",pathImages,
-                "leafAreaMin="leafAreaMin,
-                "leafBorder="leafBorder,
-                "lesionBorder="lesionBorder,
-                "lesionAreaMin="lesionAreaMin,
-                "lesionAreaMax="lesionAreaMax,
-                "lesionEccentricityMin="lesionEccentricityMin,
-                "lesionEccentricityMax="lesionEccentricityMax,
-                "lesionColorBorder="lesionColorBorder,
-                "lesionColorBodies="lesionColorBodies,
-                "blurDiameter="blurDiameter,
-                "outPosition="outPosition,
-                "parallelThreadsNum="parallelThreadsNum))
+                "leafAreaMin=",leafAreaMin,
+                "leafBorder=",leafBorder,
+                "lesionBorder=",lesionBorder,
+                "lesionAreaMin=",lesionAreaMin,
+                "lesionAreaMax=",lesionAreaMax,
+                "lesionEccentricityMin=",lesionEccentricityMin,
+                "lesionEccentricityMax=",lesionEccentricityMax,
+                "lesionColorBorder=",lesionColorBorder,
+                "lesionColorBodies=",lesionColorBodies,
+                "blurDiameter=",blurDiameter,
+                "outPosition=",outPosition,
+                "parallelThreadsNum=",parallelThreadsNum))
   cat(parameters, '\n', file = paramfilename)
   cat(cmd, '\n', file = paramfilename)
   close(paramfilename)
