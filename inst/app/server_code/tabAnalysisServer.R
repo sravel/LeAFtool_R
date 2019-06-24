@@ -334,12 +334,13 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
           h1("LOG"),
           fluidRow(
             column(12,
+            p("running please wait...")
 #                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
 #                  selectInput("thread", label = "Thread", choices = "1"),
 #                  selectInput("package", label = "Package", choices = "packages")
 #                  ),
 #            column(11,
-                  verbatimTextOutput("logfileANA")
+#                  verbatimTextOutput("logfileANA")
 #                  dataTableOutput("logTable")
                   )
           )
