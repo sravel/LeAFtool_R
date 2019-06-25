@@ -116,14 +116,14 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
         on.exit(progress$close())
       }
 
-    writeLOG( path = pathTraining, create = TRUE, message = "Training run, please wait", detail = "VERSION: 1.0", mode = mode, progress = progress)
+    writeLOG( path = pathTraining, create = TRUE, message = "Training run, please wait ", detail = "VERSION: 1.0", mode = mode, progress = progress)
     version <- "1.0"
 
     if (!(method %in% c("lda", "qda", "svm"))){
       stop(paste(method," is not valid value for method, please only use 'lda' or 'qda'"))
     }
     if (!(colormodel %in% c("rgb", "hsv"))){
-      stop(paste(colormodel," is not valid value for colormodel, please only use 'rga' or 'hsv'"))
+      stop(paste(colormodel," is not valid value for colormodel, please only use 'rgb' or 'hsv'"))
     }
 
     listdirTraining <- existDirTraining(pathTraining)
@@ -219,8 +219,11 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
 
     ## save results in text file
     file.txt <- paste(pathTraining, paste0(basename, ".txt"), sep = '/') ## text output file
+    transformTXT <- paste("'",transform,"'")
+    if (is.null(transform)) transformTXT <- "NULL"
     sink(file.txt)
     cat("Version", version, '\n')
+    cat(paste0("training(pathTraining = '",pathTraining,"', method = '",method,"', transform = ",transformTXT,", colormodel = '",colormodel,"')"), '\n')
     if (!is.null(transform)) {
       cat("transform:\n")
       print(transform)
