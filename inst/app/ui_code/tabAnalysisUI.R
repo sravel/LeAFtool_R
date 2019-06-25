@@ -50,10 +50,10 @@ tabItem(
           verbatimTextOutput("dirOutAnalysis", placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",
-          shinyDirButton('dirTrainingIn', label='Load training folder', title='Please select training file', FALSE, class = "btn-default", icon = icon("balance-scale")) %>%
+          shinyDirButton('dirTrainingIn', label='Load training folder', title='Please select training folder', FALSE, class = "btn-default", icon = icon("balance-scale")) %>%
             helper(icon = "question",
                 type = "markdown",
-                content = "dirTrainingIn"),
+                content = "dirTraining"),
           verbatimTextOutput('dirTrainingIn', placeholder = TRUE)
         ),
         fluidRow( class = "spaceRow",

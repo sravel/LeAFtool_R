@@ -31,28 +31,28 @@ tabItem(
   tabName = "tabEdit",
   # BOX SELECT EDIT
   box( title = "Edit Input", status = "success", solidHeader = TRUE, collapsible = TRUE, width = 12,
-    fluidRow( class = "spaceRow",
+    fluidRow( #class = "spaceRow",
       column(width = 5,offset = 0,
         shinyDirButton(id = 'dirInResult', label = 'Select Input results folder', title = 'Please select a folder', FALSE, class = "btn-default") %>%
           helper(icon = "question",
                 type = "markdown",
-                content = "dirInResult"),
+                content = "dirOut"),
         verbatimTextOutput("dirInResult", placeholder = TRUE),
         selectInput("imageEdit", "Sample image:",NULL)
         ),
       column(width = 2,offset = 0,
-        checkboxInput("pchOriginal", "Add lesion number", value = FALSE, width = "150px") %>%
-          helper(icon = "question",
-                type = "markdown",
-                content = "pchOriginal"),
-        checkboxInput("zoomOriginalCheck", "Zoom Original Image", value = FALSE, width = "150px") %>%
-          helper(icon = "question",
-                type = "markdown",
-                content = "zoomOriginalCheck"),
-        sliderInput("zoomValueSlider", "Zoom nX", min = 2, max = 9, value = 2, step = 1, width = "150px") %>%
-            helper(icon = "question",
-                  type = "markdown",
-                  content = "zoomValueSlider")
+        checkboxInput("pchOriginal", "Add lesion number", value = FALSE, width = "150px") #%>%
+#          helper(icon = "question",
+#                type = "markdown",
+#                content = "pchOriginal"),
+        checkboxInput("zoomOriginalCheck", "Zoom Original Image", value = FALSE, width = "150px") #%>%
+#          helper(icon = "question",
+#                type = "markdown",
+#                content = "zoomOriginalCheck"),
+        sliderInput("zoomValueSlider", "Zoom nX", min = 2, max = 9, value = 2, step = 1, width = "150px") #%>%
+#            helper(icon = "question",
+#                  type = "markdown",
+#                  content = "zoomValueSlider")
       ),
       column(width = 2, offset = 0,
         fluidRow(
@@ -66,7 +66,7 @@ tabItem(
                         allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
               helper(icon = "question",
                       type = "markdown",
-                      content = "lesion_color_borderEdit")
+                      content = "lesion_color_border")
             ),
           column(width = 6, offset = 0,
             tags$label("bodies"),
@@ -75,7 +75,7 @@ tabItem(
                         allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
               helper(icon = "question",
                       type = "markdown",
-                      content = "lesion_color_bodiesEdit")
+                      content = "lesion_color_bodies")
           )
         )
       ),
@@ -83,7 +83,7 @@ tabItem(
         fluidRow(
           tags$label("Plot adjust")
         ),
-        fluidRow( class = "spaceRow",
+        fluidRow( #class = "spaceRow",
           sliderInput("plotCexSize", "Plot cex size", min = 1, max = 4, value = 2, step = 0.5, width = "150px"), #%>%
 #            helper(icon = "question",
 #                  type = "markdown",
@@ -127,8 +127,12 @@ tabItem(
             actionButton("deselectAll", strong("Deselect All")),
             actionButton("removeFilter", strong("Remove filter")),
             actionButton("resetKeep", strong("Keep all")),
-            actionButton("removeAll", strong("Remove all")),
-#            verbatimTextOutput('info'),
+            actionButton("removeAll", strong("Remove all"))
+#            verbatimTextOutput('info')
+          )
+        ),
+        fluidRow( class = "spaceRow",
+          column(width = 12,offset = 0,
             div(style = 'overflow-x: scroll', DT::dataTableOutput("results", width = "100%"))
           )
         )

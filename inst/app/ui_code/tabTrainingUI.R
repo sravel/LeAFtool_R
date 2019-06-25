@@ -95,15 +95,16 @@ tabItem(
           column(8,
                 tags$div(class = "infoDiv", "File Rdata build and mandatory for analysis images:",
 #                  verbatimTextOutput("plotALL",placeholder = FALSE),
-                  verbatimTextOutput("mess",placeholder = FALSE)
+                  textOutput("mess")
                 )
           )
         ),
         fluidRow( class = "spaceRow",
           column(12,
-#            tags$div(class = "infoDiv","input class VS predict class:",
-                 DT::dataTableOutput("table2", width = "50%")
-#            )
+            tags$div(class = "infoDiv",
+                 DT::dataTableOutput("table2", width = "50%"),
+                  textOutput("errorRate")
+            )
           )
         ),
         fluidRow( class = "spaceRow",
