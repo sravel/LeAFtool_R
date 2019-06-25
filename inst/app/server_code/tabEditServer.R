@@ -36,6 +36,10 @@ multmerge = function(mypath, pattern){
   Reduce(function(x,y) {rbind(x,y)}, datalist)
 }
 
+
+############################################
+## Load ouput results folder
+############################################
 shinyDirChoose(
   input,'dirInResult',
   filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG"),
@@ -43,10 +47,19 @@ shinyDirChoose(
   session = session,
   restrictions = system.file(package = 'base')
 )
-# To add file path in UI
-output$dirInResult <- renderText({
-  rv$dirInResult
+
+# Use observe out the event open dirTraining to auto load when Training step before
+observe({
+  if (!is.null(rv$dirInResult)) {
+
+    loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
+    updateSelectInput(session, "imageEdit", label = NULL, choices = loadImageEdit)
+    output$dirInResult <- renderText({
+      rv$dirInResult
+    })
+  }
 })
+
 # extract file Path on input and update list of images
 observeEvent(input$dirInResult,{
   if (!is.integer(input$dirInResult))
@@ -54,14 +67,16 @@ observeEvent(input$dirInResult,{
     rv$dirInResult <- normalizePath(parseDirPath(ui_volumes, input$dirInResult))
   }
 })
-# Update list of image
+
+# Update path if previous step is run
 observe({
-  if (!is.null(rv$dirInResult))
+  if (!is.null(rv$dirSamplesOut))
   {
-    loadImageEdit <- list.files(rv$dirInResult, full.names=FALSE, pattern = "*_lesion.jpeg")
-    updateSelectInput(session, "imageEdit", label = NULL, choices = loadImageEdit)
+    rv$dirInResult <- rv$dirSamplesOut
   }
 })
+
+
 ## COLOR change
 observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
     rv$lesion_color_borderEdit <- input$lesion_color_borderEdit
