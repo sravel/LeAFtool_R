@@ -90,7 +90,7 @@
 	position: absolute;
 	background: #000000;
 	opacity: 1;
-	z-index: 200;
+	z-index: 510;
 	left: 0;
 	right: 0;
 	height: 100%;
@@ -263,3 +263,20 @@ slider color
 
                             /* changes the colour of the number tags */
                            .irs-from, .irs-to, .irs-single { background: #00a65a }
+
+
+.shinyhelper-container {
+	position: absolute;
+	top: 0;
+	right: 10px;
+	z-index: 500;
+	width: 0;
+	height: 10px;
+	padding: 0;
+	background-color: transparent;
+	background-repeat: no-repeat;
+	border: none;
+	cursor: pointer;
+	vertical-align: top;
+	color: #0a3a87;
+}
