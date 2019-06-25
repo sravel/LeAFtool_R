@@ -317,6 +317,10 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   if (rv$parallelMode == FALSE){
     rv$parallelThreadsNum <- 1
   }
+  # if no blur change to 0
+  if (rv$active_blur == FALSE){
+    rv$blur_value <- 0
+  }
   # create log file
   rv$logfilename <- paste0(rv$dirSamplesOut,"/log.txt")
 
