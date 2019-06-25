@@ -33,14 +33,16 @@
 ## If folder already open keep the working folder
 ############################################
 ui_volumes <- function() {
-  sel_path <- dirname(parseDirPath(allVolumesAvail, input$dirInSamples))
-  allVolumesAvail <- getOwnVolume()
-  if (length(sel_path) > 0 && !sel_path %in% allVolumesAvail) {
-    vnames <- c(basename(sel_path), names(allVolumesAvail))
-    setNames(c(sel_path, allVolumesAvail), vnames)
-  } else {
+
+#  allVolumesAvail2 <- getOwnVolume()
+#  sel_path <- dirname(parseDirPath(allVolumesAvail2, input$dirInSamples))
+#  print(sel_path)
+#  if (length(sel_path) > 0 && !sel_path %in% allVolumesAvail2) {
+#    vnames <- c(basename(sel_path), names(allVolumesAvail2))
+#    setNames(c(sel_path, allVolumesAvail2), vnames)
+#  } else {
     allVolumesAvail
-  }
+#  }
 }
 
 resetRun <- function() {
@@ -118,10 +120,7 @@ observeEvent(input$dirTrainingIn,{
   if (!is.integer(input$dirTrainingIn))
   {
     resetRun()
-    if (!is.integer(input$dirTrainingIn))
-    {
-      rv$dirTraining <- normalizePath(parseDirPath(ui_volumes, input$dirTrainingIn))
-    }
+    rv$dirTraining <- normalizePath(parseDirPath(ui_volumes, input$dirTrainingIn))
   }
 })
 
