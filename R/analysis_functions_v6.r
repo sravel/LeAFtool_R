@@ -36,7 +36,7 @@ writeLOGAnalysis <- function(path = NULL, create = FALSE, message = NULL, detail
     if (!is.null(path)){
       if (create == TRUE) {
         # create log file
-        logfilename <- paste0(path, "/log.txt")
+        logfilename <- base::normalizePath(paste0(path, "/log.txt"), winslash = "/")
         unlink(logfilename)# Clean up log file from the previous example
         ParallelLogger::clearLoggers()# Clean up the loggers from the previous example
         ParallelLogger::addDefaultFileLogger(logfilename)
@@ -245,6 +245,11 @@ checkParameters <- function(pathTraining,pathResult,pathImages,fileImage,leafAre
 #' pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=4)
 analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAreaMin=1000,leafBorder=5,lesionBorder=3,lesionAreaMin=10,lesionAreaMax=120000,lesionEccentricityMin=0,lesionEccentricityMax=1,lesionColorBorder="#0000FF11",lesionColorBodies="#FE8E0000",blurDiameter=0, outPosition="right", parallelThreadsNum=1, mode="CMD") {
 
+  # transforme to full path with slash for window or linux
+  pathTraining <- base::normalizePath(pathTraining, winslash = "/")
+  pathResult <- base::normalizePath(pathResult, winslash = "/")
+  pathImages <- base::normalizePath(pathImages, winslash = "/")
+
   progress <- NULL
   # auto-detect number of core on computer
   max_no_cores <- as.numeric(max(1, parallel::detectCores() - 2))
@@ -274,7 +279,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
              )
-    cmd <- paste0("pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,
+    cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,
                 "', leafAreaMin = ",leafAreaMin,
                 ", leafBorder = ",leafBorder,
                 ", lesionBorder = ",lesionBorder,
@@ -286,7 +291,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
                 "', lesionColorBodies = '",lesionColorBodies,
                 "', blurDiameter = ",blurDiameter,
                 ", outPosition = '",outPosition,
-                "', parallelThreadsNum = ",parallelThreadsNum)
+                "', parallelThreadsNum = ",parallelThreadsNum,")")
   cat(paste0(parameters,"\n",cmd), '\n', file = paramfilename)
   close(paramfilename)
   ############################ Check parameters
@@ -307,7 +312,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
 
   nbSamples <- length(listSamples)
   nbSamplesAnalysis <- 1
-  if (parallelThreadsNum > 1){
+  if (parallelThreadsNum >= 1){
 
     # if less samples than threads or computer can, update number of threads to use only max samples
     if ( parallelThreadsNum > max_no_cores){
@@ -319,45 +324,32 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
       warning(paste("You select more use thread than samples images. auto-ajust to", nbSamples, "threads"))
     }
 
-
     # Start parallel session
     osSystem <- Sys.info()["sysname"]
-    if (osSystem == "Darwin" || osSystem == "Linux") {
-      cl <- ParallelLogger::makeForkCluster(parallelThreadsNum)
-    }
-    else if (osSystem == "Windows") {
-      warning(paste("You run parallel mode but on windows you can't', so run with 1 thread"))
-      parallelThreadsNum <- 1
-      for (fileImage in listSamples){
-        analyseImageUnique(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum)
-        nbSamplesAnalysis <- nbSamplesAnalysis + 1
-      }
+    if (osSystem == "Darwin" || osSystem == "Linux" || osSystem == "Windows") {
+      library(ParallelLogger)
+      cl <- ParallelLogger::makeCluster(numberOfThreads = parallelThreadsNum, singleThreadToMain = FALSE, divideFfMemory = FALSE, setFfTempDir = FALSE)
     }
     ## load libraries on workers
-#    parallel::clusterEvalQ(cl, library(shiny))
-#    parallel::clusterEvalQ(cl, library(EBImage))
-#    parallel::clusterEvalQ(cl, library(MASS))
-#    parallel::clusterEvalQ(cl, library(lattice))
-#    parallel::clusterExport(cl, varlist=c(".GlobalEnv", "analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
-    doParallel::registerDoParallel(cl)
+    ParallelLogger::clusterRequire(cl, "shiny")
+    ParallelLogger::clusterRequire(cl, "EBImage")
+    ParallelLogger::clusterRequire(cl, "MASS")
+    ParallelLogger::clusterRequire(cl, "lattice")
+    ParallelLogger::clusterRequire(cl, "ParallelLogger")
+    ParallelLogger::clusterRequire(cl, "shinyjs")
+#    ParallelLogger::clusterRequire(cl, "LeAFtool")
+    parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
+#    doParallel::registerDoParallel(cl)
 
-    res <- foreach::foreach(fileImage = listSamples,
-#            .export = c(".GlobalEnv"),
-            .combine = c)  %dopar%
-            {
-              analyseImageUnique(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum)
-            }
+    res <- ParallelLogger::clusterApply(cl, listSamples, analyseImageUnique, pathTraining, pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum, stopOnError = FALSE, progressBar = TRUE)
+
+
   #  # Close cluster mode
-    stopCluster(cl)
-    closeAllConnections(); # for kill all process, use to add button for stop work
-    foreach::registerDoSEQ()
+    ParallelLogger::stopCluster(cl)
+#    closeAllConnections(); # for kill all process, use to add button for stop work
+#    foreach::registerDoSEQ()
     parallelThreadsNum <- 1
-  }else{
-    # if not cluster mode do sample by sample on one core
-    for (fileImage in listSamples){
-      analyseImageUnique(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum)
-      nbSamplesAnalysis <- nbSamplesAnalysis + 1
-    }
+#    print(res)
   }
 
   mymergeddata = multmerge(pathResult, "*_Merge_lesions.csv")
@@ -370,7 +362,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
   )
 }
 
-analyseImageUnique <- function(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
+analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
 
   # check params:
   lesionColorBorderAlpha <-grDevices::col2rgb(lesionColorBorder, alpha=TRUE)[4]/255
@@ -383,8 +375,9 @@ analyseImageUnique <- function(pathTraining,pathResult,pathImages,fileImage,leaf
   writeLOGAnalysis(path = pathResult, message = message, detail = detail, mode = mode, value = 1, progress = progress, parallelThreadsNum = parallelThreadsNum)
 
   ## load trainig results
-  basename <- utils::tail(strsplit(pathTraining, '/')[[1]], 1)
-  file.train <- paste(pathTraining,'/',basename,".RData",sep='')
+  basename <- utils::tail(strsplit(pathTraining, .Platform$file.sep)[[1]], 1)
+
+  file.train <-  base::normalizePath(paste0(pathTraining,'/',basename,".RData"),winslash = "/")
   load(file.train)
 
   # LOAD class
@@ -394,14 +387,14 @@ analyseImageUnique <- function(pathTraining,pathResult,pathImages,fileImage,leaf
 
   # build filename output
   filename <- strsplit(fileImage, ".", fixed = TRUE)[[1]][1]
-  fileRData <- paste0(pathResult, '/.', filename, ".RData", sep = '')
-  jpegfile <- paste0(pathResult, '/', filename, "_both.jpeg", sep = '')
-  jpegfileOnly <- paste0(pathResult, '/', filename, "_lesion.jpeg", sep = '')
-  csv_Merge_lesionsFile <- paste0(pathResult, '/', filename, "_Merge_lesions.csv", sep = '')
-  csv_All_lesionsFile <- paste0(pathResult, '/', filename, "_All_lesions.csv", sep = '')
+  fileRData <-  paste0(pathResult, .Platform$file.sep, '.', filename, ".RData")
+  jpegfile <-  paste0(pathResult, .Platform$file.sep, filename, "_both.jpeg")
+  jpegfileOnly <-  paste0(pathResult, .Platform$file.sep, filename, "_lesion.jpeg", sep = '')
+  csv_Merge_lesionsFile <- paste0(pathResult, .Platform$file.sep, filename, "_Merge_lesions.csv")
+  csv_All_lesionsFile <- paste0(pathResult, .Platform$file.sep, filename, "_All_lesions.csv")
 
   ## reading the source image
-  sourceImage <- paste0(pathImages, '/', fileImage, sep = '')
+  sourceImage <- paste0(pathImages, .Platform$file.sep, fileImage, sep = '')
   image <- EBImage::readImage(sourceImage)
   widthSize = dim(image)[1]
   heightSize = dim(image)[2]
@@ -441,6 +434,19 @@ analyseImageUnique <- function(pathTraining,pathResult,pathImages,fileImage,leaf
       maskLeaf[maskLeaf %in% w] <- 0
       featuresLeaf <- featuresLeaf[-w,]
   }
+
+#  ## Check if leaf on image:
+#  shiny::validate(
+#    shiny::need(nrow(featuresLeaf) != 0,
+#          paste0("no leaf found for image ", fileImage))
+#  )
+
+  if (nrow(featuresLeaf) == 0){
+#    if (mode == "GUI") alert(paste0("no leaf found for image ", fileImage))
+    logError( paste0("no leaf found for image ", fileImage))
+    return(1)
+  }
+
   # renumber leaves
   featuresLeaf$leaf.number <- seq(1, nrow(featuresLeaf))
   ## DEBUG:  EBImage::display(maskLeaf, method = "raster", all = TRUE)

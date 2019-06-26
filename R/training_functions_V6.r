@@ -33,7 +33,7 @@ writeLOG <- function(path = NULL, create = FALSE, message = NULL, detail = NULL,
     if (!is.null(path)){
       if (create == TRUE) {
         # create log file
-        logfilename <- paste0(path, "/log.txt")
+        logfilename <- base::normalizePath(paste0(path, "/log.txt"), winslash = "/")
         unlink(logfilename)# Clean up log file from the previous example
         ParallelLogger::clearLoggers()# Clean up the loggers from the previous example
         ParallelLogger::addDefaultFileLogger(logfilename)
@@ -102,14 +102,20 @@ existDirTraining <- function(dirTraining) {
 #' @param mode auto selection to switch between GUI or CMD mode Default:"CMD")'.
 #'
 #' @examples
-#' pathTraining <- '../Exemple_Dominique/CLFD/Samples/Sup'
+#' pathTraining <- '../Exemple1/learning/' ## FOR all OS (linux Mac Windows)
+#' pathTraining <- '..\\Exemple1\\learning' ## FOR windows only
 #' training(pathTraining)
 #' training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
 #' training(pathTraining, colormodel='hsv', method='lda')
 #' training(pathTraining, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
 #' training(pathTraining, transform=function(x) asin(2*x-1)/pi+0.5)
 #' training(pathTraining, transform=log1p)
+
 training <- function(pathTraining, method = "lda", transform = NULL, colormodel = "rgb", mode = "CMD") {
+
+    # transforme to full path with slash for window or linux
+    pathTraining <- base::normalizePath(pathTraining, winslash = "/")
+
     if (!is.null(mode) && mode == "GUI"){
         # add progress bar
         progress <- shiny::Progress$new(min=0, max=7)
@@ -221,7 +227,7 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
     file.txt <- paste(pathTraining, paste0(basename, ".txt"), sep = '/') ## text output file
     transformTXT <- paste("'",transform,"'")
     if (is.null(transform)) transformTXT <- "NULL"
-    sink(file.txt)
+    base::sink(file.txt)
     cat("Version", version, '\n')
     cat(paste0("training(pathTraining = '",pathTraining,"', method = '",method,"', transform = ",transformTXT,", colormodel = '",colormodel,"')"), '\n')
     if (!is.null(transform)) {
@@ -262,15 +268,15 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
     print(tableTrain)
     cat('\n')
     cat(errorRate)
-    sink()
+    base::sink()
 
     df4 <- data.frame(df4, classes = do.call(rbind, strsplit(as.character(df4$group), '/', 1))) ## add classes column
 
     writeLOG(path = pathTraining, message = NULL, detail = "Write output files (csv,jpeg) 5/7", mode = mode, value = 5, progress = progress)
     ## graph of groups in the discriminant plane
-    plotFileTraining1_2 <- paste(pathTraining, paste0(basename, "1_2.jpeg"), sep = '/') ## output file jpeg
-    plotFileTraining1_3 <- paste(pathTraining, paste0(basename, "1_3.jpeg"), sep = '/') ## output file jpeg
-    plotFileTraining2_3 <- paste(pathTraining, paste0(basename, "2_3.jpeg"), sep = '/') ## output file jpeg
+    plotFileTraining1_2 <- base::normalizePath(paste0(pathTraining, "/", basename, "1_2.jpeg"), winslash = "/") ## output file jpeg
+    plotFileTraining1_3 <- base::normalizePath(paste0(pathTraining, "/", basename, "1_3.jpeg"), winslash = "/") ## output file jpeg
+    plotFileTraining2_3 <- base::normalizePath(paste0(pathTraining, "/", basename, "2_3.jpeg"), winslash = "/") ## output file jpeg
 
     # Save picture of Discriminent analysis
     grDevices::jpeg(plotFileTraining1_2, width = 800, height = 800, quality = 100, units = "px")
@@ -297,7 +303,7 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
 
     ## save results
     writeLOG(path = pathTraining, message = NULL, detail = "Save analysis into R file 6/7", mode = mode, value = 6, progress = progress)
-    file.train <- paste(pathTraining, paste0(basename, ".RData"), sep = '/')
+    file.train <- base::normalizePath(paste0(pathTraining, "/", basename, ".RData"), winslash = "/")
     save(train, file = file.train)
     writeLOG(path = pathTraining, message = NULL, detail = "End of Training 7/7", mode = mode, value = 7, progress = progress)
     return(list("tableTrain" = tableTrain, "errorRate" = errorRate))

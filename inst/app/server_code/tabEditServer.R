@@ -69,12 +69,12 @@ observeEvent(input$dirInResult,{
 })
 
 # Update path if previous step is run
-observe({
-  if (!is.null(rv$dirSamplesOut))
-  {
-    rv$dirInResult <- rv$dirSamplesOut
-  }
-})
+#observe({
+#  if (!is.null(rv$dirSamplesOut))
+#  {
+#    rv$dirInResult <- rv$dirSamplesOut
+#  }
+#})
 
 
 ## COLOR change

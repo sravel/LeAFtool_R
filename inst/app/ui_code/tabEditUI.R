@@ -41,11 +41,11 @@ tabItem(
         selectInput("imageEdit", "Sample image:",NULL)
         ),
       column(width = 2,offset = 0,
-        checkboxInput("pchOriginal", "Add lesion number", value = FALSE, width = "150px") #%>%
+        checkboxInput("pchOriginal", "Add lesion number", value = FALSE, width = "150px"), #%>%
 #          helper(icon = "question",
 #                type = "markdown",
 #                content = "pchOriginal"),
-        checkboxInput("zoomOriginalCheck", "Zoom Original Image", value = FALSE, width = "150px") #%>%
+        checkboxInput("zoomOriginalCheck", "Zoom Original Image", value = FALSE, width = "150px"), #%>%
 #          helper(icon = "question",
 #                type = "markdown",
 #                content = "zoomOriginalCheck"),

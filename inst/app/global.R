@@ -68,9 +68,7 @@ library(foreach)
 library(doParallel)
 library(ParallelLogger, quietly = TRUE, warn.conflicts = FALSE)
 
-plan(multiprocess)
-
-options(shiny.fullstacktrace=TRUE)
+options(shiny.fullstacktrace=TRUE, shiny.sanitize.errors = FALSE)
 
 ############################################
 ## Global functions

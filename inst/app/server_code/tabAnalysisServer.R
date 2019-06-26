@@ -89,6 +89,7 @@ updateDirOutAnalysis <- observeEvent(input$dirOut,{
   if (!is.integer(input$dirOut))
   {
     rv$dirSamplesOut <- normalizePath(parseDirPath(ui_volumes, input$dirOut))
+    rv$logfilename <- paste0(rv$dirSamplesOut,"/log.txt")
     # render to UI
     output$dirOutAnalysis <- renderText({
       rv$dirSamplesOut
@@ -350,7 +351,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
       )
     )
 
-#  source("../../R/analysis_functions_v6.r")
+  source("../../R/analysis_functions_v6.r")
   analyseImages(pathTraining = rv$dirTraining,
                           pathResult = rv$dirSamplesOut,
                           pathImages = rv$dirSamples,
@@ -371,6 +372,8 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
   rv$exitStatusAna <- 1
   enable("runButtonAnalysis")
+
+  rv$dirInResult <- rv$dirSamplesOut
 
 #  ########################### END ANALYSIS
   hide(id = "loading-content", anim = TRUE, animType = "fade")
@@ -503,13 +506,13 @@ observeEvent(input$actionPrevious,{
 })
 
 ### DISABLE PARALLEL FOR WINDOWS
-observe({
-  osSystem <- Sys.info()["sysname"]
-  if (osSystem == "Windows") {
-     disable("parallelMode")
-     updateCheckboxInput(session, "parallelMode", label = "Active Parallel mode not avail for Windows", value = FALSE)
-  }
-})
+#observe({
+#  osSystem <- Sys.info()["sysname"]
+#  if (osSystem == "Windows") {
+#     disable("parallelMode")
+#     updateCheckboxInput(session, "parallelMode", label = "Active Parallel mode not avail for Windows", value = FALSE)
+#  }
+#})
 
 outputOptions(output, 'analysisFinish', suspendWhenHidden = FALSE)
 outputOptions(output, 'contents', suspendWhenHidden = FALSE)
