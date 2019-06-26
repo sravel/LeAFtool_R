@@ -87,11 +87,11 @@ observeEvent(
         rv$basename <- tail(strsplit(rv$dirTraining,'/')[[1]],1)
 
         ## graph of groups in the discriminant plane
-        rv$plotFileTraining1_2 <- paste(rv$dirTraining,paste0(rv$basename,"1_2.jpeg"),sep='/') ## output file jpeg
-        rv$plotFileTraining1_3 <- paste(rv$dirTraining,paste0(rv$basename,"1_3.jpeg"),sep='/') ## output file jpeg
-        rv$plotFileTraining2_3 <- paste(rv$dirTraining,paste0(rv$basename,"2_3.jpeg"),sep='/') ## output file jpeg
+        rv$plotFileTraining1_2 <- paste(rv$dirTraining,paste0(rv$basename,"1_2.jpeg"),sep=.Platform$file.sep) ## output file jpeg
+        rv$plotFileTraining1_3 <- paste(rv$dirTraining,paste0(rv$basename,"1_3.jpeg"),sep=.Platform$file.sep) ## output file jpeg
+        rv$plotFileTraining2_3 <- paste(rv$dirTraining,paste0(rv$basename,"2_3.jpeg"),sep=.Platform$file.sep) ## output file jpeg
 
-        rv$fileRData <- paste(rv$dirTraining,paste0(rv$basename,".RData"),sep='/')
+        rv$fileRData <- paste(rv$dirTraining,paste0(rv$basename,".RData"),sep=.Platform$file.sep)
         rv$exitStatusCal <- 1
         rv$messCal <- rv$fileRData
 
