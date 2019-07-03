@@ -329,30 +329,30 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
   show("loading-content")
 
-    showModal(      # Information Dialog Box
-      modalDialog(
-        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
-        size = "l",
-        easyClose = FALSE,
-        fade = FALSE,
-          h1("LOG"),
-          fluidRow(
-            column(12,
-            p("running please wait...")
-#                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
-#                  selectInput("thread", label = "Thread", choices = "1"),
-#                  selectInput("package", label = "Package", choices = "packages")
-#                  ),
-#            column(11,
-#                  verbatimTextOutput("logfileANA")
-#                  dataTableOutput("logTable")
-                  )
-          )
-      )
-    )
+#    showModal(      # Information Dialog Box
+#      modalDialog(
+#        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
+#        size = "l",
+#        easyClose = FALSE,
+#        fade = FALSE,
+#          h1("LOG"),
+#          fluidRow(
+#            column(12,
+#            p("running please wait...")
+##                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
+##                  selectInput("thread", label = "Thread", choices = "1"),
+##                  selectInput("package", label = "Package", choices = "packages")
+##                  ),
+##            column(11,
+##                  verbatimTextOutput("logfileANA")
+##                  dataTableOutput("logTable")
+#                  )
+#          )
+#      )
+#    )
 
-#  source("../../R/analysis_functions_v6.r")
-  analyseImages(pathTraining = rv$dirTraining,
+  source("../../R/analysis_functions_v6.r")
+  rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
                           pathResult = rv$dirSamplesOut,
                           pathImages = rv$dirSamples,
                           fileImage = NA,
@@ -416,18 +416,23 @@ output$contents <- DT::renderDataTable({
     LeafNames2 <- list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg")
     rv$LeafNames2Full <-  unlist(lapply(list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg"),img_uri2), use.names=FALSE)
 
-    if (LeafNames != '' && LeafNames2 != '' && length(LeafNames) == length(LeafNames2)){
+
+
+    if (LeafNames != '' && LeafNames2 != '' ){  #&& length(LeafNames) == length(LeafNames2)
+      rv$responseDataFilter <- merge(data.frame(LeafNames = LeafNames,
+                            Original = rv$LeafNamesFull,
+                            LesionColor = rv$LeafNames2Full,
+                            stringsAsFactors = FALSE
+                            ),rv$dfStatus)
 
       addResourcePath(rv$randomNameOriginal,rv$dirSamples) # Images are located outside shiny App
       addResourcePath(rv$randomNameLesionColor,rv$dirSamplesOut) # Images are located outside shiny App
 
-      rv$responseDataFilter <- data.frame(LeafNames = LeafNames,
-                              Original = rv$LeafNamesFull,
-                              LesionColor = rv$LeafNames2Full,stringsAsFactors = FALSE)
+
 
       displayableData<-DT::datatable(data = as.data.frame(rv$responseDataFilter, stringAsFactors = FALSE, row.names = NULL),
 
-                                     escape=FALSE,selection="single",rownames=FALSE,colnames=c("FileName","Original","LesionColor"),
+                                     escape=FALSE,selection="single",rownames=FALSE,colnames=c("FileName","Original","LesionColor", "Status"),
                                      style = "bootstrap",
                                      options = list(
                                        paging=TRUE,searching = TRUE,ordering=TRUE,scrollY = 750,scrollCollapse=TRUE,server = FALSE

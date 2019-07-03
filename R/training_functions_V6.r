@@ -25,6 +25,12 @@
 # Version 0.1.0 written by Sebastien RAVEL, François BONNOT, Sajid ALI, FOURNIER Elisabeth
 #####################################################################################################
 
+## load packages
+library(EBImage)
+library(MASS)
+library(lattice)
+library(ParallelLogger)
+library(shinyjs)
 ## library(e1071) only for svm (not implemented)
 
 # To write in log file or show progress if not in parallel mode

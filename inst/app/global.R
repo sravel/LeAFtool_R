@@ -84,11 +84,15 @@ max_no_cores <- as.numeric(max(1, detectCores() - 2))
 rv <<- reactiveValues(
                         # for calibration
                         exitStatusCal = -1, messCal = NULL, errCal = NULL,
-                        dirTraining = NULL, outTrainingTable = NULL,
+#                        dirTraining = NULL,
+                        outTrainingTable = NULL,
                         outTrainingCSV = NULL, plotFileTraining = NULL,
 #                        # for analysis
-                        dirSamples = NULL,
-                        dirSamplesOut = NULL,
+#                        dirSamples = NULL,
+#                        dirSamplesOut = NULL,
+                        dirSamples = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples",
+                        dirSamplesOut = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
+                        dirTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
 
                         exitStatusAna = -1,
                         codeValidationInt = 1,

@@ -28,7 +28,81 @@
 ## load packages
 library(EBImage)
 library(MASS)
+library(lattice)
+library(ParallelLogger)
+library(shinyjs)
 ## library(e1071) only for svm (not implemented)
+
+
+clusterApply2 <- function(cluster, x, fun, ..., stopOnError = FALSE, progressBar = TRUE, mode="CMD") {
+  if (class(cluster)[1] == "noCluster") {
+    lapply(x, fun, ...)
+  } else {
+    n <- length(x)
+    p <- length(cluster)
+    if (n > 0 && p > 0) {
+      if (progressBar && mode == "CMD") {pb <- txtProgressBar(style = 3)}
+      if (progressBar && mode == "GUI" && p > 1 )
+      {
+        progressNODE <- shiny::Progress$new(min = 0, max = n)
+        progressNODE$set(message = 'Analysis in progress', detail = 'This may take a while...', value = 0)
+        on.exit(progressNODE$close())
+        }
+
+      for (i in 1:min(n, p)) {
+        snow::sendCall(cluster[[i]], fun, c(list(x[[i]]), list(...)), tag = i)
+      }
+
+      val <- vector("list", n)
+      hasError <- FALSE
+      formatError <- function(threadNumber, error, args) {
+        sprintf("Thread %s returns error: \"%s\" when using argument(s): %s",
+                threadNumber,
+                gsub("\n", "\\n", gsub("\t", "\\t", error)),
+                gsub("\n", "\\n", gsub("\t", "\\t", paste(args, collapse = ","))))
+      }
+      for (i in 1:n) {
+        d <- snow::recvOneResult(cluster)
+        if (inherits(d$value, "try-error")) {
+          val[d$tag] <- NULL
+          errorMessage <- formatError(d$node, d$value, c(list(x[[d$tag]]), list(...)))
+          if (stopOnError) {
+            stop(errorMessage)
+          } else {
+            ParallelLogger::logError(errorMessage)
+            hasError <- TRUE
+          }
+        }
+        if (progressBar && mode == "CMD")  setTxtProgressBar(pb, i/n)
+        if (progressBar && mode == "GUI" && p > 1 )
+        {
+          progressNODE$set(value = i, detail = paste0("file: ",i,"/",n))
+        }
+        j <- i + min(n, p)
+        if (j <= n) {
+          snow::sendCall(cluster[[d$node]], fun, c(list(x[[j]]), list(...)), tag = j)
+        }
+        val[d$tag] <- list(d$value)
+      }
+      if (progressBar && mode == "CMD") {
+        close(pb)
+      }
+      if (progressBar && mode == "GUI" && p > 1 ) {
+        progressNODE$close()
+      }
+#      if (hasError) {
+#        message <- paste0("Error(s) when calling function '",
+#                          substitute(fun, parent.frame(1)),
+#                          "', see earlier messages for details")
+#        stop(message)
+#      }
+      df <- do.call(rbind,val)
+      return(df)
+    }
+  }
+}
+
+
 
 # To write in log file or show progress if not in parallel mode
 writeLOGAnalysis <- function(path = NULL, create = FALSE, message = NULL, detail = NULL, mode = NULL, value = NULL, progress = NULL, parallelThreadsNum = NULL) {
@@ -45,9 +119,6 @@ writeLOGAnalysis <- function(path = NULL, create = FALSE, message = NULL, detail
     if (mode == "GUI" && parallelThreadsNum == 1){
       progress$set(value = value, message = message, detail = detail)
     }
-#    if (mode == "GUI" && parallelThreadsNum > 1){
-#      progress$set(value = value, message = message, detail = detail)
-#    }
   }
 }
 
@@ -328,28 +399,28 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
     osSystem <- Sys.info()["sysname"]
     if (osSystem == "Darwin" || osSystem == "Linux" || osSystem == "Windows") {
       library(ParallelLogger)
-      cl <- ParallelLogger::makeCluster(numberOfThreads = parallelThreadsNum, singleThreadToMain = FALSE, divideFfMemory = FALSE, setFfTempDir = FALSE)
+      cl <- ParallelLogger::makeCluster(numberOfThreads = parallelThreadsNum, singleThreadToMain = TRUE, divideFfMemory = FALSE, setFfTempDir = FALSE)
     }
-    ## load libraries on workers
-    ParallelLogger::clusterRequire(cl, "shiny")
-    ParallelLogger::clusterRequire(cl, "EBImage")
-    ParallelLogger::clusterRequire(cl, "MASS")
-    ParallelLogger::clusterRequire(cl, "lattice")
-    ParallelLogger::clusterRequire(cl, "ParallelLogger")
-    ParallelLogger::clusterRequire(cl, "shinyjs")
-#    ParallelLogger::clusterRequire(cl, "LeAFtool")
-    parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
-#    doParallel::registerDoParallel(cl)
+    if (parallelThreadsNum > 1)
+    {
+      ## load libraries on workers
+      ParallelLogger::clusterRequire(cl, "shiny")
+      ParallelLogger::clusterRequire(cl, "EBImage")
+      ParallelLogger::clusterRequire(cl, "MASS")
+      ParallelLogger::clusterRequire(cl, "lattice")
+      ParallelLogger::clusterRequire(cl, "ParallelLogger")
+      ParallelLogger::clusterRequire(cl, "shinyjs")
+#     ParallelLogger::clusterRequire(cl, "LeAFtool")
+      parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
+    }
 
-    res <- ParallelLogger::clusterApply(cl, listSamples, analyseImageUnique, pathTraining, pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum, stopOnError = FALSE, progressBar = TRUE)
-
+    res <- clusterApply2(cl, listSamples, analyseImageUnique, pathTraining, pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum, stopOnError = FALSE, progressBar = TRUE, mode = mode)
 
   #  # Close cluster mode
     ParallelLogger::stopCluster(cl)
 #    closeAllConnections(); # for kill all process, use to add button for stop work
 #    foreach::registerDoSEQ()
     parallelThreadsNum <- 1
-#    print(res)
   }
 
   mymergeddata = multmerge(pathResult, "*_Merge_lesions.csv")
@@ -360,6 +431,8 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
     row.names = FALSE,
     sep = '\t'
   )
+
+  return(res)
 }
 
 analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
@@ -444,7 +517,8 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
   if (nrow(featuresLeaf) == 0){
 #    if (mode == "GUI") alert(paste0("no leaf found for image ", fileImage))
     logError( paste0("no leaf found for image ", fileImage))
-    return(1)
+    return(data.frame(file=fileImage, status="ERROR: no leaf found for image"))
+    stop(paste0("no leaf found for image ", fileImage))
   }
 
   # renumber leaves
@@ -547,4 +621,5 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
   )
   detail <- " Step 6/6 : Finish sample"
   writeLOGAnalysis(path = pathResult, message = message, detail = detail, mode = mode, value = 1, progress = progress, parallelThreadsNum = parallelThreadsNum)
+  return(data.frame(file=fileImage, status="finish"))
 }

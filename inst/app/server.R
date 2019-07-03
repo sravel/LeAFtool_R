@@ -151,11 +151,10 @@ shinyServer(function(input, output, session) {
     stopApp()
   })
 
-#  observe({
-#    # debug output to show the listN content.
-#    output$debug <- renderPrint({
-#      rv %>% reactiveValuesToList
-#    })
-
-#  })
+  observe({
+    # debug output to show the listN content.
+    output$debug <- renderPrint({
+      rv %>% reactiveValuesToList
+    })
+  })
 })
