@@ -52,7 +52,7 @@ sidebar <- dashboardSidebar(
     menuItem("Training", tabName = "tabTraining", icon = icon("balance-scale")),
     menuItem("Analysis", tabName = "tabAnalysis", icon = icon("pagelines")),
     menuItem("Edit", tabName = "tabEdit", icon = icon("edit")),
-    menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard")),
+#    menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard")),
     menuItem("LOG", tabName = "tabLOG", icon = icon("file-code"))
   )
   # actionButton('close', "Close", class = "btn btn-danger",onclick = "setTimeout(function(){window.close();},500);")
@@ -84,12 +84,12 @@ body <- dashboardBody(
     # add tab for edit
     source(file.path("ui_code", "tabEditUI.R"), local = TRUE, chdir = TRUE)$value,
 
-    # other tab
-    tabItem(
-      tabName = "tabDebug",
-      h1("DEBUG"),
-      verbatimTextOutput("debug")
-    ),
+#    # other tab
+#    tabItem(
+#      tabName = "tabDebug",
+#      h1("DEBUG"),
+#      verbatimTextOutput("debug")
+#    ),
     # other tab
     tabItem(
       tabName = "tabLOG",
