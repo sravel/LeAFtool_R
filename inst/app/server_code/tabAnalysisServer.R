@@ -351,7 +351,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 #      )
 #    )
 
-  source("../../R/analysis_functions_v6.r")
+#  source("../../R/analysis_functions_v6.r")
   rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
                           pathResult = rv$dirSamplesOut,
                           pathImages = rv$dirSamples,
@@ -369,7 +369,6 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
                           outPosition = rv$position,
                           parallelThreadsNum = rv$parallelThreadsNum,
                           mode="GUI")
-
   rv$exitStatusAna <- 1
   enable("runButtonAnalysis")
 
@@ -389,18 +388,20 @@ output$analysisFinish <- renderText({
 })
 
 img_uri1 <- function(x) {
-
   ext <- unlist(strsplit(x, "[.]"))[2]
+  leafName <- gsub(paste0(".",ext), "", x)
   if ( ext == "tif"){
-    sprintf("Tiff not support by browser", x)
+    img <- "Tiff not support by browser"
   }else{
-  sprintf("<img src='%s/%s' height='60'></img>", rv$randomNameOriginal, x)
+  img <- sprintf("<img src='%s/%s' height='60'></img>", rv$randomNameOriginal, x)
   }
+  return(data.frame(LeafName=leafName,Original=img, stringsAsFactors = FALSE))
 }
-img_uri2 <- function(x) {
 
-#  sprintf("<img src='%s' height='60'></img>", knitr::image_uri(x))
-  sprintf("<img src='%s/%s' height='60'></img>", rv$randomNameLesionColor, x)
+img_uri2 <- function(x) {
+  img <- sprintf("<img src='%s/%s' height='60'></img>", rv$randomNameLesionColor, x)
+  leafName <- gsub("_lesion.jpeg", "", x)
+  return(data.frame(LeafName=leafName,LesionColor=img, stringsAsFactors = FALSE))
 }
 
 
@@ -409,34 +410,49 @@ output$contents <- DT::renderDataTable({
 
   if (rv$exitStatusAna == 1){
 
+    # add temporary directory for browser refresh
     rv$randomNameOriginal <- paste0("Original",runif(1, min=0, max=999))
     rv$randomNameLesionColor <- paste0("LesionColor",runif(1, min=0, max=999))
-    LeafNames <- list.files(rv$dirSamples, full.names=FALSE)
-    rv$LeafNamesFull <-  unlist(lapply(list.files(rv$dirSamples, full.names=FALSE),img_uri1), use.names=FALSE)
-    LeafNames2 <- list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg")
-    rv$LeafNames2Full <-  unlist(lapply(list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg"),img_uri2), use.names=FALSE)
 
+    # list of original samples
+    leafNameOriginal <- list.files(rv$dirSamples, full.names=FALSE)
 
+    # dataframe of orignal samples with Leaf Name and image encode URL to visualise on browser (ex: LeafName   Original 163Madu210818_dpi49_6.tif Tiff not support by browser)
+    dfLeafOriginal <- do.call(rbind,lapply(leafNameOriginal,img_uri1))
 
-    if (LeafNames != '' && LeafNames2 != '' ){  #&& length(LeafNames) == length(LeafNames2)
-      rv$responseDataFilter <- merge(data.frame(LeafNames = LeafNames,
-                            Original = rv$LeafNamesFull,
-                            LesionColor = rv$LeafNames2Full,
-                            stringsAsFactors = FALSE
-                            ),rv$dfStatus)
+    # list of output file with lesion
+    leafNameLesion <- list.files(rv$dirSamplesOut, full.names=FALSE, pattern = "*_lesion.jpeg")
+
+    # dataframe of lesion samples with Leaf Name and image encode URL to visualise on browser (ex: LeafName   Original toto_1.tif <img src='LesionColor128.981319006532/toto_1_lesion.jpeg' height='60'></img>)
+    dfLeafLesion <-   do.call(rbind,lapply(leafNameLesion ,img_uri2))
+
+    mergedf <- merge(dfLeafOriginal, dfLeafLesion, all = TRUE)
+
+    if (leafNameOriginal != '' && leafNameLesion != '' ){  #&& length(LeafName) == length(LeafName2)
+
+      rv$responseDataFilter <- merge(mergedf, rv$dfStatus)
+#      print(rv$responseDataFilter)
 
       addResourcePath(rv$randomNameOriginal,rv$dirSamples) # Images are located outside shiny App
       addResourcePath(rv$randomNameLesionColor,rv$dirSamplesOut) # Images are located outside shiny App
 
-
-
-      displayableData<-DT::datatable(data = as.data.frame(rv$responseDataFilter, stringAsFactors = FALSE, row.names = NULL),
-
-                                     escape=FALSE,selection="single",rownames=FALSE,colnames=c("FileName","Original","LesionColor", "Status"),
-                                     style = "bootstrap",
+      displayableData <- DT::datatable(data = as.data.frame(rv$responseDataFilter),
+                                      rownames=FALSE,
+                                      escape=FALSE,
+                                      selection="single",
+                                      colnames=c("FileName","Original","LesionColor", "Status", "Message"),
+                                     style = 'bootstrap', class = 'table-condensed ',
+                                     filter = list(position = 'top', clear = FALSE, plain = TRUE),
                                      options = list(
-                                       paging=TRUE,searching = TRUE,ordering=TRUE,scrollY = 750,scrollCollapse=TRUE,server = FALSE
-                                     ))
+                                        order = list(4, 'asc'),
+                                        paging=TRUE,searching = TRUE,ordering=TRUE,scrollY = 750,scrollCollapse=TRUE,server = FALSE, autoWidth = TRUE
+                                     )
+      ) %>%
+      formatStyle(
+        'Status',
+        target = 'row',
+        backgroundColor = styleEqual("ERROR", 'red')
+      )
 
     ifelse (!is.null(displayableData),return(displayableData),return(NULL))
     }
@@ -452,8 +468,8 @@ currentImage <- reactive({
       return("")
 
     #Load image for plot
-    lesionImgPath <- strsplit(rv$responseDataFilter[imIndex,"LeafNames"], ".", fixed = TRUE)[[1]][1]
-    rv$responseDataFilter[imIndex,"LeafNames"]
+    lesionImgPath <- strsplit(rv$responseDataFilter[imIndex,"LeafName"], ".", fixed = TRUE)[[1]][1]
+    rv$responseDataFilter[imIndex,"LeafName"]
 
 
 })
