@@ -281,8 +281,46 @@ multmerge = function(mypath, pattern){
   Reduce(function(x,y) {rbind(x,y)}, datalist)
 }
 
-checkParameters <- function(pathTraining,pathResult,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition){
+checkDirRead <- function(path,namePath, test = c("e","r","w")){
+#  readable = mode 4 and writeable mode 3 existence mode 0
+  if (!is.null(path)){
+    if (file.access(path, mode = 0)[[1]] == -1 && ("e" %in% test)){
+      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because it don't exist")
+      stop(errorMessage, call. = FALSE)
+    }
+    if (file.access(path, mode = 4)[[1]] == -1 && ("r" %in% test)){
+      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because you don't have read permission")
+      stop(errorMessage, call. = FALSE)
+    }
+    if (file.access(path, mode = 3)[[1]] == -1 && ("w" %in% test)) {
+      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because you don't have write permission")
+      stop(errorMessage, call. = FALSE)
+    }
+  }
+}
 
+
+
+checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition){
+
+  # test input training path is readable = mode 4 and/or writeable mode 3 and if file Rdata exist
+  basename <- utils::tail(strsplit(pathTraining, .Platform$file.sep)[[1]], 1)
+  fileTrain <-  paste0(pathTraining,'/',basename,".RData")
+  checkDirRead(pathTraining,"pathTraining")
+  if (file.access(fileTrain, mode = 0)[[1]] == -1) {
+    errorMessage <- paste0("Path '",pathTraining,"' is not a valid path for parameter 'pathTraining', can't find the training file: '",fileTrain,"', please run training function before.")
+    stop(errorMessage, call. = FALSE)
+  }
+
+  # test input pathImages path is readable = mode 4 and writeable mode 3
+  checkDirRead(pathImages,"pathImages")
+  # test input fileImage path is readable = mode 4 and writeable mode 3
+  checkDirRead(fileImage,"fileImage",test=c("e","r"))
+
+
+#    if (!(method %in% c("lda", "qda", "svm"))){
+#      stop(paste(method," is not valid value for method, please only use 'lda' or 'qda'"))
+#    }
 
 }
 
@@ -314,13 +352,12 @@ checkParameters <- function(pathTraining,pathResult,pathImages,fileImage,leafAre
 #' analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
 #' pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
 #' pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=4)
-analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAreaMin=1000,leafBorder=5,lesionBorder=3,lesionAreaMin=10,lesionAreaMax=120000,lesionEccentricityMin=0,lesionEccentricityMax=1,lesionColorBorder="#0000FF11",lesionColorBodies="#FE8E0000",blurDiameter=0, outPosition="right", parallelThreadsNum=1, mode="CMD") {
+analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL,leafAreaMin=1000,leafBorder=5,lesionBorder=3,lesionAreaMin=10,lesionAreaMax=120000,lesionEccentricityMin=0,lesionEccentricityMax=1,lesionColorBorder="#0000FF11",lesionColorBodies="#FE8E0000",blurDiameter=0, outPosition="right", parallelThreadsNum=1, mode="CMD") {
 
   # transforme to full path with slash for window or linux
   pathTraining <- base::normalizePath(pathTraining, winslash = "/")
   pathResult <- base::normalizePath(pathResult, winslash = "/")
-  pathImages <- base::normalizePath(pathImages, winslash = "/")
-
+  if (!is.null(pathImages)){ pathImages <- base::normalizePath(pathImages, winslash = "/") }
   progress <- NULL
   # auto-detect number of core on computer
   max_no_cores <- as.numeric(max(1, parallel::detectCores() - 2))
@@ -330,7 +367,15 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
       progress <- shiny::Progress$new(min=0, max=7)
       on.exit(progress$close())
     }
-  writeLOGAnalysis(path = pathResult, create = TRUE, message = "Analysis run, please wait", detail = "VERSION: 1.0", mode = mode, progress = progress, parallelThreadsNum = parallelThreadsNum)
+
+  ############################ Check parameters
+  # test input pathResult path is readable = mode 4 and writeable mode 3
+  checkDirRead(pathResult,"pathResult")
+
+  # if possible add log file for all error after
+  writeLOGAnalysis(path = pathResult, create = TRUE, message = "Analysis run, please wait", detail = " VERSION: 1.0", mode = mode, progress = progress, parallelThreadsNum = parallelThreadsNum)
+
+  checkParameters(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition)
 
   # create config file to save input values
   paramfilename <- file(paste0(pathResult,"/LeAFtool-parameters-input.txt"))
@@ -338,6 +383,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
             "Training folder: ",pathTraining,"\n",
             "Samples folder: ",pathImages,"\n",
             "Output folder: ",pathResult,"\n",
+            "file image: ",fileImage,"\n",
             "leaf area min: ",leafAreaMin,"\n",
             "Leaf border size: ",leafBorder,"\n",
             "lesion border size: ",lesionBorder,"\n",
@@ -350,7 +396,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
              )
-    cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,
+    cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,"', fileImage = '",fileImage,
                 "', leafAreaMin = ",leafAreaMin,
                 ", leafBorder = ",leafBorder,
                 ", lesionBorder = ",lesionBorder,
@@ -365,14 +411,11 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
                 "', parallelThreadsNum = ",parallelThreadsNum,")")
   cat(paste0(parameters,"\n",cmd), '\n', file = paramfilename)
   close(paramfilename)
-  ############################ Check parameters
-  # count number of Samples on input directory
-
 
 
   ############################ RUN ANALYSIS
   # count number of Samples on input directory
-  if (!is.na(fileImage)){
+  if (!is.null(fileImage)){
     listSamples <- fileImage
     writeLOGAnalysis(path = pathResult, message = NULL, detail = paste0("Start Analysis on image: ",fileImage), mode = mode, value = 1, progress = progress, parallelThreadsNum = parallelThreadsNum)
   }
@@ -387,12 +430,12 @@ analyseImages <- function(pathTraining,pathResult,pathImages,fileImage=NA,leafAr
 
     # if less samples than threads or computer can, update number of threads to use only max samples
     if ( parallelThreadsNum > max_no_cores){
+      warning(paste("You select ",parallelThreadsNum,", it is more use threads than computer can. auto-adjust to", max_no_cores, "threads (avail:",max_no_cores+2,")"))
       parallelThreadsNum <- max_no_cores
-      warning(paste("You select more use thread than computer can. auto-ajust to", max_no_cores, "threads (avail:",max_no_cores+2,")"))
     }
     if ( parallelThreadsNum > nbSamples){
+      warning(paste("You select ",parallelThreadsNum,", it is more use threads than samples images. auto-adjust to", nbSamples, "threads"))
       parallelThreadsNum <- nbSamples
-      warning(paste("You select more use thread than samples images. auto-ajust to", nbSamples, "threads"))
     }
 
     # Start parallel session
@@ -449,7 +492,6 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
 
   ## load trainig results
   basename <- utils::tail(strsplit(pathTraining, .Platform$file.sep)[[1]], 1)
-
   file.train <-  base::normalizePath(paste0(pathTraining,'/',basename,".RData"),winslash = "/")
   load(file.train)
 
@@ -459,7 +501,9 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
   lesion <- train$classes$subclass[train$classes$class=="lesion"]
 
   # build filename output
-  filename <- strsplit(fileImage, ".", fixed = TRUE)[[1]][1]
+  ext <- unlist(strsplit(basename(fileImage), "[.]"))[2]
+  leafName <- gsub(paste0(".",ext), "", basename(fileImage))
+  filename <- strsplit(basename(fileImage), ".", fixed = TRUE)[[1]][1]
   fileRData <-  paste0(pathResult, .Platform$file.sep, '.', filename, ".RData")
   jpegfile <-  paste0(pathResult, .Platform$file.sep, filename, "_both.jpeg")
   jpegfileOnly <-  paste0(pathResult, .Platform$file.sep, filename, "_lesion.jpeg", sep = '')
@@ -508,17 +552,10 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
       featuresLeaf <- featuresLeaf[-w,]
   }
 
-#  ## Check if leaf on image:
-#  shiny::validate(
-#    shiny::need(nrow(featuresLeaf) != 0,
-#          paste0("no leaf found for image ", fileImage))
-#  )
-
   if (nrow(featuresLeaf) == 0){
-#    if (mode == "GUI") alert(paste0("no leaf found for image ", fileImage))
-    logError( paste0("no leaf found for image ", fileImage))
-    return(data.frame(file=fileImage, status="ERROR: no leaf found for image"))
-    stop(paste0("no leaf found for image ", fileImage))
+    logError( paste0("no leaf found for image ", leafName))
+    return(data.frame(LeafName = leafName, Status = "ERROR", Message = "No leaf found for image"))
+    stop(paste0("no leaf found for image ", leafName))
   }
 
   # renumber leaves
@@ -621,5 +658,5 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
   )
   detail <- " Step 6/6 : Finish sample"
   writeLOGAnalysis(path = pathResult, message = message, detail = detail, mode = mode, value = 1, progress = progress, parallelThreadsNum = parallelThreadsNum)
-  return(data.frame(file=fileImage, status="finish"))
+  return(data.frame(LeafName = leafName, Status = "finish", Message = ""))
 }
