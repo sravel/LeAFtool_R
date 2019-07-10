@@ -4,9 +4,9 @@
 \alias{analyseImages}
 \title{Analyse an image or a set of images}
 \usage{
-analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
-  leafAreaMin = 1000, leafBorder = 5, lesionBorder = 3,
-  lesionAreaMin = 10, lesionAreaMax = 120000,
+analyseImages(pathTraining, pathResult, pathImages = NULL,
+  fileImage = NULL, leafAreaMin = 1000, leafBorder = 5,
+  lesionBorder = 3, lesionAreaMin = 10, lesionAreaMax = 120000,
   lesionEccentricityMin = 0, lesionEccentricityMax = 1,
   lesionColorBorder = "#0000FF11", lesionColorBodies = "#FE8E0000",
   blurDiameter = 0, outPosition = "right", parallelThreadsNum = 1,
@@ -48,11 +48,11 @@ analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
 \item{mode}{auto selection to switch between GUI or CMD mode Default:"CMD")'.}
 }
 \description{
-Analysis step on multi-thread is able only for Linux and Mac system:
-Please use 1 for Windows
+Analysis step can use many ram on parallel mode.
+The function return a dataframe with file name, exit status and message if error.
 }
 \examples{
-analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
+dataframeExitStatus <- analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
 pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
 pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=4)
 }
