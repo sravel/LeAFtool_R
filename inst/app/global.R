@@ -30,21 +30,21 @@ rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
 gc() #free up memrory and report the memory usage.
 
 # list of packages required
-list.of.packages <- c("RCurl","shiny","shinydashboard","shinyFiles","shinyjs", "DT","EBImage","MASS","lattice",
+#list.of.packages <- c("RCurl","shiny","shinydashboard","shinyFiles","shinyjs", "DT","EBImage","MASS","lattice",
                       "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2","ParallelLogger")
 
 
 #checking missing packages from list
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+#new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 
 #install missing ones
-if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
+#if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
 
 #Case of EBImage
-if (!require('EBImage')) {
-  source("https://bioconductor.org/biocLite.R")
-  biocLite("EBImage")
-}
+#if (!require('EBImage')) {
+#  source("https://bioconductor.org/biocLite.R")
+#  biocLite("EBImage")
+#}
 
 #Load all library
 library(shiny, quietly = TRUE, warn.conflicts = FALSE)

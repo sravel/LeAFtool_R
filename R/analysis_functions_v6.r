@@ -349,9 +349,9 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
 #' @param mode auto selection to switch between GUI or CMD mode Default:"CMD")'.
 #'
 #' @examples
-#' dataframeExitStatus <- analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
-#' pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
-#' pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=4)
+#' dataframeExitStatus <- analyseImages(pathTraining = "../exemple1/learning",
+#' pathResult = "../exemple1/results",
+#' pathImages = "../exemple1/samples", parallelThreadsNum=4)
 analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL,leafAreaMin=1000,leafBorder=5,lesionBorder=3,lesionAreaMin=10,lesionAreaMax=120000,lesionEccentricityMin=0,lesionEccentricityMax=1,lesionColorBorder="#0000FF11",lesionColorBodies="#FE8E0000",blurDiameter=0, outPosition="right", parallelThreadsNum=1, mode="CMD") {
 
   # transforme to full path with slash for window or linux
