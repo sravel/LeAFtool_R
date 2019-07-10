@@ -474,10 +474,12 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
     row.names = FALSE,
     sep = '\t'
   )
-  print(class(res))
-  print(as.data.frame(res))
 
-  return(as.data.frame(res))
+  if (class(res) == "list")
+  {
+    return(do.call(rbind.data.frame, res))
+  }
+  return(res)
 }
 
 analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
