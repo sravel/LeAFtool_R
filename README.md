@@ -133,4 +133,4 @@ sudo apt install libtiff5-dev libfftw3-dev -y
 
 #### Poster
 
-![LeAFtool poster](/inst/app/www/posterLeaftool-JOBIM2019.tif)
+![LeAFtool poster](/inst/app/www/posterLeaftool-JOBIM2019.png)
