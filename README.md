@@ -128,3 +128,11 @@ sudo apt install libtiff5-dev libfftw3-dev -y
 ```
 
 ## Citation
+
+## Other
+
+<object data="https://github.com/sravel/LeAFtool/blob/master/inst/app/www/posterLeAFtool-JOBIM2019-final.pdf" type="application/pdf" width="700px" height="700px">
+    <embed src="https://github.com/sravel/LeAFtool/blob/master/inst/app/www/posterLeAFtool-JOBIM2019-final.pdf">
+        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="https://github.com/sravel/LeAFtool/blob/master/inst/app/www/posterLeAFtool-JOBIM2019-final.pdf">Download PDF</a>.</p>
+    </embed>
+</object>
