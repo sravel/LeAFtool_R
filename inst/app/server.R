@@ -143,9 +143,7 @@ shinyServer(function(input, output, session) {
     clearLoggers() # reset log file
     isolate(
       if (rv$parallelMode == TRUE){
-        try(parallel::stopCluster(cl), silent = TRUE) # Close cluster mode
         closeAllConnections(); # for kill all process, use to add button for stop work
-        registerDoSEQ()
       }
     )
     stopApp()

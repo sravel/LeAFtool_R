@@ -19,7 +19,7 @@ analyseImages(pathTraining, pathResult, pathImages = NULL,
 
 \item{pathImages}{The path of the directory containing the images to analyse.}
 
-\item{fileImage}{A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).}
+\item{fileImage}{A character vector containg the fils names of the images to analyse in pathImages (NULL to analyse all the images in pathImages).}
 
 \item{leafAreaMin}{The minimum area of a leaf (in pixels) Default:1000.}
 
@@ -52,7 +52,7 @@ Analysis step can use many ram on parallel mode.
 The function return a dataframe with file name, exit status and message if error.
 }
 \examples{
-dataframeExitStatus <- analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
-pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
-pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=4)
+dataframeExitStatus <- analyseImages(pathTraining = "../exemple1/learning",
+pathResult = "../exemple1/results",
+pathImages = "../exemple1/samples", parallelThreadsNum=4)
 }

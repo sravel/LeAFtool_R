@@ -113,4 +113,18 @@ See here: https://docs.google.com/document/d/1lFr8_08TGJps5lcSbY_AimstFnf0AfuOX7
 
 ## Troubleshooting
 
+#### install on linux
+
+if install *devtools* fail please check you have the library:
+```
+sudo apt install libxml2-dev libcurl4-openssl-dev libssl-dev -y
+R
+install.package("devtools")
+```
+
+if install *LeAFtool* fail please check you have the library:
+```
+sudo apt install libtiff5-dev libfftw3-dev -y
+```
+
 ## Citation

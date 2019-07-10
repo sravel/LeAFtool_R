@@ -101,7 +101,7 @@ options(digits=2)
 max_no_cores <- as.numeric(max(1, detectCores() - 2))
 
 # All reactive values for program
-rv <<- reactiveValues(
+rv <- reactiveValues(
                         # for calibration
                         exitStatusCal = -1, messCal = NULL, errCal = NULL,
                         dirTraining = NULL,

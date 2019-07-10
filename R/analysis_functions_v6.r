@@ -333,7 +333,7 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
 #' @param pathTraining The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.
 #' @param pathResult The path of the directory where to store the result files (created by the function if it does not exist).
 #' @param pathImages The path of the directory containing the images to analyse.
-#' @param fileImage A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).
+#' @param fileImage A character vector containg the fils names of the images to analyse in pathImages (NULL to analyse all the images in pathImages).
 #' @param leafAreaMin The minimum area of a leaf (in pixels) Default:1000.
 #' @param leafBorder The diameter of the brush (in pixels) used to erode the leafBorder Default:5.
 #' @param lesionBorder The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.
@@ -474,8 +474,10 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
     row.names = FALSE,
     sep = '\t'
   )
+  print(class(res))
+  print(as.data.frame(res))
 
-  return(res)
+  return(as.data.frame(res))
 }
 
 analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
