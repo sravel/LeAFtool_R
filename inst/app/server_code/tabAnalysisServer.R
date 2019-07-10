@@ -355,7 +355,6 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
                           pathResult = rv$dirSamplesOut,
                           pathImages = rv$dirSamples,
-                          fileImage = NA,
                           leafAreaMin = rv$leaf_min_size,
                           leafBorder = rv$leaf_border_size,
                           lesionBorder = rv$lesion_border_size,
