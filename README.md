@@ -20,24 +20,7 @@ The tools are being developed and a first functional version is available. The f
   * Upgrading R and Rstudio to the latest version (R >= 3.5, Rstudio > 1.0.0) is strongly recommended.
 
 ```
-# Dependecies that needs to be manually installed.
-# You may need to paste the following code line by line
-# and choose if previously installed packages should be updated (recommended).
-
-# list of packages required
-list.of.packages <- c("devtools", "RCurl","shiny","shinydashboard","shinyFiles","shinyBS","shinyjs", "DT","EBImage","MASS","lattice",
-                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2", "ParallelLogger")
-#checking missing packages from list
-new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-
-# install missing ones
-if(length(new.packages)) install.packages(new.packages, dependencies = TRUE)
-
-# install EBImage
-source("https://bioconductor.org/biocLite.R")
-biocLite("EBImage")
-
-# Install LeAFtool
+# Install or update LeAFtool
 library(devtools)
 install_github("sravel/LeAFtool")
 
@@ -45,7 +28,7 @@ install_github("sravel/LeAFtool")
 
 ## Running LeAFtool with GUI
 
-  * To run the application LeAFtool
+* To run the application LeAFtool
 ```
 library(LeAFtool)
 runLeAFtool()
@@ -54,6 +37,9 @@ runLeAFtool()
 ## Running LeAFtool without GUI (call direct function)
 
 ### Training
+
+The function return the confusion matrix and error rate.
+
 ```
 library(LeAFtool)
 training(pathTraining, method = "lda", transform = NULL,
@@ -61,14 +47,14 @@ training(pathTraining, method = "lda", transform = NULL,
 ```
 * pathTraining	The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
 * method	Method of discrimainant analysis: "lda" (default) or "qda"
-* transform	 transformation before analysis (e.g. sqrt)
+* transform	 transformation before analysis (e.g. sqrt) # not avail on GUI
 * colormodel	 Model of color for the analysis: "rgb" (default) or "hsv"
 
 ```
 ## Examples
 
 pathTraining <- '/media/sebastien/LaAFtool/exemples/exemple1/learning'
-training(pathTraining)
+confusionMatrix <- training(pathTraining)
 training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
 training(pathTraining, colormodel='hsv', method='lda')
 training(pathTraining, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
@@ -77,6 +63,9 @@ training(pathTraining, transform=log1p)
 ```
 
 ### Analysis
+
+The function return a dataframe with file name, exit status and message if error.
+
 ```
 library(LeAFtool)
 analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
@@ -106,11 +95,11 @@ analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
 ```
 ## Examples
 
-analyseImages(pathTraining = "/media/sebastien/LaAFtool/exemples/exemple1/learning",
+dataframeExitStatus <- analyseImages(pathTraining = "/media/sebastien/LaAFtool/exemples/exemple1/learning",
              pathResult = "/media/sebastien/LaAFtool/exemples/exemple1/results",
              pathImages = "/media/sebastien/LaAFtool/exemples/exemple1/samples", parallelThreadsNum=22)
 
-analyseImages(pathTraining = "/media/sebastien/LaAFtool/exemples/exemple1/learning",
+dataframeExitStatus <- analyseImages(pathTraining = "/media/sebastien/LaAFtool/exemples/exemple1/learning",
               pathResult = "/media/sebastien/LaAFtool/exemples/exemple1/results",
               pathImages = "/media/sebastien/LaAFtool/exemples/exemple1/samples",
               leafAreaMin = 600,

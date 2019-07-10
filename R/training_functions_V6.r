@@ -100,6 +100,7 @@ existDirTraining <- function(dirTraining) {
 #'   \item lesion
 #' }
 #' This sub-folder can contain either image files or sub-folders containing different groups of image files
+#' The function return the confusion matrix and error rate.
 #'
 #' @param pathTraining The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
 #' @param method Method of discrimainant analysis: "lda" (default) or "qda"
@@ -110,12 +111,12 @@ existDirTraining <- function(dirTraining) {
 #' @examples
 #' pathTraining <- '../Exemple1/learning/' ## FOR all OS (linux Mac Windows)
 #' pathTraining <- '..\\Exemple1\\learning' ## FOR windows only
-#' training(pathTraining)
-#' training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
-#' training(pathTraining, colormodel='hsv', method='lda')
-#' training(pathTraining, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
-#' training(pathTraining, transform=function(x) asin(2*x-1)/pi+0.5)
-#' training(pathTraining, transform=log1p)
+#' confusionMatrix <- training(pathTraining)
+#' confusionMatrix <-training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
+#' confusionMatrix <-training(pathTraining, colormodel='hsv', method='lda')
+#' confusionMatrix <-training(pathTraining, transform=function(x) (sin(pi*(x-0.5))+1)/2, method='qda')
+#' confusionMatrix <-training(pathTraining, transform=function(x) asin(2*x-1)/pi+0.5)
+#' confusionMatrix <-training(pathTraining, transform=log1p)
 
 training <- function(pathTraining, method = "lda", transform = NULL, colormodel = "rgb", mode = "CMD") {
 

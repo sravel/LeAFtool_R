@@ -327,8 +327,8 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
 
 #' Analyse an image or a set of images
 #'
-#' Analysis step on multi-thread is able only for Linux and Mac system:
-#' Please use 1 for Windows
+#' Analysis step can use many ram on parallel mode.
+#' The function return a dataframe with file name, exit status and message if error.
 #'
 #' @param pathTraining The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.
 #' @param pathResult The path of the directory where to store the result files (created by the function if it does not exist).
@@ -349,7 +349,7 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
 #' @param mode auto selection to switch between GUI or CMD mode Default:"CMD")'.
 #'
 #' @examples
-#' analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
+#' dataframeExitStatus <- analyseImages(pathTraining = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/learning",
 #' pathResult = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/results",
 #' pathImages = "/media/sebastien/Bayer/ScriptsSEB/exemples/exemple1/samples", parallelThreadsNum=4)
 analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL,leafAreaMin=1000,leafBorder=5,lesionBorder=3,lesionAreaMin=10,lesionAreaMax=120000,lesionEccentricityMin=0,lesionEccentricityMax=1,lesionColorBorder="#0000FF11",lesionColorBodies="#FE8E0000",blurDiameter=0, outPosition="right", parallelThreadsNum=1, mode="CMD") {
@@ -452,7 +452,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
       ParallelLogger::clusterRequire(cl, "MASS")
       ParallelLogger::clusterRequire(cl, "lattice")
       ParallelLogger::clusterRequire(cl, "ParallelLogger")
-      ParallelLogger::clusterRequire(cl, "shinyjs")
+#      ParallelLogger::clusterRequire(cl, "shinyjs")
 #     ParallelLogger::clusterRequire(cl, "LeAFtool")
       parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
     }
