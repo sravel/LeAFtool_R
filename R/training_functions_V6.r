@@ -109,7 +109,7 @@ existDirTraining <- function(dirTraining) {
 #' @param mode auto selection to switch between GUI or CMD mode Default:"CMD")'.
 #'
 #' @examples
-#' pathTraining <- '../Exemple1/learning/' ## FOR all OS (linux Mac Windows)
+#' pathTraining <- '../Exemple1/learning/' ## FOR all OS (Linux Mac Windows)
 #' pathTraining <- '..\\Exemple1\\learning' ## FOR windows only
 #' confusionMatrix <- training(pathTraining)
 #' confusionMatrix <- training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
