@@ -34,7 +34,7 @@ The tools are being developed and a first functional version is available. The f
   * Main Program: Please copy and paste the following command to R console.
   * Upgrading R and Rstudio to the latest version (R >= 3.5, Rstudio > 1.0.0) is strongly recommended.
 
-```
+``` ruby
 #### Install or update LeAFtool
 library(devtools)
 install_github("sravel/LeAFtool")
@@ -44,7 +44,7 @@ install_github("sravel/LeAFtool")
 ## Running LeAFtool with GUI
 
 * To run the application LeAFtool
-```
+```ruby
 library(LeAFtool)
 runLeAFtool()
 ```
@@ -63,7 +63,7 @@ This sub-folder can contain either image files or sub-folders containing differe
 
 The function return the confusion matrix and error rate.
 
-```
+```ruby
 library(LeAFtool)
 pathTraining <- '../Exemple1/learning/' ## FOR all OS (Linux Mac Windows)
 pathTraining <- '..\\Exemple1\\learning' ## FOR windows only
@@ -78,7 +78,7 @@ training(pathTraining,
 * __transform__	 transformation before analysis (e.g. sqrt) # not avail on GUI
 * __colormodel__	 Model of color for the analysis: "rgb" (default) or "hsv"
 
-```
+```ruby
 #### Examples
 pathTraining <- '/media/sebastien/LaAFtool/exemples/exemple1/learning'
 confusionMatrix <- training(pathTraining)
@@ -96,7 +96,7 @@ Analysis step can use many ram on parallel mode.
 
 The function return a dataframe with file name, exit status and message if error.
 
-```
+```ruby
 library(LeAFtool)
 analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
   leafAreaMin = 1000, leafBorder = 5, lesionBorder = 3,
@@ -123,9 +123,8 @@ analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
 * __outPosition__	join origale and color lesion image at right or buttom Default:right)'.
 * __parallelThreadsNum__	number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
 
-```
+```ruby
 #### Examples
-
 dataframeExitStatus <- analyseImages(pathTraining = "../exemple1/learning",
              pathResult = "../exemple1/results",
              pathImages = "../exemple1/samples",
@@ -150,12 +149,12 @@ See here: https://docs.google.com/document/d/1lFr8_08TGJps5lcSbY_AimstFnf0AfuOX7
 #### install on linux
 
 if install *devtools* fail please check you have the library:
-```
+```ruby
 sudo apt install libxml2-dev libcurl4-openssl-dev libssl-dev -y
 ```
 
 if install *LeAFtool* fail please check you have the library:
-```
+```ruby
 sudo apt install libtiff5-dev libfftw3-dev -y
 ```
 
