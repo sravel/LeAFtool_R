@@ -2,8 +2,6 @@
 
 ## Table of Contents
 <!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
-
-- [Table of Contents](#table-of-contents)
 - [About this package](#about-this-package)
 - [Installation](#installation)
 - [Running LeAFtool with GUI](#running-leaftool-with-gui)
