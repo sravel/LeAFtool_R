@@ -1,8 +1,7 @@
 ![LeAFtool Logo](/inst/app/www/LeAFtool-long.png)
 
-
 ## Table of Contents
-<!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:0 orderedList:0 -->
+<!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
 
 - [Table of Contents](#table-of-contents)
 - [About this package](#about-this-package)
@@ -13,9 +12,12 @@
 	- [Analysis](#analysis)
 - [Troubleshooting](#troubleshooting)
 - [Citation](#citation)
+- [License](#license)
 - [Other](#other)
 
 <!-- /TOC -->
+
+
 ## About this package
 
 Research on plant leaf diseases requires the acquisition of quantitative data to characterize the symptoms caused by different pathogens. These symptoms are frequently lesions that are differentiated from the leaf blade by their color and texture. Among the variables used to characterize the impact of a disease, the most relevant are the number of lesions per unit of leaf area, the area and the shape of the lesions. Since visual measurements are only possible on small numbers of images, it is necessary to use computerized image analysis procedures.
@@ -159,8 +161,11 @@ sudo apt install libtiff5-dev libfftw3-dev -y
 ```
 
 ## Citation
+The paper is currently in prep.
 
+## License
 
+LGPL-3 | file LICENSE
 
 ## Other
 
