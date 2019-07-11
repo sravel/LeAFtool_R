@@ -1,5 +1,21 @@
 ![LeAFtool Logo](/inst/app/www/LeAFtool-long.png)
 
+
+## Table of Contents
+<!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:0 orderedList:0 -->
+
+- [Table of Contents](#table-of-contents)
+- [About this package](#about-this-package)
+- [Installation](#installation)
+- [Running LeAFtool with GUI](#running-leaftool-with-gui)
+- [Running LeAFtool without GUI (call direct function)](#running-leaftool-without-gui-call-direct-function)
+	- [Training](#training)
+	- [Analysis](#analysis)
+- [Troubleshooting](#troubleshooting)
+- [Citation](#citation)
+- [Other](#other)
+
+<!-- /TOC -->
 ## About this package
 
 Research on plant leaf diseases requires the acquisition of quantitative data to characterize the symptoms caused by different pathogens. These symptoms are frequently lesions that are differentiated from the leaf blade by their color and texture. Among the variables used to characterize the impact of a disease, the most relevant are the number of lesions per unit of leaf area, the area and the shape of the lesions. Since visual measurements are only possible on small numbers of images, it is necessary to use computerized image analysis procedures.
@@ -18,8 +34,8 @@ The tools are being developed and a first functional version is available. The f
   * Main Program: Please copy and paste the following command to R console.
   * Upgrading R and Rstudio to the latest version (R >= 3.5, Rstudio > 1.0.0) is strongly recommended.
 
-```{r}
-# Install or update LeAFtool
+```
+#### Install or update LeAFtool
 library(devtools)
 install_github("sravel/LeAFtool")
 
@@ -28,7 +44,7 @@ install_github("sravel/LeAFtool")
 ## Running LeAFtool with GUI
 
 * To run the application LeAFtool
-```{r}
+```
 library(LeAFtool)
 runLeAFtool()
 ```
@@ -47,7 +63,7 @@ This sub-folder can contain either image files or sub-folders containing differe
 
 The function return the confusion matrix and error rate.
 
-```{r}
+```
 library(LeAFtool)
 pathTraining <- '../Exemple1/learning/' ## FOR all OS (Linux Mac Windows)
 pathTraining <- '..\\Exemple1\\learning' ## FOR windows only
@@ -62,9 +78,8 @@ training(pathTraining,
 * __transform__	 transformation before analysis (e.g. sqrt) # not avail on GUI
 * __colormodel__	 Model of color for the analysis: "rgb" (default) or "hsv"
 
-```{r}
-## Examples
-
+```
+#### Examples
 pathTraining <- '/media/sebastien/LaAFtool/exemples/exemple1/learning'
 confusionMatrix <- training(pathTraining)
 training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
@@ -81,7 +96,7 @@ Analysis step can use many ram on parallel mode.
 
 The function return a dataframe with file name, exit status and message if error.
 
-```{r}
+```
 library(LeAFtool)
 analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
   leafAreaMin = 1000, leafBorder = 5, lesionBorder = 3,
@@ -108,8 +123,8 @@ analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
 * __outPosition__	join origale and color lesion image at right or buttom Default:right)'.
 * __parallelThreadsNum__	number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
 
-```{r}
-## Examples
+```
+#### Examples
 
 dataframeExitStatus <- analyseImages(pathTraining = "../exemple1/learning",
              pathResult = "../exemple1/results",
@@ -124,26 +139,29 @@ analyseImages(pathTraining = "../exemple1/learning",
               leafBorder = 130,
               parallelThreadsNum = 22)
 ```
-
+<!--
 ## User manual
 
 See here: https://docs.google.com/document/d/1lFr8_08TGJps5lcSbY_AimstFnf0AfuOX7tY1MfkDv8/edit?usp=sharing
+-->
 
 ## Troubleshooting
 
 #### install on linux
 
 if install *devtools* fail please check you have the library:
-```{bash}
+```
 sudo apt install libxml2-dev libcurl4-openssl-dev libssl-dev -y
 ```
 
 if install *LeAFtool* fail please check you have the library:
-```{bash}
+```
 sudo apt install libtiff5-dev libfftw3-dev -y
 ```
 
 ## Citation
+
+
 
 ## Other
 
