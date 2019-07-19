@@ -166,23 +166,13 @@ tabItem(
       )
     )
   ),
-  # BOX ERROR
-#  fluidRow(
-#    conditionalPanel(
-#      condition = 'output.codeValidationInt==0',
-#      box(
-#        title = "Warning", status = "warning",solidHeader = TRUE,
-#        uiOutput("warning")
-#      )
-#    )
-#  ),
   # BOX RESULT
   fluidRow(
     conditionalPanel(
       condition = "output.analysisFinish==1",
       box(
         title = "Analysis output", status = "success",solidHeader = TRUE, width = 12,
-        #verbatimTextOutput("analysisFinish",placeholder = FALSE),
+#        verbatimTextOutput("analysisFinish",placeholder = FALSE),
         DT::dataTableOutput("contents")
       )
     )
