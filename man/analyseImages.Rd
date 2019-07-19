@@ -35,7 +35,7 @@ analyseImages(pathTraining, pathResult, pathImages = NULL,
 
 \item{lesionEccentricityMax}{The maximum eccentricity of a lesion Default:1.}
 
-\item{lesionColorBorder}{hexadecimal code for output fill color for lesion in the output image Default:#0000FF (blue).}
+\item{lesionColorBorder}{hexadecimal code for output fill color for lesion in the output image Default:#0000FF11 (blue).}
 
 \item{lesionColorBodies}{hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).}
 

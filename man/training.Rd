@@ -29,7 +29,7 @@ This sub-folder can contain either image files or sub-folders containing differe
 The function return the confusion matrix and error rate.
 }
 \examples{
-pathTraining <- '../Exemple1/learning/' ## FOR all OS (linux Mac Windows)
+pathTraining <- '../Exemple1/learning/' ## FOR all OS (Linux Mac Windows)
 pathTraining <- '..\\\\Exemple1\\\\learning' ## FOR windows only
 confusionMatrix <- training(pathTraining)
 confusionMatrix <- training(pathTraining, transform=function(x) log1p(x),colormodel='rgb', method='svm')
