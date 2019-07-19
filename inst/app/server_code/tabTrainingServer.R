@@ -67,33 +67,30 @@ observeEvent(
       if(listdirTraining$dirlimb == TRUE && listdirTraining$dirBackground == TRUE && listdirTraining$dirLesion == TRUE){
 
         # hide app
-        show(id = "loading-content")
-        # add progress bar
-#        progress <- shiny::Progress$new()
-#        on.exit(progress$close())
-#        progress$set(message = 'Making Training, please wait\n', value = 0)
-#        progress$inc(1/7, detail = paste0("Start training on folder: ",rv$dirTraining, " 1/6"))
+        shinyjs::show(id = "loading-content")
 
         ###########################
         # call function Training
         ###########################
 
 #        source("../../R/training_functions_V6.r")
-        results <- training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel, mode = "GUI")
-        rv$outTrainingTable <- results$tableTrain
-        rv$errorRate <- results$errorRate
+        tryObserve({
+          results <- training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel, mode = "GUI")
+          rv$outTrainingTable <- results$tableTrain
+          rv$errorRate <- results$errorRate
 
-        ## name common to the 3 output files, identical to the name of the directory
-        rv$basename <- tail(strsplit(rv$dirTraining,'/')[[1]],1)
+          ## name common to the 3 output files, identical to the name of the directory
+          rv$basename <- tail(strsplit(rv$dirTraining,'/')[[1]],1)
 
-        ## graph of groups in the discriminant plane
-        rv$plotFileTraining1_2 <- paste(rv$dirTraining,paste0(rv$basename,"1_2.jpeg"),sep=.Platform$file.sep) ## output file jpeg
-        rv$plotFileTraining1_3 <- paste(rv$dirTraining,paste0(rv$basename,"1_3.jpeg"),sep=.Platform$file.sep) ## output file jpeg
-        rv$plotFileTraining2_3 <- paste(rv$dirTraining,paste0(rv$basename,"2_3.jpeg"),sep=.Platform$file.sep) ## output file jpeg
+          ## graph of groups in the discriminant plane
+          rv$plotFileTraining1_2 <- paste(rv$dirTraining,paste0(rv$basename,"1_2.jpeg"),sep=.Platform$file.sep) ## output file jpeg
+          rv$plotFileTraining1_3 <- paste(rv$dirTraining,paste0(rv$basename,"1_3.jpeg"),sep=.Platform$file.sep) ## output file jpeg
+          rv$plotFileTraining2_3 <- paste(rv$dirTraining,paste0(rv$basename,"2_3.jpeg"),sep=.Platform$file.sep) ## output file jpeg
 
-        rv$fileRData <- paste(rv$dirTraining,paste0(rv$basename,".RData"),sep=.Platform$file.sep)
-        rv$exitStatusCal <- 1
-        rv$messCal <- rv$fileRData
+          rv$fileRData <- paste(rv$dirTraining,paste0(rv$basename,".RData"),sep=.Platform$file.sep)
+          rv$exitStatusCal <- 1
+          rv$messCal <- rv$fileRData
+        })
 
       }
       else{
@@ -110,7 +107,7 @@ observeEvent(
         rv$errCal <- errorMess
 
       }
-      hide(id = "loading-content", anim = TRUE, animType = "fade")
+      shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
     }
   }
 )
@@ -219,11 +216,6 @@ output$table2 <- DT::renderDataTable({
 #  formatStyle(0, fontWeight = styleEqual(3, "bold"))
 
 })
-
-
-
-
-
 
 # view large plot
 observeEvent(input$img1_2_zoom_cal,
