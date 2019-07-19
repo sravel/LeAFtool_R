@@ -89,33 +89,33 @@ tryObserve <- function(x=NULL) {
 }
 
 
-# add parallel function detectCores
-detectCores <- function (all.tests = FALSE, logical = TRUE)
-{
-    systems <- list(linux = "grep ^processor /proc/cpuinfo 2>/dev/null | wc -l",
-        darwin = if (logical) "/usr/sbin/sysctl -n hw.logicalcpu 2>/dev/null" else "/usr/sbin/sysctl -n hw.physicalcpu 2>/dev/null",
-        solaris = if (logical) "/usr/sbin/psrinfo -v | grep 'Status of.*processor' | wc -l" else "/bin/kstat -p -m cpu_info | grep :core_id | cut -f2 | uniq | wc -l",
-        freebsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null", openbsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null",
-        irix = c("hinv | grep Processors | sed 's: .*::'", "hinv | grep '^Processor '| wc -l"))
-    for (i in seq(systems)) if (all.tests || length(grep(paste0("^",
-        names(systems)[i]), R.version$os)))
-        for (cmd in systems[i]) {
-            if (is.null(a <- tryCatch(suppressWarnings(system(cmd,
-                TRUE)), error = function(e) NULL)))
-                next
-            a <- gsub("^ +", "", a[1])
-            if (grepl("^[1-9]", a))
-                return(as.integer(a))
-        }
-    NA_integer_
-}
+# add parallel function parallel::detectCores
+#parallel::detectCores <- function (all.tests = FALSE, logical = TRUE)
+#{
+#    systems <- list(linux = "grep ^processor /proc/cpuinfo 2>/dev/null | wc -l",
+#        darwin = if (logical) "/usr/sbin/sysctl -n hw.logicalcpu 2>/dev/null" else "/usr/sbin/sysctl -n hw.physicalcpu 2>/dev/null",
+#        solaris = if (logical) "/usr/sbin/psrinfo -v | grep 'Status of.*processor' | wc -l" else "/bin/kstat -p -m cpu_info | grep :core_id | cut -f2 | uniq | wc -l",
+#        freebsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null", openbsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null",
+#        irix = c("hinv | grep Processors | sed 's: .*::'", "hinv | grep '^Processor '| wc -l"))
+#    for (i in seq(systems)) if (all.tests || length(grep(paste0("^",
+#        names(systems)[i]), R.version$os)))
+#        for (cmd in systems[i]) {
+#            if (is.null(a <- tryCatch(suppressWarnings(system(cmd,
+#                TRUE)), error = function(e) NULL)))
+#                next
+#            a <- gsub("^ +", "", a[1])
+#            if (grepl("^[1-9]", a))
+#                return(as.integer(a))
+#        }
+#    NA_integer_
+#}
 
 
 # to only 2 digits after dot
 options(digits=2)
 
 # auto-detect number of core on computer
-max_no_cores <- as.numeric(max(1, detectCores() - 2))
+max_no_cores <- as.numeric(max(1, parallel::parallel::detectCores() - 2))
 
 # All reactive values for program
 rv <- reactiveValues(

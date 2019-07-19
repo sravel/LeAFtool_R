@@ -1,4 +1,4 @@
-![LeAFtool Logo](/inst/app/www/LeAFtool-long.png)
+![LeAFtool Logo](./inst/app/www/LeAFtool-long.png)
 
 ## Table of Contents
 <!-- TOC depthFrom:2 depthTo:3 withLinks:1 updateOnSave:1 orderedList:0 -->
@@ -169,4 +169,4 @@ LGPL-3 | file LICENSE
 
 #### Poster
 
-![LeAFtool poster](/inst/app/www/posterLeaftool-JOBIM2019.png)
+![LeAFtool poster](./inst/app/www/posterLeaftool-JOBIM2019.png)

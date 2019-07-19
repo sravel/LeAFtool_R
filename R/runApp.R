@@ -30,7 +30,7 @@
 
 
 library(parallel)
-max_no_cores <- as.numeric(max(1, detectCores() - 2))
+max_no_cores <- as.numeric(max(1, parallel::detectCores() - 2))
 
 
 #' Launch LeAFtool GUI

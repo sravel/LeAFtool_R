@@ -257,7 +257,7 @@ observeEvent(input$lesion_border_size,{
 ######### parallel mode
 observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
   rv$parallelMode <- input$parallelMode
-  max_no_cores <- as.numeric(max(1, detectCores() - 2))
+  max_no_cores <- as.numeric(max(1, parallel::detectCores() - 2))
   feedbackDanger(
       inputId = "parallelThreadsNum",
       condition = is.na(input$parallelThreadsNum),
