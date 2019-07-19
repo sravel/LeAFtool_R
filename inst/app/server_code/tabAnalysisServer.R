@@ -327,7 +327,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
   output$logfileANA <- renderText(rv$logfilename)
 
-  show("loading-content")
+  shinyjs::show("loading-content")
 
 #    showModal(      # Information Dialog Box
 #      modalDialog(
@@ -351,7 +351,8 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 #      )
 #    )
 
-  source("../../R/analysis_functions_v6.r")
+#  source("../../R/analysis_functions_v6.r")
+  tryObserve({
   rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
                           pathResult = rv$dirSamplesOut,
                           pathImages = rv$dirSamples,
@@ -369,12 +370,14 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
                           parallelThreadsNum = rv$parallelThreadsNum,
                           mode="GUI")
   rv$exitStatusAna <- 1
+  })
+
   enable("runButtonAnalysis")
 
   rv$dirInResult <- rv$dirSamplesOut
 
 #  ########################### END ANALYSIS
-  hide(id = "loading-content", anim = TRUE, animType = "fade")
+  shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
 }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
 
