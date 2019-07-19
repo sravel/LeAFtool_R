@@ -33,7 +33,9 @@ library(ParallelLogger)
 library(shinyjs)
 ## library(e1071) only for svm (not implemented)
 
-
+##############################################
+##### FUNCTION clusterApply2 to run parallel mode with progress bar both on commande line and shiny (base on ParallelLogger function)
+##############################################
 clusterApply2 <- function(cluster, x, fun, ..., stopOnError = FALSE, progressBar = TRUE, mode="CMD") {
   if (class(cluster)[1] == "noCluster") {
     lapply(x, fun, ...)
@@ -45,7 +47,7 @@ clusterApply2 <- function(cluster, x, fun, ..., stopOnError = FALSE, progressBar
       if (progressBar && mode == "GUI" && p > 1 )
       {
         progressNODE <- shiny::Progress$new(min = 0, max = n)
-        progressNODE$set(message = 'Analysis in progress', detail = 'This may take a while...', value = 0)
+        progressNODE$set(message = 'Analysis in progress', detail = paste0('Initiating cluster with ',p,' threads and starting on the first ',p,' files of ',n), value = 0)
         on.exit(progressNODE$close())
         }
 
@@ -76,7 +78,7 @@ clusterApply2 <- function(cluster, x, fun, ..., stopOnError = FALSE, progressBar
         if (progressBar && mode == "CMD")  setTxtProgressBar(pb, i/n)
         if (progressBar && mode == "GUI" && p > 1 )
         {
-          progressNODE$set(value = i, detail = paste0("file: ",i,"/",n))
+          progressNODE$set(value = i, detail = paste0("Number of image analyze: ",i,"/",n))
         }
         j <- i + min(n, p)
         if (j <= n) {
@@ -102,9 +104,9 @@ clusterApply2 <- function(cluster, x, fun, ..., stopOnError = FALSE, progressBar
   }
 }
 
-
-
-# To write in log file or show progress if not in parallel mode
+##############################################
+##### FUNCTION writeLOGAnalysis to To write in log file or show progress if not in parallel mode
+##############################################
 writeLOGAnalysis <- function(path = NULL, create = FALSE, message = NULL, detail = NULL, mode = NULL, value = NULL, progress = NULL, parallelThreadsNum = NULL) {
     # if not GUI mode write to log file
     if (!is.null(path)){
@@ -122,6 +124,132 @@ writeLOGAnalysis <- function(path = NULL, create = FALSE, message = NULL, detail
   }
 }
 
+##############################################
+##### FUNCTION checkDirRead to test if path is valid (e=exist, r=read, w=write)
+##############################################
+checkDirRead <- function(path,namePath, test = c("e","r","w")){
+#  readable = mode 4 and writeable mode 3 existence mode 0
+  if (!is.null(path)){
+    if (file.access(path, mode = 0)[[1]] == -1 && ("e" %in% test)){
+      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because it don't exist")
+      stop(errorMessage, call. = FALSE)
+    }
+    if (file.access(path, mode = 4)[[1]] == -1 && ("r" %in% test)){
+      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because you don't have read permission")
+      stop(errorMessage, call. = FALSE)
+    }
+    if (file.access(path, mode = 3)[[1]] == -1 && ("w" %in% test)) {
+      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because you don't have write permission")
+      stop(errorMessage, call. = FALSE)
+    }
+  }
+}
+
+##############################################
+##### FUNCTION is.wholenumber check integer value
+##############################################
+is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+
+##############################################
+##### FUNCTION checkValue test for all numeric parameters
+##############################################
+checkValue <- function(value, nameParam, odd=FALSE, max=NULL){
+
+  if (!is.numeric(value) || !is.wholenumber(value)){
+    errorMessage <- paste0("'",value,"' is invalid value for '",nameParam,"', please add integer number.")
+    stop(errorMessage, call. = FALSE)
+  }
+  else if (is.na(value) || as.numeric(value) < 0){
+    errorMessage <- paste0("'",value,"' is invalid value for '",nameParam,"', please add positive integer number.")
+    stop(errorMessage, call. = FALSE)
+  }
+  else if(odd == TRUE && value !=0 && value%%2==0){
+    warningMessage <- paste0("'",value,"' is not odd value for '",nameParam,"', auto-adjust to ",value+1,".")
+    warning(warningMessage)
+    return(value+1)
+  }
+  if(!is.null(max) && max < value){
+    errorMessage <- paste0("'",value,"' for parameter '",nameParam,"' is greater than max value '",max,"' for '",gsub('.{3}$', '', nameParam),"Max', please change value.")
+    stop(errorMessage, call. = FALSE)
+  }
+  return(value)
+}
+
+##############################################
+##### FUNCTION checkValuelesionEccentricity
+##############################################
+checkValuelesionEccentricity <- function(value, nameParam, max=NULL){
+
+  if (!is.numeric(value)){
+    errorMessage <- paste0("'",value,"' is invalid numeric value for '",nameParam,"', please add  0 < float number < 1.")
+    stop(errorMessage, call. = FALSE)
+  }
+  else if (value < 0 || value > 1){
+    errorMessage <- paste0("'",value,"' is invalid value for '",nameParam,"', please add  0 < float number < 1.")
+    stop(errorMessage, call. = FALSE)
+  }
+  if(!is.null(max) && max <= value){
+    errorMessage <- paste0("'",value,"' for parameter '",nameParam,"' is greater or equal than max value '",max,"' for '",gsub('.{3}$', '', nameParam),"Max', please change value.")
+    stop(errorMessage, call. = FALSE)
+  }
+  return(value)
+}
+
+##############################################
+##### FUNCTION checkColorHexacode
+##############################################
+checkColorHexacode <- function(color, nameParam){
+  tryCatch({ grDevices::col2rgb(color, alpha=TRUE)[4]/255},
+        error=function(cond) {
+            stop(paste("Erreur : '",color," is not a valid hexadécimal number color for parameter '",nameParam,"', you can try '#0000FF11' for blue or '#0000FF00' for transparent."), call. = FALSE)
+        })
+}
+
+##############################################
+##### FUNCTION checkParameters, check all parameter and return if need adjust parameters
+##############################################
+checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition){
+
+  # test input training path is readable = mode 4 and/or writeable mode 3 and if file Rdata exist
+  basename <- utils::tail(strsplit(pathTraining, .Platform$file.sep)[[1]], 1)
+  fileTrain <-  paste0(pathTraining, .Platform$file.sep, basename,".RData")
+  checkDirRead(pathTraining,"pathTraining")
+  if (file.access(fileTrain, mode = 0)[[1]] == -1) {
+    errorMessage <- paste0("Path '",pathTraining,"' is not a valid path for parameter 'pathTraining', can't find the training file: '",fileTrain,"', please run training function before.")
+    stop(errorMessage, call. = FALSE)
+  }
+
+  # test input pathImages path is readable = mode 4 and writeable mode 3
+  checkDirRead(pathImages,"pathImages")
+  # test input fileImage path is readable = mode 4 and writeable mode 3
+  checkDirRead(fileImage,"fileImage",test=c("e","r"))
+
+  # check all numeric values
+  checkValue(leafAreaMin,"leafAreaMin")
+  checkValue(lesionAreaMin,"lesionAreaMin",max=lesionAreaMax)
+  checkValue(lesionAreaMax,"lesionAreaMax")
+  leafBorder <- checkValue(leafBorder,"leafBorder",odd=TRUE)
+  lesionBorder <- checkValue(lesionBorder,"lesionBorder", odd=TRUE)
+  blurDiameter <- checkValue(blurDiameter,"blurDiameter", odd=TRUE)
+  checkValuelesionEccentricity(lesionEccentricityMin,"lesionEccentricityMin", max=lesionEccentricityMax)
+  checkValuelesionEccentricity(lesionEccentricityMax,"lesionEccentricityMax")
+
+  # check color:
+  checkColorHexacode(lesionColorBorder,"lesionColorBorder")
+  checkColorHexacode(lesionColorBodies,"lesionColorBodies")
+
+  # outPosition
+  if (!(outPosition %in% c("right", "bottum"))){
+    stop(paste("'",outPosition,"' is not valid value for outPosition, please only use 'right' or 'bottum'"), call. = FALSE)
+  }
+
+  return(list("leafBorder"=leafBorder, "lesionBorder"=lesionBorder, "blurDiameter"=blurDiameter))
+}
+
+
+##############################################
+##### FUNCTIONS  for analysis leaves
+##############################################
 ## returns the range of indexes of objet in vector x
 ## (called by boundingRectangle)
 rangeNA <- function(x, object) {
@@ -161,11 +289,12 @@ predict2 <- function(image,train) { ## returns predicted values according to tra
         return(stats::predict(train$svm,df))
 }
 
-## analyse a single leaf
+##############################################
+##### FUNCTION analyseLeaf to analyse a single leaf if multiple on image
+##############################################
 analyseLeaf <- function(x,train,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,blurDiameter,filename) {
 
-  #  print(paste("leafNum : ", x$leafNum, "    surface leaf : ",x$leaf.surface))
-
+  ## DEBUG: print(paste("leafNum : ", x$leafNum, "    surface leaf : ",x$leaf.surface))
   f <- x$leaf
   ## DEBUG: EBImage::display(f, method = "raster", all = TRUE)
 
@@ -218,7 +347,6 @@ analyseLeaf <- function(x,train,lesionBorder,lesionAreaMin,lesionAreaMax,lesionE
   featuresLesion <- EBImage::computeFeatures.shape(mask)
   momentsLesion <- EBImage::computeFeatures.moment(mask)
 
-
   ## Remove objects
   w.small <- w.great <- w.eccentricMin <- w.eccentricMax <- w.edge <- NULL
 
@@ -248,7 +376,6 @@ analyseLeaf <- function(x,train,lesionBorder,lesionAreaMin,lesionAreaMax,lesionE
   featuresLesion <- EBImage::computeFeatures.shape(maskLesion)
 
   featuresLesionClean <- as.data.frame(featuresLesion)
-#  featuresLesionClean$leaf.surface <- rep(as.numeric(x$leaf.surface),nrow(featuresLesionClean))
   featuresLesionClean$lesion.number <- as.numeric(row.names(featuresLesionClean))
 
   colnames(featuresLesionClean)[which(colnames(featuresLesionClean) %in%
@@ -281,50 +408,6 @@ multmerge = function(mypath, pattern){
   Reduce(function(x,y) {rbind(x,y)}, datalist)
 }
 
-checkDirRead <- function(path,namePath, test = c("e","r","w")){
-#  readable = mode 4 and writeable mode 3 existence mode 0
-  if (!is.null(path)){
-    if (file.access(path, mode = 0)[[1]] == -1 && ("e" %in% test)){
-      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because it don't exist")
-      stop(errorMessage, call. = FALSE)
-    }
-    if (file.access(path, mode = 4)[[1]] == -1 && ("r" %in% test)){
-      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because you don't have read permission")
-      stop(errorMessage, call. = FALSE)
-    }
-    if (file.access(path, mode = 3)[[1]] == -1 && ("w" %in% test)) {
-      errorMessage <- paste0("Path '",path,"' is not a valid path for parameter '",namePath,"', because you don't have write permission")
-      stop(errorMessage, call. = FALSE)
-    }
-  }
-}
-
-
-
-checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition){
-
-  # test input training path is readable = mode 4 and/or writeable mode 3 and if file Rdata exist
-  basename <- utils::tail(strsplit(pathTraining, .Platform$file.sep)[[1]], 1)
-  fileTrain <-  paste0(pathTraining,'/',basename,".RData")
-  checkDirRead(pathTraining,"pathTraining")
-  if (file.access(fileTrain, mode = 0)[[1]] == -1) {
-    errorMessage <- paste0("Path '",pathTraining,"' is not a valid path for parameter 'pathTraining', can't find the training file: '",fileTrain,"', please run training function before.")
-    stop(errorMessage, call. = FALSE)
-  }
-
-  # test input pathImages path is readable = mode 4 and writeable mode 3
-  checkDirRead(pathImages,"pathImages")
-  # test input fileImage path is readable = mode 4 and writeable mode 3
-  checkDirRead(fileImage,"fileImage",test=c("e","r"))
-
-
-#    if (!(method %in% c("lda", "qda", "svm"))){
-#      stop(paste(method," is not valid value for method, please only use 'lda' or 'qda'"))
-#    }
-
-}
-
-
 #' Analyse an image or a set of images
 #'
 #' Analysis step can use many ram on parallel mode.
@@ -341,7 +424,7 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
 #' @param lesionAreaMax The maximum area of a lesion (in pixels) Default:120000.
 #' @param lesionEccentricityMin The minimum eccentricity of a lesion Default:0.
 #' @param lesionEccentricityMax The maximum eccentricity of a lesion Default:1.
-#' @param lesionColorBorder hexadecimal code for output fill color for lesion in the output image Default:#0000FF (blue).
+#' @param lesionColorBorder hexadecimal code for output fill color for lesion in the output image Default:#0000FF11 (blue).
 #' @param lesionColorBodies hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).
 #' @param blurDiameter The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.
 #' @param outPosition join origale and color lesion image at right or buttom Default:right)'.
@@ -371,12 +454,15 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
   ############################ Check parameters
   # test input pathResult path is readable = mode 4 and writeable mode 3
   checkDirRead(pathResult,"pathResult")
-
   # if possible add log file for all error after
   writeLOGAnalysis(path = pathResult, create = TRUE, message = "Analysis run, please wait", detail = " VERSION: 1.0", mode = mode, progress = progress, parallelThreadsNum = parallelThreadsNum)
 
-  checkParameters(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition)
+  autoAdjustList <- checkParameters(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition)
+  leafBorder <- autoAdjustList$leafBorder
+  lesionBorder <- autoAdjustList$lesionBorder
+  blurDiameter <- autoAdjustList$blurDiameter
 
+  ############################ add to parameters file
   # create config file to save input values
   paramfilename <- file(paste0(pathResult,"/LeAFtool-parameters-input.txt"))
   parameters <- paste0(
@@ -396,8 +482,8 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
              )
-    cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,"', fileImage = '",fileImage,
-                "', leafAreaMin = ",leafAreaMin,
+    cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,"', fileImage = ",fileImage,
+                ", leafAreaMin = ",leafAreaMin,
                 ", leafBorder = ",leafBorder,
                 ", lesionBorder = ",lesionBorder,
                 ", lesionAreaMin = ",lesionAreaMin,
@@ -411,7 +497,6 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
                 "', parallelThreadsNum = ",parallelThreadsNum,")")
   cat(paste0(parameters,"\n",cmd), '\n', file = paramfilename)
   close(paramfilename)
-
 
   ############################ RUN ANALYSIS
   # count number of Samples on input directory
@@ -441,7 +526,6 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
     # Start parallel session
     osSystem <- Sys.info()["sysname"]
     if (osSystem == "Darwin" || osSystem == "Linux" || osSystem == "Windows") {
-      library(ParallelLogger)
       cl <- ParallelLogger::makeCluster(numberOfThreads = parallelThreadsNum, singleThreadToMain = TRUE, divideFfMemory = FALSE, setFfTempDir = FALSE)
     }
     if (parallelThreadsNum > 1)
@@ -459,13 +543,13 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
 
     res <- clusterApply2(cl, listSamples, analyseImageUnique, pathTraining, pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum, stopOnError = FALSE, progressBar = TRUE, mode = mode)
 
-  #  # Close cluster mode
+    # Close cluster mode
     ParallelLogger::stopCluster(cl)
-#    closeAllConnections(); # for kill all process, use to add button for stop work
-#    foreach::registerDoSEQ()
+    closeAllConnections(); # for kill all process, use to add button for stop work
     parallelThreadsNum <- 1
   }
 
+  # merge all tables
   mymergeddata = multmerge(pathResult, "*_Merge_lesions.csv")
   utils::write.table(
     mymergeddata,
@@ -482,6 +566,9 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
   return(res)
 }
 
+##############################################
+##### FUNCTION analyseImageUnique to analyse only one file image
+##############################################
 analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
 
   # check params:
@@ -496,7 +583,7 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
 
   ## load trainig results
   basename <- utils::tail(strsplit(pathTraining, .Platform$file.sep)[[1]], 1)
-  file.train <-  base::normalizePath(paste0(pathTraining,'/',basename,".RData"),winslash = "/")
+  file.train <-  base::normalizePath(paste0(pathTraining, .Platform$file.sep, basename,".RData"),winslash = "/")
   load(file.train)
 
   # LOAD class
@@ -559,7 +646,7 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
   if (nrow(featuresLeaf) == 0){
     logError( paste0("no leaf found for image ", leafName))
     return(data.frame(LeafName = leafName, Status = "ERROR", Message = "No leaf found for image"))
-    stop(paste0("no leaf found for image ", leafName))
+    stop(paste0("no leaf found for image ", leafName), call. = FALSE)
   }
 
   # renumber leaves
