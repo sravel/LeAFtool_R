@@ -72,6 +72,23 @@ options(shiny.fullstacktrace=TRUE, shiny.sanitize.errors = FALSE)
 ## Global functions
 ############################################
 
+tryObserve <- function(x=NULL) {
+  x <- substitute(x)
+  env <- parent.frame()
+  rv$exitStatusAna <- 0
+  rv$exitStatusCal <- 0
+  observe({
+    tryCatch(
+      eval(x, env),
+      error = function(e) {
+        logError(paste("Error: ", e$message))
+        showNotification(paste("Error: ", e$message), type = "error", duration = NULL, closeButton = TRUE)
+      }
+    )
+  })
+}
+
+
 # add parallel function detectCores
 detectCores <- function (all.tests = FALSE, logical = TRUE)
 {
@@ -112,7 +129,6 @@ rv <- reactiveValues(
                         dirSamplesOut = NULL,
 
                         exitStatusAna = -1,
-                        codeValidationInt = 1,
                         rmScanLine = FALSE,
 
                         leaf_min_size = 1000,
@@ -132,7 +148,6 @@ rv <- reactiveValues(
                         parallelMode = FALSE,
                         parallelThreadsNum = max_no_cores,
                         blur_value = 0,
-#                        logfilename = "log.txt",
 
                         # edit
                         dirInResult = NULL,
@@ -196,7 +211,6 @@ returnOdd <- function(value){
 
 # no color for hide ploint of plot on edit mode
 noColor <- rgb(red = 0, green = 0, blue = 1, alpha = 0)
-
 
 existDirTraining <- function(dirTraining){
   list(
