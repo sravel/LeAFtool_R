@@ -90,8 +90,8 @@ observeEvent(
           rv$fileRData <- paste(rv$dirTraining,paste0(rv$basename,".RData"),sep=.Platform$file.sep)
           rv$exitStatusCal <- 1
           rv$messCal <- rv$fileRData
+          shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
         })
-
       }
       else{
         # print(paste("else inputdir",rv$datapath))
@@ -105,9 +105,9 @@ observeEvent(
         rv$exitStatusCal <- 0
         rv$messCal <- NULL
         rv$errCal <- errorMess
-
+        shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
       }
-      shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
+
     }
   }
 )

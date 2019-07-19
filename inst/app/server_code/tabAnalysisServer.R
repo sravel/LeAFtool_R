@@ -353,7 +353,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
 
 #  source("../../R/analysis_functions_v6.r")
   tryObserve({
-  rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
+    rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
                           pathResult = rv$dirSamplesOut,
                           pathImages = rv$dirSamples,
                           leafAreaMin = rv$leaf_min_size,
@@ -369,15 +369,14 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
                           outPosition = rv$position,
                           parallelThreadsNum = rv$parallelThreadsNum,
                           mode="GUI")
-  rv$exitStatusAna <- 1
+    rv$exitStatusAna <- 1
+
+    enable("runButtonAnalysis")
+    rv$dirInResult <- rv$dirSamplesOut
+  #  ########################### END ANALYSIS
+    shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
   })
 
-  enable("runButtonAnalysis")
-
-  rv$dirInResult <- rv$dirSamplesOut
-
-#  ########################### END ANALYSIS
-  shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
 }, ignoreNULL = FALSE, ignoreInit = TRUE)
 
 
