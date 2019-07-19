@@ -133,10 +133,10 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
     version <- "1.0"
 
     if (!(method %in% c("lda", "qda", "svm"))){
-      stop(paste(method," is not valid value for method, please only use 'lda' or 'qda'"))
+      stop(paste(method," is not valid value for method, please only use 'lda' or 'qda'"), call. = FALSE)
     }
     if (!(colormodel %in% c("rgb", "hsv"))){
-      stop(paste(colormodel," is not valid value for colormodel, please only use 'rgb' or 'hsv'"))
+      stop(paste(colormodel," is not valid value for colormodel, please only use 'rgb' or 'hsv'"), call. = FALSE)
     }
 
     listdirTraining <- existDirTraining(pathTraining)
@@ -148,10 +148,8 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
         "\t-  background: ", listdirTraining$dirBackground, "\n",
         "\t-  lesion: ", listdirTraining$dirLesion, "\n"
       )
-
-      stop(errorMess)
+      stop(errorMess, call. = FALSE)
     }
-
 
     ## search for sub-folders in pathTraining
     writeLOG(path = pathTraining, message = NULL, detail = paste0("Start training on folder: ",pathTraining, " 1/6"), mode = mode, value = 1, progress = progress)
@@ -291,7 +289,7 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
       g <- plotLDGraph(df4, df4$LD1, "LD1", df4$LD2, "LD2", df4$group, df4$classes, backgroundDir, limbDir, lesionDir)
       print(g)
       grDevices::dev.off()
-      rv$plotALL <- FALSE
+#      rv$plotALL <- FALSE
     } else{
       g <- plotLDGraph(df4, df4$LD1, "LD1", df4$LD2, "LD2", df4$group, df4$classes.1, backgroundDir, limbDir, lesionDir)
       print(g)
