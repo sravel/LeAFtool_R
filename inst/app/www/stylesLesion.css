@@ -99,6 +99,15 @@
 	margin-top: -25px;
 }
 
+
+.shiny-notification-error {
+  color: #a94442;
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
+  font-size: large;
+  opacity: 1;
+}
+
 /*
 ####### Ajustement des modals
 */
