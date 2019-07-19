@@ -80,7 +80,7 @@ observeEvent(
           rv$errorRate <- results$errorRate
 
           ## name common to the 3 output files, identical to the name of the directory
-          rv$basename <- tail(strsplit(rv$dirTraining,.Platform$file.sep)[[1]],1)
+          rv$basename <- basename(rv$dirTraining)
 
           ## graph of groups in the discriminant plane
           rv$plotFileTraining1_2 <- paste(rv$dirTraining,paste0(rv$basename,"1_2.jpeg"),sep=.Platform$file.sep) ## output file jpeg

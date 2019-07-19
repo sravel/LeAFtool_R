@@ -115,7 +115,7 @@ tryObserve <- function(x=NULL) {
 options(digits=2)
 
 # auto-detect number of core on computer
-max_no_cores <- as.numeric(max(1, parallel::parallel::detectCores() - 2))
+max_no_cores <- as.numeric(max(1, parallel::detectCores() - 2))
 
 # All reactive values for program
 rv <- reactiveValues(
