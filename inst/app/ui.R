@@ -41,7 +41,6 @@
 ############################################
 
 # add header
-#header <- dashboardHeader(title = "ALAMA: Automatic Lesion Analysis Measure Area", titleWidth = 500
 header <- dashboardHeader(title = img(src = "LeAFtool-long.png", class = 'img-responsive'), titleWidth = 400)
 
 # Sidebar for acces to tab
@@ -55,7 +54,6 @@ sidebar <- dashboardSidebar(
 #    menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard")),
     menuItem("LOG", tabName = "tabLOG", icon = icon("file-code"))
   )
-  # actionButton('close', "Close", class = "btn btn-danger",onclick = "setTimeout(function(){window.close();},500);")
 )
 
 # Boby page
@@ -63,11 +61,28 @@ body <- dashboardBody(
   includeCSS('www/stylesLesion.css'),
   useShinyjs(),
   useShinyFeedback(),
+  # use to favicon
+  tags$head(tags$link(rel = "shortcut icon", href = "favicons/favicon.ico", type="image/x-icon")),
+  tags$head(tags$link(rel = "icon", href = "favicons/favicon.png", type="image/png")),
+  tags$head(tags$link(rel = "icon", sizes="32x32", href = "favicons/favicon-32.png", type="image/png")),
+  tags$head(tags$link(rel = "icon", sizes="64x64", href = "favicons/favicon-64.png", type="image/png")),
+  tags$head(tags$link(rel = "icon", sizes="96x96", href = "favicons/favicon-96.png", type="image/png")),
+  tags$head(tags$link(rel = "icon", sizes="196x196", href = "favicons/favicon-196.png", type="image/png")),
+  tags$head(tags$link(rel = "apple-touch-icon", sizes="152x152", href = "favicons/apple-touch-icon.png")),
+  tags$head(tags$link(rel = "apple-touch-icon", sizes="60x60", href = "favicons/apple-touch-icon-60x60.png")),
+  tags$head(tags$link(rel = "apple-touch-icon", sizes="76x76", href = "favicons/apple-touch-icon-76x76.png")),
+  tags$head(tags$link(rel = "apple-touch-icon", sizes="114x114", href = "favicons/apple-touch-icon-114x114.png")),
+  tags$head(tags$link(rel = "apple-touch-icon", sizes="120x120", href = "favicons/apple-touch-icon-120x120.png")),
+  tags$head(tags$link(rel = "apple-touch-icon", sizes="144x144", href = "favicons/apple-touch-icon-144x144.png")),
+  tags$head(tags$meta(name = "msapplication-TileImage", content="favicon-144.png")),
+  tags$head(tags$meta(name = "msapplication-TileColor", content="#FFFFFF")),
+
   # Loading message
   hidden(
     tags$div(
       id = "loading-content",
-      tags$h2("Loading...")
+      tags$h2("Loading"),
+      img(src = "ajax-loader-leaf.gif")
     )
   ),
 
@@ -90,20 +105,21 @@ body <- dashboardBody(
 #      h1("DEBUG"),
 #      verbatimTextOutput("debug")
 #    ),
-    # other tab
+
+    # LOG tab
     tabItem(
       tabName = "tabLOG",
       h1("LOG"),
       fluidRow(
         column(1,
-              selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
-              selectInput("thread", label = "Thread", choices = "1"),
-              selectInput("package", label = "Package", choices = "packages")
-              ),
+          selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
+          selectInput("thread", label = "Thread", choices = "1"),
+          selectInput("package", label = "Package", choices = "packages")
+        ),
         column(11,
-              verbatimTextOutput("logFilePath"),
-              dataTableOutput("logTable")
-              )
+          verbatimTextOutput("logFilePath"),
+          dataTableOutput("logTable")
+        )
       )
     )
   )
