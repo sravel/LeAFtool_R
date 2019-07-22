@@ -72,17 +72,26 @@ options(shiny.fullstacktrace=TRUE, shiny.sanitize.errors = FALSE)
 ## Global functions
 ############################################
 
-tryObserve <- function(x=NULL) {
+tryObserve <- function(x=NULL, test=NULL) {
   x <- substitute(x)
   env <- parent.frame()
-  rv$exitStatusAna <- 0
-  rv$exitStatusCal <- 0
   observe({
     tryCatch(
       eval(x, env),
       error = function(e) {
-        logError(paste("Error: ", e$message))
-        showNotification(paste("Error: ", e$message), type = "error", duration = NULL, closeButton = TRUE)
+        isolate({
+            if(test == "analysis") {
+                rv$exitStatusAna <- 0
+                enable("runButtonAnalysis")
+            }
+            if(test == "training") {
+                rv$exitStatusCal <- 0
+            }
+            logError(paste("Error: ", e$message))
+            showNotification(paste("Error: ", e$message), type = "error", duration = NULL, closeButton = TRUE)
+            #  ########################### END ANALYSIS
+            shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
+        })
       }
     )
   })

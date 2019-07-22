@@ -91,7 +91,8 @@ observeEvent(
           rv$exitStatusCal <- 1
           rv$messCal <- rv$fileRData
           shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
-        })
+
+        },test="training")
       }
       else{
         # print(paste("else inputdir",rv$datapath))

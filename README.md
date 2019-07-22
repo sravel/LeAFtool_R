@@ -158,6 +158,10 @@ if install *LeAFtool* fail please check you have the library:
 sudo apt install libtiff5-dev libfftw3-dev -y
 ```
 
+#### parallel mode on windows 7
+The application fail to created cluster on windows 7, so use only 1 thread. I see with package authors to fix the bug.
+
+
 ## Citation
 The paper is currently in prep.
 

@@ -303,78 +303,58 @@ observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
 ## run analysis
 ############################################
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
-  ## load values and add loading frame
-  disable("runButtonAnalysis")
-  rv$exitStatusAna <- 0
-  rv$lesion_color_border <- input$lesion_color_border
-  rv$lesion_color_bodies <- input$lesion_color_bodies
-
-  displayableData <- DT::datatable(data = NULL)
-  rv$dirInResult <- rv$dirSamplesOut
-
-  rv$responseDataFilter <- NULL
-
-  # reset to 1 if not select parallel mode
-  if (rv$parallelMode == FALSE){
-    rv$parallelThreadsNum <- 1
-  }
-  # if no blur change to 0
-  if (rv$active_blur == FALSE){
-    rv$blur_value <- 0
-  }
-  # create log file
-  rv$logfilename <- paste0(rv$dirSamplesOut,"/log.txt")
-
-  output$logfileANA <- renderText(rv$logfilename)
-
-  shinyjs::show("loading-content")
-
-#    showModal(      # Information Dialog Box
-#      modalDialog(
-#        title = paste("Analysis run on folder", rv$dirSamples, sep = " "),
-#        size = "l",
-#        easyClose = FALSE,
-#        fade = FALSE,
-#          h1("LOG"),
-#          fluidRow(
-#            column(12,
-#            p("running please wait...")
-##                  selectInput("level", label = "Level", choices = "INFO", selected = "INFO"),
-##                  selectInput("thread", label = "Thread", choices = "1"),
-##                  selectInput("package", label = "Package", choices = "packages")
-##                  ),
-##            column(11,
-##                  verbatimTextOutput("logfileANA")
-##                  dataTableOutput("logTable")
-#                  )
-#          )
-#      )
-#    )
 
 #  source("../../R/analysis_functions_v6.r")
-  tryObserve({
-    rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
-                          pathResult = rv$dirSamplesOut,
-                          pathImages = rv$dirSamples,
-                          leafAreaMin = rv$leaf_min_size,
-                          leafBorder = rv$leaf_border_size,
-                          lesionBorder = rv$lesion_border_size,
-                          lesionAreaMin = rv$lesion_min_size,
-                          lesionAreaMax = rv$lesion_max_size,
-                          lesionEccentricityMin = rv$lesion_eccentricMin,
-                          lesionEccentricityMax = rv$lesion_eccentricMax,
-                          lesionColorBorder = rv$lesion_color_border,
-                          lesionColorBodies = rv$lesion_color_bodies,
-                          blurDiameter = rv$blur_value,
-                          outPosition = rv$position,
-                          parallelThreadsNum = rv$parallelThreadsNum,
-                          mode="GUI")
-    rv$exitStatusAna <- 1
+  isolate({
+    tryObserve({
+      ## load values and add loading frame
+      disable("runButtonAnalysis")
+      rv$exitStatusAna <- 0
+      rv$lesion_color_border <- input$lesion_color_border
+      rv$lesion_color_bodies <- input$lesion_color_bodies
 
-    enable("runButtonAnalysis")
-    rv$dirInResult <- rv$dirSamplesOut
-  #  ########################### END ANALYSIS
-    shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
+      displayableData <- DT::datatable(data = NULL)
+      rv$dirInResult <- rv$dirSamplesOut
+
+      rv$responseDataFilter <- NULL
+
+      # reset to 1 if not select parallel mode
+      if (rv$parallelMode == FALSE){
+        rv$parallelThreadsNum <- 1
+      }
+      # if no blur change to 0
+      if (rv$active_blur == FALSE){
+        rv$blur_value <- 0
+      }
+      # create log file
+      rv$logfilename <- paste0(rv$dirSamplesOut,"/log.txt")
+
+      output$logfileANA <- renderText(rv$logfilename)
+
+      shinyjs::show("loading-content")
+      rv$dfStatus <- analyseImages(pathTraining = rv$dirTraining,
+                            pathResult = rv$dirSamplesOut,
+                            pathImages = rv$dirSamples,
+                            leafAreaMin = rv$leaf_min_size,
+                            leafBorder = rv$leaf_border_size,
+                            lesionBorder = rv$lesion_border_size,
+                            lesionAreaMin = rv$lesion_min_size,
+                            lesionAreaMax = rv$lesion_max_size,
+                            lesionEccentricityMin = rv$lesion_eccentricMin,
+                            lesionEccentricityMax = rv$lesion_eccentricMax,
+                            lesionColorBorder = rv$lesion_color_border,
+                            lesionColorBodies = rv$lesion_color_bodies,
+                            blurDiameter = rv$blur_value,
+                            outPosition = rv$position,
+                            parallelThreadsNum = rv$parallelThreadsNum,
+                            mode="GUI")
+      rv$exitStatusAna <- 1
+
+      enable("runButtonAnalysis")
+      rv$dirInResult <- rv$dirSamplesOut
+    #  ########################### END ANALYSIS
+      shinyjs::hide(id = "loading-content", anim = TRUE, animType = "fade")
+    }, test="analysis")
   })
 
 }, ignoreNULL = FALSE, ignoreInit = TRUE)
