@@ -221,6 +221,13 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
 
   # test input pathImages path is readable = mode 4 and writeable mode 3
   checkDirRead(pathImages,"pathImages")
+  if (!is.null(pathImages)){
+    listSamples <- list.files(pathImages, full.names = FALSE, include.dirs = FALSE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", ignore.case = TRUE)
+    if (length(listSamples) == 0){
+      errorMessage <- paste0("Path '",pathImages,"' is not a valid path for parameter 'pathImages', can't find the jpg, jpeg, png or tif files.")
+      stop(errorMessage, call. = FALSE)
+    }
+  }
   # test input fileImage path is readable = mode 4 and writeable mode 3
   checkDirRead(fileImage,"fileImage",test=c("e","r"))
 
@@ -505,7 +512,8 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
     writeLOGAnalysis(path = pathResult, message = NULL, detail = paste0("Start Analysis on image: ",fileImage), mode = mode, value = 1, progress = progress, parallelThreadsNum = parallelThreadsNum)
   }
   else{
-    listSamples <-list.files(pathImages)
+#    listSamples <-list.files(pathImages)
+    listSamples <- list.files( pathImages, full.names = FALSE, pattern = "\\.jpg$|\\.jpeg$|\\.PNG$|\\.tif$", include.dirs = FALSE, ignore.case = TRUE)
     writeLOGAnalysis(path = pathResult, message = NULL, detail = paste0("Start Analysis on folder: ",pathImages), mode = mode, value = 1, progress = progress, parallelThreadsNum = parallelThreadsNum)
   }
 
