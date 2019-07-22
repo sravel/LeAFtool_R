@@ -6,8 +6,8 @@
 - [Installation](#installation)
 - [Running LeAFtool with GUI](#running-leaftool-with-gui)
 - [Running LeAFtool without GUI (call direct function)](#running-leaftool-without-gui-call-direct-function)
-	- [Training](#training)
-	- [Analysis](#analysis)
+  - [Training](#training)
+  - [Analysis](#analysis)
 - [Troubleshooting](#troubleshooting)
 - [Citation](#citation)
 - [License](#license)
@@ -36,8 +36,8 @@ The tools are being developed and a first functional version is available. The f
 
 ``` ruby
 #### Install or update LeAFtool
-library(devtools)
-install_github("sravel/LeAFtool")
+install.packages("remotes")
+remotes::install_github("sravel/LeAFtool")
 
 ```
 
@@ -73,10 +73,10 @@ training(pathTraining,
          colormodel = "rgb"
         )
 ```
-* __pathTraining__	The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
-* __method__	Method of discrimainant analysis: "lda" (default) or "qda"
-* __transform__	 transformation before analysis (e.g. sqrt) # not avail on GUI
-* __colormodel__	 Model of color for the analysis: "rgb" (default) or "hsv"
+* __pathTraining__  The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
+* __method__  Method of discrimainant analysis: "lda" (default) or "qda"
+* __transform__  transformation before analysis (e.g. sqrt) # not avail on GUI
+* __colormodel__   Model of color for the analysis: "rgb" (default) or "hsv"
 
 ```ruby
 #### Examples
@@ -106,22 +106,22 @@ analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
   blurDiameter = 0, outPosition = "right", parallelThreadsNum = 1)
 ```
 
-* __pathTraining__	The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.
-* __pathResult__	The path of the directory where to store the result files (created by the function if it does not exist).
-* __pathImages__	The path of the directory containing the images to analyse.
-* __fileImage__	A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).
-* __leafAreaMin__	The minimum area of a leaf (in pixels) Default:1000.
-* __leafBorder__	The diameter of the brush (in pixels) used to erode the leafBorder Default:5.
-* __lesionBorder__	The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.
-* __lesionAreaMin__	The minimum area of a lesion (in pixels) Default:10.
-* __lesionAreaMax__	The maximum area of a lesion (in pixels) Default:120000.
-* __lesionEccentricityMin__	The minimum eccentricity of a lesion Default:0.
-* __lesionEccentricityMax__	The maximum eccentricity of a lesion Default:1.
-* __lesionColorBorder__	hexadecimal code for output fill color for lesion in the output image Default:#0000FF (blue).
-* __lesionColorBodies__	hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).
-* __blurDiameter__	The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.
-* __outPosition__	join origale and color lesion image at right or buttom Default:right)'.
-* __parallelThreadsNum__	number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
+* __pathTraining__  The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.
+* __pathResult__  The path of the directory where to store the result files (created by the function if it does not exist).
+* __pathImages__  The path of the directory containing the images to analyse.
+* __fileImage__ A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).
+* __leafAreaMin__ The minimum area of a leaf (in pixels) Default:1000.
+* __leafBorder__  The diameter of the brush (in pixels) used to erode the leafBorder Default:5.
+* __lesionBorder__  The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.
+* __lesionAreaMin__ The minimum area of a lesion (in pixels) Default:10.
+* __lesionAreaMax__ The maximum area of a lesion (in pixels) Default:120000.
+* __lesionEccentricityMin__ The minimum eccentricity of a lesion Default:0.
+* __lesionEccentricityMax__ The maximum eccentricity of a lesion Default:1.
+* __lesionColorBorder__ hexadecimal code for output fill color for lesion in the output image Default:#0000FF (blue).
+* __lesionColorBodies__ hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).
+* __blurDiameter__  The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.
+* __outPosition__ join origale and color lesion image at right or buttom Default:right)'.
+* __parallelThreadsNum__  number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
 
 ```ruby
 #### Examples
