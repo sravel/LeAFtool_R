@@ -327,7 +327,7 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
         rv$blur_value <- 0
       }
       # create log file
-      rv$logfilename <- paste0(rv$dirSamplesOut,"/log.txt")
+      rv$logfilename <- file.path(rv$dirSamplesOut,"log.txt")
 
       output$logfileANA <- renderText(rv$logfilename)
 

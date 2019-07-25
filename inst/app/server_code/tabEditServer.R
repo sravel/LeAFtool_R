@@ -98,16 +98,16 @@ observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
 observeEvent(input$imageEdit, {
   #Load image for plot
   lesionImg <- strsplit(input$imageEdit, ".", fixed = TRUE)[[1]][1]
-  pathImg <- paste(rv$dirInResult, input$imageEdit, sep = .Platform$file.sep)
+  pathImg <- file.path(rv$dirInResult, input$imageEdit)
 
   if(file.exists(pathImg)){
     baseName <- gsub("_lesion", "", lesionImg)
-    rv$originalFileName <- paste0(rv$dirInResult, .Platform$file.sep,baseName,"_lesion.jpeg")
-    rv$loadcurrentImageEdit <- readImage(rv$originalFileName)
-    load(file = paste0(rv$dirInResult, .Platform$file.sep, ".",baseName,".RData"), envir = .GlobalEnv)
+    rv$originalFileName <- file.path(rv$dirInResult, paste0(baseName,"_lesion.jpeg"))
+    rv$loadcurrentImageEdit <- EBImage::readImage(rv$originalFileName)
+    load(file = file.path(rv$dirInResult, paste0(".",baseName,".RData")), envir = .GlobalEnv)
     rv$position <- filePosition
-    rv$originalFileNameBoth <- paste0(rv$dirInResult, .Platform$file.sep,baseName,"_both.jpeg")
-    img <- readImage(rv$originalFileNameBoth)
+    rv$originalFileNameBoth <- file.path(rv$dirInResult, paste0(baseName,"_both.jpeg"))
+    img <- EBImage::readImage(rv$originalFileNameBoth)
     # test if image is right or bottum
     if (rv$position  == "right"){
       rv$widthSize = dim(img)[1]/2
@@ -117,12 +117,12 @@ observeEvent(input$imageEdit, {
       rv$heightSize = dim(img)[2]/2
     }
     rv$loadcurrentImageOriginaleEdit <- img[1:rv$widthSize,1:rv$heightSize,]
-    rv$loadCSVcurrentImageName <- paste0(rv$dirInResult, .Platform$file.sep,baseName,"_All_lesions.csv")
+    rv$loadCSVcurrentImageName <- file.path(rv$dirInResult, paste0(baseName,"_All_lesions.csv"))
     rv$loadCSVcurrentImage <- read.csv(rv$loadCSVcurrentImageName ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
     rv$selectedRows <- list(1:nrow(rv$loadCSVcurrentImage))
-    rv$csv_Merge_lesionsFile <- paste(rv$dirInResult, .Platform$file.sep, baseName,"_Merge_lesions.csv", sep = '')
+    rv$csv_Merge_lesionsFile <- file.path(rv$dirInResult, paste0(baseName,"_Merge_lesions.csv"))
     rv$AG <- read.csv(rv$csv_Merge_lesionsFile ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
-    rv$MERGE <- read.csv(paste0(rv$dirInResult,.Platform$file.sep,"merge_ResumeCount.csv") ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+    rv$MERGE <- read.csv(file.path(rv$dirInResult, "merge_ResumeCount.csv") ,header = TRUE, sep = "\t", stringsAsFactors = FALSE)
 
   }
 }, ignoreNULL = FALSE, ignoreInit = TRUE)
@@ -268,7 +268,7 @@ updateAll <- function(res){
 
   write.table(
     rv$MERGE,
-    file = paste0(rv$dirInResult,"/merge_ResumeCount.csv"),
+    file = file.path(rv$dirInResult, "merge_ResumeCount.csv"),
     quote = FALSE,
     row.names = FALSE,
     sep = '\t'
