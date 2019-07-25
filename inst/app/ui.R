@@ -52,7 +52,8 @@ sidebar <- dashboardSidebar(
     menuItem("Analysis", tabName = "tabAnalysis", icon = icon("pagelines")),
     menuItem("Edit", tabName = "tabEdit", icon = icon("edit")),
 #    menuItem("Debug", tabName = "tabDebug", icon = icon("dashboard")),
-    menuItem("LOG", tabName = "tabLOG", icon = icon("file-code"))
+    menuItem("LOG", tabName = "tabLOG", icon = icon("file-code")),
+    menuItem("Toolbox", tabName = "tabToolbox", icon = icon("toolbox"))
   )
 )
 
@@ -98,6 +99,9 @@ body <- dashboardBody(
 
     # add tab for edit
     source(file.path("ui_code", "tabEditUI.R"), local = TRUE, chdir = TRUE)$value,
+
+    # add tab for edit
+    source(file.path("ui_code", "tabToolboxUI.R"), local = TRUE, chdir = TRUE)$value,
 
 #    # other tab
 #    tabItem(

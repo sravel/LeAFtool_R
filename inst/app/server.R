@@ -56,6 +56,9 @@ shinyServer(function(input, output, session) {
   # Load functions for tab Edit
   source(file.path("server_code", "tabEditServer.R"), local = TRUE)$value
 
+  # Load functions for tab toolbox
+  source(file.path("server_code", "tabToolboxServer.R"), local = TRUE)$value
+
   ## LOG FILE PRINT
   eventLog <- reactivePoll(4000, session,
     # This function returns the time that rv$logfilename was last modified
