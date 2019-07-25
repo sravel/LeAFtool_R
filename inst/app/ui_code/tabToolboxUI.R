@@ -37,7 +37,7 @@ tabItem(
           shinyDirButton(id = 'dirInResize', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("compress")) %>%
             helper(icon = "question",
                 type = "markdown",
-                content = "dirInResize"),
+                content = "dirInSamples"),
           verbatimTextOutput("dirResize", placeholder = TRUE),
           numericInput("factor", "factor to resize:", value = 2, min=1,  width = "150px") %>%
             helper(icon = "question",
@@ -55,16 +55,16 @@ tabItem(
               numericInput("splitVertical", "Split Vertical:", value = 1, min=1,  width = "150px") %>%
                 helper(icon = "question",
                       type = "markdown",
-                      content = "splitVertical")
+                      content = "splithelp")
             ),
             column(3,
               numericInput("splitHorizontal", "Split Horizontal:", value = 1, min=1,  width = "150px") %>%
                 helper(icon = "question",
                       type = "markdown",
-                      content = "splitHorizontal")
+                      content = "splithelp")
             ),
             column(3,
-              checkboxInput("outputNumber", "Order to numerote right", value = FALSE, width = "150px") %>%
+              checkboxInput("outputNumber", "Order to numerote 'left to right'", value = FALSE, width = "150px") %>%
               helper(icon = "question",
                     type = "markdown",
                     content = "outputNumber")
@@ -73,7 +73,7 @@ tabItem(
           shinyDirButton(id = 'dirInSplit', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("cut")) %>%
             helper(icon = "question",
                 type = "markdown",
-                content = "dirInSplit"),
+                content = "dirInSamples"),
           verbatimTextOutput("dirSplit", placeholder = TRUE),
           "Split path output:",
           verbatimTextOutput("splitPathOut")
