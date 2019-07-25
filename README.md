@@ -8,6 +8,9 @@
 - [Running LeAFtool without GUI (call direct function)](#running-leaftool-without-gui-call-direct-function)
   - [Training](#training)
   - [Analysis](#analysis)
+- [Toolbox](#toolbox)
+  - [Resize function](#resize-function)
+  - [Split function](#split-function)
 - [Troubleshooting](#troubleshooting)
 - [Citation](#citation)
 - [License](#license)
@@ -143,6 +146,38 @@ analyseImages(pathTraining = "../exemple1/learning",
 
 See here: https://docs.google.com/document/d/1lFr8_08TGJps5lcSbY_AimstFnf0AfuOX7tY1MfkDv8/edit?usp=sharing
 -->
+## Toolbox
+
+### Resize function
+
+Resize all images into directory in order to reduce size.
+The function create new directory with factor resize.
+
+```ruby
+library(LeAFtool)
+pathImages <- '../exemple1/samples'
+resizeImageDirectory(path = pathImages, factor = 1.5)
+```
+
+* __path__ The path of the directory containing the sampled images to resize.
+* __factor__ The factor of reduce size Default: 2.
+
+### Split function
+
+The function split image on n horizontal / m vertical.
+For exemple if you want to split on 2 equal part
+The function create new directory with split images.
+
+```ruby
+library(LeAFtool)
+pathImages <- '../exemple1/samples'
+splitImages(path = pathImages, splitVertical = 2, splitHorizontal = 3) # split on 6 part (2x3)
+```
+
+* __path__ The path of the directory containing the sampled images to resize.
+* __splitVertical__ The number of part split vertical Default: 1.
+* __splitHorizontal__ The number of part split horizontal Default: 1.
+* __numOrder__ The order to numerote output image left from right or top to buttom. Default:bottum).
 
 ## Troubleshooting
 
