@@ -31,7 +31,7 @@ gc() #free up memrory and report the memory usage.
 
 # list of packages required
 #list.of.packages <- c("RCurl","shiny","shinydashboard","shinyFiles","shinyjs", "DT","EBImage","MASS","lattice",
-#                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2","ParallelLogger")
+#                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2","ParallelLogger", "tools")
 
 
 #checking missing packages from list
@@ -56,6 +56,7 @@ library(shinyFeedback, quietly = TRUE, warn.conflicts = FALSE)
 library(shinyhelper, quietly = TRUE, warn.conflicts = FALSE)
 library(colourpicker, quietly = TRUE, warn.conflicts = FALSE)
 library(shinyjqui, quietly = TRUE, warn.conflicts = FALSE)
+library(tools)
 
 # calibration
 library(EBImage)
@@ -66,11 +67,18 @@ library(ggplot2)
 # analysis
 library(ParallelLogger, quietly = TRUE, warn.conflicts = FALSE)
 
-options(shiny.fullstacktrace=TRUE, shiny.sanitize.errors = FALSE)
+#shiny options
+options(shiny.maxRequestSize=10000*1024^2, shiny.fullstacktrace=TRUE, shiny.sanitize.errors = FALSE)
+# to only 2 digits after dot
+options(digits=2)
 
 ############################################
 ## Global functions
 ############################################
+RDir <- system.file("R", package = "LeAFtool")
+source(file.path(RDir, "analysis_functions_v6.r"), local = TRUE)$value
+source(file.path(RDir, "training_functions_V6.r"), local = TRUE)$value
+source(file.path(RDir, "toolbox.R"), local = TRUE)$value
 
 tryObserve <- function(x=NULL, test=NULL) {
   x <- substitute(x)
@@ -96,32 +104,6 @@ tryObserve <- function(x=NULL, test=NULL) {
     )
   })
 }
-
-
-# add parallel function parallel::detectCores
-#parallel::detectCores <- function (all.tests = FALSE, logical = TRUE)
-#{
-#    systems <- list(linux = "grep ^processor /proc/cpuinfo 2>/dev/null | wc -l",
-#        darwin = if (logical) "/usr/sbin/sysctl -n hw.logicalcpu 2>/dev/null" else "/usr/sbin/sysctl -n hw.physicalcpu 2>/dev/null",
-#        solaris = if (logical) "/usr/sbin/psrinfo -v | grep 'Status of.*processor' | wc -l" else "/bin/kstat -p -m cpu_info | grep :core_id | cut -f2 | uniq | wc -l",
-#        freebsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null", openbsd = "/sbin/sysctl -n hw.ncpu 2>/dev/null",
-#        irix = c("hinv | grep Processors | sed 's: .*::'", "hinv | grep '^Processor '| wc -l"))
-#    for (i in seq(systems)) if (all.tests || length(grep(paste0("^",
-#        names(systems)[i]), R.version$os)))
-#        for (cmd in systems[i]) {
-#            if (is.null(a <- tryCatch(suppressWarnings(system(cmd,
-#                TRUE)), error = function(e) NULL)))
-#                next
-#            a <- gsub("^ +", "", a[1])
-#            if (grepl("^[1-9]", a))
-#                return(as.integer(a))
-#        }
-#    NA_integer_
-#}
-
-
-# to only 2 digits after dot
-options(digits=2)
 
 # auto-detect number of core on computer
 max_no_cores <- as.numeric(max(1, parallel::detectCores() - 2))
@@ -223,8 +205,19 @@ noColor <- rgb(red = 0, green = 0, blue = 1, alpha = 0)
 
 existDirTraining <- function(dirTraining){
   list(
-    dirlimb = dir.exists(paste(dirTraining,"/limb", sep = .Platform$file.sep)),
-    dirBackground = dir.exists(paste(dirTraining,"/background", sep = .Platform$file.sep)),
-    dirLesion = dir.exists(paste(dirTraining,"/lesion", sep = .Platform$file.sep))
+    dirlimb = dir.exists(paste(dirTraining,"limb", sep = .Platform$file.sep)),
+    dirBackground = dir.exists(paste(dirTraining,"background", sep = .Platform$file.sep)),
+    dirLesion = dir.exists(paste(dirTraining,"lesion", sep = .Platform$file.sep))
   )
+}
+
+fixUploadedFilesNames <- function(x) {
+  if (is.null(x)) return()
+  extractPath <- paste0(Sys.getenv("HOME"),"/leaftool/")
+  if(!dir.exists(extractPath)) dir.create(extractPath)
+  oldNames = x$datapath
+  newNames = file.path(extractPath,x$name)
+  file.rename(from = oldNames, to = newNames)
+  x$datapath <- newNames
+  x
 }
