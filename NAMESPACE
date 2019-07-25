@@ -5,5 +5,7 @@
 exportPattern("run.")
 exportPattern("training")
 exportPattern("analyseImages")
+exportPattern("resizeImageDirectory")
+exportPattern("splitImages")
 
 # Import all packages listed as Imports or Depends
