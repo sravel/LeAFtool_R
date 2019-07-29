@@ -28,7 +28,7 @@
 tabItem(# Tab for Home input/output
   tabName = "tabHome",
   fluidRow(
-    box(title = "LeAFtool     Lesion Area Finding tool", status="success", solidHeader = TRUE, collapsible = FALSE, width = 12,
+    box(collapsible = FALSE, width = 12,
       fluidRow(column( 12, offset = 0,
       img(src = "LeAFtool-short.png", class = 'img-responsive', style="max-width: 50%;display: block;margin-left: auto;margin-right: auto;")
       )),
@@ -44,41 +44,103 @@ tabItem(# Tab for Home input/output
         )
       ),
       fluidRow(
-        column( width = 4, offset = 0,
+        box( width = 6, offset = 0, title = "Training", status = "success", solidHeader = FALSE, collapsible = TRUE,
           withTags(
             div( class = "TrainingHome",
-              h2("Training"),
               p('Training is the first of two steps to analyse lesions present on the leaves. It begins by creating a training game and then, carrying out a discriminant factorial analysis.'),
               p('Important note: the Training folder must contain the sub-folder "background", "limb" and "lesion" with these names (case-sensitive).'),
               p('The current version accepts these three categories of pixels, with  no restriction for sub-categories'),
-              p('There is no constraint on the name and the number of the Training image files, the program always reads all .jpg, .jpeg .PNG and .tif files present (not case sensitive for extention).'),
-              p('At the end of the training phase, three files are created in the Training folder (the first part of the name these files is the name of the folder with the extensions .png (graph of the discriminant analysis), .txt (results of the discriminant analysis), and .RData (file R containing the results of the discriminant analysis, then used by the image analysis procedure).')
+              p('There is no constraint on the name and the number of the Training image files, the program always reads all .jpg, .jpeg .PNG and .tif files present (not case sensitive for extention).')
             )
           ),
-          tags$div(
+          tags$div( class = "TrainingHome",
             tags$p("Input exemple:"),
-            actionButton( "showInTraining", class = "btn-img", img(src = "trainingFolder.png", width = '60%', height = '60%'))
+            actionButton( "showInTraining", class = "btn-img", img(src = "trainingFolder.png", width = '90%'))
           ),
-          tags$div(
+          tags$div( class = "TrainingHome",
             tags$p("Output exemple:"),
-            actionButton( "showTraining", class = "btn-img", img(src = "training.jpeg", width = '60%', height = '60%'))
+            actionButton( "showTraining", class = "btn-img", img(src = "training.jpeg", width = '70%'))
           )
         ),
-        column( width = 4, offset = 0,
+        box( width = 6, offset = 0, title = "Analysis", status = "success", solidHeader = FALSE, collapsible = TRUE,
           withTags(
             div( class = "analysisHome",
-              h2("Analysis"),
               p("Analysis parameters:"),
-              ul(
-                li("Samples folder: folder for storing files to be analyzed"),
-                li("Output folder: "),
-                li(".RData file: file created during the Training phase in the Training folder"),
-                li("Blur image: Minimum area of a leaf"),
-                li("Leaf min size: Minimum area of a leaf"),
-                li("Leaf border size: leaf edge thickness to be removed"),
-                li("Lesion min size: minimum area of a lesion"),
-                li("Lesion border size: thickness of lesion border to dilate / erode"),
-                li("Lesion color output: color of lesions in the analyzed image (0 = black, 1 = white)")
+              HTML("
+                <table class='display table table-condensed dataTable no-footer'>
+                <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>function</th>
+                </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>pathTraining</td>
+                    <td>The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.</td>
+                  </tr>
+                  <tr>
+                    <td>pathResult</td>
+                    <td>The path of the directory where to store the result files.</td>
+                  </tr>
+                  <tr>
+                    <td>pathImages</td>
+                    <td>The path of the directory containing the images to analyse.</td>
+                  </tr>
+                  <tr>
+                    <td>fileImage</td>
+                    <td>The files names of the images to analyse in pathImages Default: NULL.</td>
+                  </tr>
+                  <tr>
+                    <td>leafAreaMin</td>
+                    <td>The minimum area of a leaf (in pixels) Default: 1000.</td>
+                  </tr>
+                  <tr>
+                    <td>leafBorder</td>
+                    <td>The diameter of the brush (in pixels) used to erode the leafBorder Default: 5.</td>
+                  </tr>
+                  <tr>
+                    <td>lesionBorder</td>
+                    <td>The diameter of the brush (in pixels) used to erode the lesionBorder Default: 3.</td>
+                  </tr>
+                  <tr>
+                    <td>lesionAreaMin</td>
+                    <td>The minimum area of a lesion (in pixels) Default: 10.</td>
+                  </tr>
+                  <tr>
+                    <td>lesionAreaMax</td>
+                    <td>The maximum area of a lesion (in pixels) Default: 120000.</td>
+                  </tr>
+                  <tr>
+                    <td>lesionEccentricityMin</td>
+                    <td>The minimum eccentricity of a lesion Default: 0.</td>
+                  </tr>
+                  <tr>
+                    <td>lesionEccentricityMax</td>
+                    <td>The maximum eccentricity of a lesion Default: 1.</td>
+                  </tr>
+                  <tr>
+                    <td>lesionColorBorder</td>
+                    <td>hexadecimal code for output fill color for lesion Default: #0000FF (blue).</td>
+                  </tr>
+                  <tr>
+                    <td>lesionColorBodies</td>
+                    <td>hexadecimal code for output bodies color for lesion Default: #FE8E0000 (transparent).</td>
+                  </tr>
+                  <tr>
+                    <td>blurDiameter</td>
+                    <td>The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default: 0.</td>
+                  </tr>
+                  <tr>
+                    <td>outPosition</td>
+                    <td>join origale and color lesion image at right or buttom Default: right.</td>
+                  </tr>
+                  <tr>
+                    <td>parallelThreadsNum</td>
+                    <td>number of thread use, 1 thread analysis 1 image if >= 2 Default: 1.</td>
+                  </tr>
+                </tbody>
+                </table>"
               ),
               p("There is no constraint on the name and the number of the sample images files."),
               p("Note: Surfaces and thicknesses are given in pixels.")
@@ -86,15 +148,16 @@ tabItem(# Tab for Home input/output
           ),
           tags$div(
             tags$p("Output exemple:"),
-            actionButton( "show", class = "btn-img", img(src = "exemple.jpeg", width = '60%', height = '60%'))
+            actionButton( "show", class = "btn-img", img(src = "exemple.jpeg", width = '62%'))
           )
-        ),
-        column( width = 4, offset = 0,
+        )
+      ),
+      fluidRow(
+        box( width = 6, offset = 0, offset = 0, title = "Edit", status = "success", solidHeader = FALSE, collapsible = TRUE,
           withTags(
             div( class = "analysisHome",
-              h2("Edit mode"),
               p("Edition availables:"),
-              ul(
+              ul( class="leaf",
                 li("remove bad lesion detection (juste click)"),
                 li("remove multiple bad lesions detection (brush on image)"),
                 li("filter all lesions table with many values (for exemple size of lesion, excentricity, ...)"),
@@ -104,9 +167,20 @@ tabItem(# Tab for Home input/output
               p("Note: if you edit the tables outside LeAFtool, they may not be compatible anymore")
             )
           ),
-          tags$div(
+          tags$div( class = "TrainingHome",
             tags$p("Exemple:"),
-            actionButton( "showEdit", class = "btn-img", img(src = "editMode.png", width = '60%', height = '60%'))
+            actionButton( "showEdit", class = "btn-img", img(src = "editMode.png", width = '90%'))
+          )
+        ),
+        box( width = 6, offset = 0, offset = 0, title = "Toolbox", status = "success", solidHeader = FALSE, collapsible = TRUE,
+          withTags(
+            div( class = "analysisHome",
+              p("2 functions availables:"),
+              ul(class="leaf",
+                li("resizeImageDirectory: Resize all images into directory in order to reduce size. The function create new directory with factor resize."),
+                li("splitImages: The function split image on n horizontal / m vertical. For exemple if you want to split on 2 equal part. The function create new directory with split images.")
+              )
+            )
           )
         )
       ),

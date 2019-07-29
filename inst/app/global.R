@@ -71,11 +71,11 @@ library(ParallelLogger, quietly = TRUE, warn.conflicts = FALSE)
 options(shiny.maxRequestSize=10000*1024^2, shiny.fullstacktrace=TRUE, shiny.sanitize.errors = FALSE)
 # to only 2 digits after dot
 options(digits=2)
-
+#options(repos = BiocInstaller::biocinstallRepos())
 ############################################
 ## Global functions
 ############################################
-#RDir <- system.file("R", package = "LeAFtool")
+#RDir <- file_path_as_absolute("../../R")
 #source(file.path(RDir, "analysis_functions_v6.r"), local = TRUE)$value
 #source(file.path(RDir, "training_functions_V6.r"), local = TRUE)$value
 #source(file.path(RDir, "toolbox.R"), local = TRUE)$value
