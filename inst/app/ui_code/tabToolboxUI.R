@@ -34,15 +34,16 @@ tabItem(
     box(
       title = "Resize images", status = "success", solidHeader = TRUE, collapsible = TRUE, width = 6,
       column(12,
-          shinyDirButton(id = 'dirInResize', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("compress")) %>%
-            helper(icon = "question",
+        numericInput("factor", "factor to resize:", value = 2, min=1,  width = "150px") %>%
+          helper(icon = "question",
                 type = "markdown",
-                content = "dirInSamples"),
-          verbatimTextOutput("dirResize", placeholder = TRUE),
-          numericInput("factor", "factor to resize:", value = 2, min=1,  width = "150px") %>%
-            helper(icon = "question",
-                  type = "markdown",
-                  content = "factor_resize"),
+                content = "factor_resize"),
+
+          shinyDirButton(id = 'dirInResize', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("compress")) %>%
+          helper(icon = "question",
+              type = "markdown",
+              content = "dirInSamples"),
+        verbatimTextOutput("dirResize", placeholder = TRUE),
         "Resize path output:",
         verbatimTextOutput("resizePathOut")
       )
@@ -79,22 +80,23 @@ tabItem(
           verbatimTextOutput("splitPathOut")
       )
     )
-  ),
-  fluidRow(
-    box(
-      title = "Upload data", status = "success", solidHeader = TRUE, collapsible = TRUE, width = 12,
-      column(6,
-
-        fileInput("file", "Upload Zip file", accept = ".zip"),
-        # action button to unzip the file
-        actionButton("unzip", "Unzip Files", icon = icon("file-archive")),
-
-        # to display the metadata of the zipped file
-        tableOutput("filedf"),
-
-        # to display the list of unzipped files
-        tableOutput("unzipped")
-      )
-    )
   )
+#  ),
+#  fluidRow(
+#    box(
+#      title = "Upload data", status = "success", solidHeader = TRUE, collapsible = TRUE, width = 12,
+#      column(6,
+
+#        fileInput("file", "Upload Zip file", accept = ".zip"),
+#        # action button to unzip the file
+#        actionButton("unzip", "Unzip Files", icon = icon("file-archive")),
+
+#        # to display the metadata of the zipped file
+#        tableOutput("filedf"),
+
+#        # to display the list of unzipped files
+#        tableOutput("unzipped")
+#      )
+#    )
+#  )
 )

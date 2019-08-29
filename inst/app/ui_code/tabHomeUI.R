@@ -179,7 +179,9 @@ tabItem(# Tab for Home input/output
               ul(class="leaf",
                 li("resizeImageDirectory: Resize all images into directory in order to reduce size. The function create new directory with factor resize."),
                 li("splitImages: The function split image on n horizontal / m vertical. For exemple if you want to split on 2 equal part. The function create new directory with split images.")
-              )
+              ),
+              tags$p("Exemple:"),
+              actionButton( "showSplit", class = "btn-img", img(src = "splitExemple.png", width = '90%'))
             )
           )
         )

@@ -48,3 +48,15 @@ observeEvent(input$showEdit,
                  )
                )
              })
+observeEvent(input$showSplit,
+             {
+               showModal(
+                 # Information Dialog Box
+                 modalDialog(
+                   title = "Exemple of Split",
+                   size = "l",
+                   easyClose = TRUE,
+                     img(src = "splitExemple.png", class='img-responsive')
+                 )
+               )
+             })
