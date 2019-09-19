@@ -228,7 +228,7 @@ updateAll <- function(res){
   #  print(ag.surface)
 
     ag <- merge(ag.count, ag.surface)
-    ag$pourcent.lesions <- ag$lesion.surface / (ag$leaf.surface + ag$lesion.surface) * 100
+    ag$pourcent.lesions <- ag$lesion.surface / ag$leaf.surface * 100
     ag$lesion.nb[ag$lesion.surface == 0] <- 0
     ag$lesion.surface[ag$lesion.surface == 0] <- 0
 
