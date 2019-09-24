@@ -304,3 +304,9 @@ slider color
 ul.leaf {
 list-style-image:  url('leaf_icon.jpg');
 }
+
+
+toto{
+  padding: 12px 5px 12px 15px;
+  display: block;
+}

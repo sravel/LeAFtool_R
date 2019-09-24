@@ -312,6 +312,8 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
       rv$exitStatusAna <- 0
       rv$lesion_color_border <- input$lesion_color_border
       rv$lesion_color_bodies <- input$lesion_color_bodies
+      rv$leaf_color_border <- input$leaf_color_border
+      rv$leaf_color_bodies <- input$leaf_color_bodies
 
       displayableData <- DT::datatable(data = NULL)
       rv$dirInResult <- rv$dirSamplesOut
@@ -344,6 +346,8 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
                             lesionEccentricityMax = rv$lesion_eccentricMax,
                             lesionColorBorder = rv$lesion_color_border,
                             lesionColorBodies = rv$lesion_color_bodies,
+                            leafColorBorder = rv$leaf_color_border,
+                            leafColorBodies = rv$leaf_color_bodies,
                             blurDiameter = rv$blur_value,
                             outPosition = rv$position,
                             parallelThreadsNum = rv$parallelThreadsNum,

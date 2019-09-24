@@ -208,7 +208,7 @@ checkColorHexacode <- function(color, nameParam){
 ##############################################
 ##### FUNCTION checkParameters, check all parameter and return if need adjust parameters
 ##############################################
-checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition){
+checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,leafColorBorder, leafColorBodies,blurDiameter,outPosition){
 
   # test input training path is readable = mode 4 and/or writeable mode 3 and if file Rdata exist
   basename <- utils::tail(strsplit(pathTraining, .Platform$file.sep)[[1]], 1)
@@ -244,6 +244,8 @@ checkParameters <- function(pathTraining,pathImages,fileImage,leafAreaMin,leafBo
   # check color:
   checkColorHexacode(lesionColorBorder,"lesionColorBorder")
   checkColorHexacode(lesionColorBodies,"lesionColorBodies")
+  checkColorHexacode(leafColorBorder,"leafColorBorder")
+  checkColorHexacode(leafColorBodies,"leafColorBodies")
 
   # outPosition
   if (!(outPosition %in% c("right", "bottum"))){
@@ -433,6 +435,8 @@ multmerge = function(mypath, pattern){
 #' @param lesionEccentricityMax The maximum eccentricity of a lesion Default:1.
 #' @param lesionColorBorder hexadecimal code for output fill color for lesion in the output image Default:#0000FF11 (blue).
 #' @param lesionColorBodies hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).
+#' @param leafColorBorder hexadecimal code for output fill color for leaf in the output image Default:#FF000000 (transparent).
+#' @param leafColorBodies hexadecimal code for output bodies color for leaf in the output image Default:#FF000000 (transparent).
 #' @param blurDiameter The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.
 #' @param outPosition join origale and color lesion image at right or buttom Default:right)'.
 #' @param parallelThreadsNum number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
@@ -442,7 +446,7 @@ multmerge = function(mypath, pattern){
 #' dataframeExitStatus <- analyseImages(pathTraining = "../exemple1/learning",
 #' pathResult = "../exemple1/results",
 #' pathImages = "../exemple1/samples", parallelThreadsNum=4)
-analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL,leafAreaMin=1000,leafBorder=5,lesionBorder=3,lesionAreaMin=10,lesionAreaMax=120000,lesionEccentricityMin=0,lesionEccentricityMax=1,lesionColorBorder="#0000FF11",lesionColorBodies="#FE8E0000",blurDiameter=0, outPosition="right", parallelThreadsNum=1, mode="CMD") {
+analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL,leafAreaMin=1000,leafBorder=5,lesionBorder=3,lesionAreaMin=10,lesionAreaMax=120000,lesionEccentricityMin=0,lesionEccentricityMax=1,lesionColorBorder="#0000FF11",lesionColorBodies="#FE8E0000",leafColorBorder="FF000000", leafColorBodies="FF000000",blurDiameter=0, outPosition="right", parallelThreadsNum=1, mode="CMD") {
 
   # transforme to full path with slash for window or linux
   pathTraining <- base::normalizePath(pathTraining, winslash = "/")
@@ -464,7 +468,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
   # if possible add log file for all error after
   writeLOGAnalysis(path = pathResult, create = TRUE, message = "Analysis run, please wait", detail = " VERSION: 1.0", mode = mode, progress = progress, parallelThreadsNum = parallelThreadsNum)
 
-  autoAdjustList <- checkParameters(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition)
+  autoAdjustList <- checkParameters(pathTraining,pathImages,fileImage,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies, leafColorBorder, leafColorBodies,blurDiameter,outPosition)
   leafBorder <- autoAdjustList$leafBorder
   lesionBorder <- autoAdjustList$lesionBorder
   blurDiameter <- autoAdjustList$blurDiameter
@@ -485,6 +489,8 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
             "lesion eccentricity: min ",lesionEccentricityMin, "\tmax ",lesionEccentricityMax,"\n",
             "lesion color border: ", lesionColorBorder,"\n",
             "lesion color bodies: ", lesionColorBodies,"\n",
+            "leaf color border: ", leafColorBorder,"\n",
+            "leaf color bodies: ", leafColorBodies,"\n",
             "blur diameter: ",blurDiameter,"\n",
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
@@ -499,6 +505,8 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
                 ", lesionEccentricityMax = ",lesionEccentricityMax,
                 ", lesionColorBorder = '",lesionColorBorder,
                 "', lesionColorBodies = '",lesionColorBodies,
+                ", leafColorBorder = '",leafColorBorder,
+                "', leafColorBodies = '",leafColorBodies,
                 "', blurDiameter = ",blurDiameter,
                 ", outPosition = '",outPosition,
                 "', parallelThreadsNum = ",parallelThreadsNum,")")
@@ -549,7 +557,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
       parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
     }
 
-    res <- clusterApply2(cl, listSamples, analyseImageUnique, pathTraining, pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum, stopOnError = FALSE, progressBar = TRUE, mode = mode)
+    res <- clusterApply2(cl, listSamples, analyseImageUnique, pathTraining, pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies, leafColorBorder, leafColorBodies, blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum, stopOnError = FALSE, progressBar = TRUE, mode = mode)
 
     # Close cluster mode
     ParallelLogger::stopCluster(cl)
@@ -577,11 +585,18 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
 ##############################################
 ##### FUNCTION analyseImageUnique to analyse only one file image
 ##############################################
-analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies,blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
+analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin,lesionEccentricityMax,lesionColorBorder,lesionColorBodies, leafColorBorder, leafColorBodies, blurDiameter,outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum) {
 
   # check params:
   lesionColorBorderAlpha <-grDevices::col2rgb(lesionColorBorder, alpha=TRUE)[4]/255
   lesionColorBodiesAlpha <-grDevices::col2rgb(lesionColorBodies, alpha=TRUE)[4]/255
+
+  leafColorBorderAlpha <-grDevices::col2rgb(leafColorBorder, alpha=TRUE)[4]/255
+  leafColorBodiesAlpha <-grDevices::col2rgb(leafColorBodies, alpha=TRUE)[4]/255
+  print(leafColorBorder)
+  print(leafColorBorderAlpha)
+  print(leafColorBodies)
+  print(leafColorBodiesAlpha)
 
   if (!file.exists(pathResult)) dir.create(pathResult)
 
@@ -695,6 +710,9 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
     graphics::par( mfrow = c(2,1) )
   }
   EBImage::display(image, method="raster")
+
+  # leaf coloration if not transparent
+  image <- EBImage::paintObjects(maskLeaf  ,image, thick=TRUE, col=c(leafColorBorder, leafColorBodies), opac=c(leafColorBorderAlpha, leafColorBodiesAlpha))
 
   ## sortie des résultats et coloration des lésions
   for (i in 1:length(li)){

@@ -93,8 +93,34 @@ tabItem(
           numericInput("leaf_border_size", "Leaf border size:", value = 5, min=1, step = 2, width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
-                  content = "leaf_border_size")
+                  content = "leaf_border_size"),
+        column(width = 12, offset = 0,
+          fluidRow(
+            tags$label("Leaf color")
+          ),
+          fluidRow( class = "colorRow",
+            column(width = 6, offset = 0,
+              tags$label("border"),
+              colourInput("leaf_color_border",  label = "", value = "#FF000000",
+                          palette = c("square", "limited"), allowedCols = NULL,
+                          allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
+                helper(icon = "question",
+                      type = "markdown",
+                      content = "leaf_color_border")
+            ),
+            column(width = 6, offset = 0,
+              tags$label("bodies"),
+              colourInput("leaf_color_bodies",  label = "", value = "#FF000000",
+                          palette = c("square", "limited"), allowedCols = NULL,
+                          allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
+                helper(icon = "question",
+                      type = "markdown",
+                      content = "leaf_color_bodies")
+            )
+          )
+        )
       ),
+
       column(width = 2,offset = 0,
       ### Lesion parameters
         h3("Lesions parameters:"),
