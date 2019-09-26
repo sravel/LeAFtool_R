@@ -22,33 +22,33 @@ analyseImages(pathTraining, pathResult, pathImages = NULL,
 
 \item{fileImage}{A character vector containg the fils names of the images to analyse in pathImages (NULL to analyse all the images in pathImages).}
 
-\item{leafAreaMin}{The minimum area of a leaf (in pixels) Default:1000.}
+\item{leafAreaMin}{The minimum area of a leaf (in pixels) Default: 1000.}
 
-\item{leafBorder}{The diameter of the brush (in pixels) used to erode the leafBorder Default:5.}
+\item{leafBorder}{The diameter of the brush (in pixels) used to erode the leafBorder Default: 5.}
 
-\item{lesionBorder}{The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.}
+\item{lesionBorder}{The diameter of the brush (in pixels) used to erode the lesionBorder Default: 3.}
 
-\item{lesionAreaMin}{The minimum area of a lesion (in pixels) Default:10.}
+\item{lesionAreaMin}{The minimum area of a lesion (in pixels) Default: 10.}
 
-\item{lesionAreaMax}{The maximum area of a lesion (in pixels) Default:120000.}
+\item{lesionAreaMax}{The maximum area of a lesion (in pixels) Default: 120000.}
 
-\item{lesionEccentricityMin}{The minimum eccentricity of a lesion Default:0.}
+\item{lesionEccentricityMin}{The minimum eccentricity of a lesion Default: 0.}
 
-\item{lesionEccentricityMax}{The maximum eccentricity of a lesion Default:1.}
+\item{lesionEccentricityMax}{The maximum eccentricity of a lesion Default: 1.}
 
-\item{lesionColorBorder}{hexadecimal code for output fill color for lesion in the output image Default:#0000FF11 (blue).}
+\item{lesionColorBorder}{hexadecimal code for output fill color for lesion in the output image Default: #0000FF11 (blue).}
 
-\item{lesionColorBodies}{hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).}
+\item{lesionColorBodies}{hexadecimal code for output bodies color for lesion in the output image Default: #FE8E0000 (transparent).}
 
-\item{leafColorBorder}{hexadecimal code for output fill color for leaf in the output image Default:#FF000000 (transparent).}
+\item{leafColorBorder}{hexadecimal code for output fill color for leaf in the output image Default: #FF000000 (transparent).}
 
-\item{leafColorBodies}{hexadecimal code for output bodies color for leaf in the output image Default:#FF000000 (transparent).}
+\item{leafColorBodies}{hexadecimal code for output bodies color for leaf in the output image Default: #FF000000 (transparent).}
 
-\item{blurDiameter}{The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.}
+\item{blurDiameter}{The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default: 0'.}
 
-\item{outPosition}{join origale and color lesion image at right or buttom Default:right)'.}
+\item{outPosition}{join origale and color lesion image at right or buttom Default: right'.}
 
-\item{parallelThreadsNum}{number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.}
+\item{parallelThreadsNum}{number of thread use, 1 thread analysis 1 image if >= 2 Default: 1'.}
 
 \item{mode}{auto selection to switch between GUI or CMD mode Default:"CMD")'.}
 }

@@ -426,20 +426,20 @@ multmerge = function(mypath, pattern){
 #' @param pathResult The path of the directory where to store the result files (created by the function if it does not exist).
 #' @param pathImages The path of the directory containing the images to analyse.
 #' @param fileImage A character vector containg the fils names of the images to analyse in pathImages (NULL to analyse all the images in pathImages).
-#' @param leafAreaMin The minimum area of a leaf (in pixels) Default:1000.
-#' @param leafBorder The diameter of the brush (in pixels) used to erode the leafBorder Default:5.
-#' @param lesionBorder The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.
-#' @param lesionAreaMin The minimum area of a lesion (in pixels) Default:10.
-#' @param lesionAreaMax The maximum area of a lesion (in pixels) Default:120000.
-#' @param lesionEccentricityMin The minimum eccentricity of a lesion Default:0.
-#' @param lesionEccentricityMax The maximum eccentricity of a lesion Default:1.
-#' @param lesionColorBorder hexadecimal code for output fill color for lesion in the output image Default:#0000FF11 (blue).
-#' @param lesionColorBodies hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).
-#' @param leafColorBorder hexadecimal code for output fill color for leaf in the output image Default:#FF000000 (transparent).
-#' @param leafColorBodies hexadecimal code for output bodies color for leaf in the output image Default:#FF000000 (transparent).
-#' @param blurDiameter The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.
-#' @param outPosition join origale and color lesion image at right or buttom Default:right)'.
-#' @param parallelThreadsNum number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
+#' @param leafAreaMin The minimum area of a leaf (in pixels) Default: 1000.
+#' @param leafBorder The diameter of the brush (in pixels) used to erode the leafBorder Default: 5.
+#' @param lesionBorder The diameter of the brush (in pixels) used to erode the lesionBorder Default: 3.
+#' @param lesionAreaMin The minimum area of a lesion (in pixels) Default: 10.
+#' @param lesionAreaMax The maximum area of a lesion (in pixels) Default: 120000.
+#' @param lesionEccentricityMin The minimum eccentricity of a lesion Default: 0.
+#' @param lesionEccentricityMax The maximum eccentricity of a lesion Default: 1.
+#' @param lesionColorBorder hexadecimal code for output fill color for lesion in the output image Default: #0000FF11 (blue).
+#' @param lesionColorBodies hexadecimal code for output bodies color for lesion in the output image Default: #FE8E0000 (transparent).
+#' @param leafColorBorder hexadecimal code for output fill color for leaf in the output image Default: #FF000000 (transparent).
+#' @param leafColorBodies hexadecimal code for output bodies color for leaf in the output image Default: #FF000000 (transparent).
+#' @param blurDiameter The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default: 0'.
+#' @param outPosition join origale and color lesion image at right or buttom Default: right'.
+#' @param parallelThreadsNum number of thread use, 1 thread analysis 1 image if >= 2 Default: 1'.
 #' @param mode auto selection to switch between GUI or CMD mode Default:"CMD")'.
 #'
 #' @examples

@@ -113,18 +113,18 @@ analyseImages(pathTraining, pathResult, pathImages, fileImage = NA,
 * __pathResult__  The path of the directory where to store the result files (created by the function if it does not exist).
 * __pathImages__  The path of the directory containing the images to analyse.
 * __fileImage__ A character vector containg the fils names of the images to analyse in pathImages (NA to analyse all the images in pathImages).
-* __leafAreaMin__ The minimum area of a leaf (in pixels) Default:1000.
-* __leafBorder__  The diameter of the brush (in pixels) used to erode the leafBorder Default:5.
-* __lesionBorder__  The diameter of the brush (in pixels) used to erode the lesionBorder Default:3.
-* __lesionAreaMin__ The minimum area of a lesion (in pixels) Default:10.
-* __lesionAreaMax__ The maximum area of a lesion (in pixels) Default:120000.
-* __lesionEccentricityMin__ The minimum eccentricity of a lesion Default:0.
-* __lesionEccentricityMax__ The maximum eccentricity of a lesion Default:1.
-* __lesionColorBorder__ hexadecimal code for output fill color for lesion in the output image Default:#0000FF (blue).
-* __lesionColorBodies__ hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).
-* __blurDiameter__  The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.
-* __outPosition__ join origale and color lesion image at right or buttom Default:right)'.
-* __parallelThreadsNum__  number of thread use, 1 thread analysis 1 image if >= 2 Default:1)'.
+* __leafAreaMin__ The minimum area of a leaf (in pixels) Default: 1000.
+* __leafBorder__  The diameter of the brush (in pixels) used to erode the leafBorder Default: 5.
+* __lesionBorder__  The diameter of the brush (in pixels) used to erode the lesionBorder Default: 3.
+* __lesionAreaMin__ The minimum area of a lesion (in pixels) Default: 10.
+* __lesionAreaMax__ The maximum area of a lesion (in pixels) Default: 120000.
+* __lesionEccentricityMin__ The minimum eccentricity of a lesion Default: 0.
+* __lesionEccentricityMax__ The maximum eccentricity of a lesion Default: 1.
+* __lesionColorBorder__ hexadecimal code for output fill color for lesion in the output image Default: #0000FF (blue).
+* __lesionColorBodies__ hexadecimal code for output bodies color for lesion in the output image Default: #FE8E0000 (transparent).
+* __blurDiameter__  The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default: 0'.
+* __outPosition__ join origale and color lesion image at right or buttom Default: right'.
+* __parallelThreadsNum__  number of thread use, 1 thread analysis 1 image if >= 2 Default: 1'.
 
 ```ruby
 #### Examples
@@ -171,17 +171,23 @@ The function create new directory with split images.
 ```ruby
 library(LeAFtool)
 pathImages <- '../exemple1/samples'
-splitImages(pathImages, splitVertical = 2, splitHorizontal = 3, marginTop = 10, marginRight = 300, marginBottom = 300, marginLeft = 170,) # split on 6 part (2x3)
+splitImages(pathImages, splitVertical = 2, splitHorizontal = 3,
+            marginTop = 10,
+            marginRight = 300,
+            marginBottom = 300,
+            marginLeft = 170,
+            numOrder = "bottum"
+            ) # split on 6 part (2x3)
 ```
 
 * __path__ The path of the directory containing the sampled images to resize.
 * __splitVertical__ The number of part split vertical Default: 1.
 * __splitHorizontal__ The number of part split horizontal Default: 1.
-* __numOrder__ The order to numerote output image left from right or top to buttom. Default:bottum.
-* __marginTop__ The crop margin top. Default:0
-* __marginRight__ The crop margin right. Default:0
-* __marginBottom__ The crop margin bottom. Default:0
-* __marginLeft__ The crop margin left. Default:0
+* __numOrder__ The order to numerote output image left from right or top to buttom. Default: bottum.
+* __marginTop__ The crop margin top. Default: 0
+* __marginRight__ The crop margin right. Default: 0
+* __marginBottom__ The crop margin bottom. Default: 0
+* __marginLeft__ The crop margin left. Default: 0
 
 ## Troubleshooting
 
