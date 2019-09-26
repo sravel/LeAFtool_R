@@ -9,6 +9,7 @@ analyseImages(pathTraining, pathResult, pathImages = NULL,
   lesionBorder = 3, lesionAreaMin = 10, lesionAreaMax = 120000,
   lesionEccentricityMin = 0, lesionEccentricityMax = 1,
   lesionColorBorder = "#0000FF11", lesionColorBodies = "#FE8E0000",
+  leafColorBorder = "FF000000", leafColorBodies = "FF000000",
   blurDiameter = 0, outPosition = "right", parallelThreadsNum = 1,
   mode = "CMD")
 }
@@ -38,6 +39,10 @@ analyseImages(pathTraining, pathResult, pathImages = NULL,
 \item{lesionColorBorder}{hexadecimal code for output fill color for lesion in the output image Default:#0000FF11 (blue).}
 
 \item{lesionColorBodies}{hexadecimal code for output bodies color for lesion in the output image Default:#FE8E0000 (transparent).}
+
+\item{leafColorBorder}{hexadecimal code for output fill color for leaf in the output image Default:#FF000000 (transparent).}
+
+\item{leafColorBodies}{hexadecimal code for output bodies color for leaf in the output image Default:#FF000000 (transparent).}
 
 \item{blurDiameter}{The diameter of the brush (in pixels) used to blur the image (0 for no blur) Default:0)'.}
 
