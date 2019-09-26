@@ -82,12 +82,16 @@ resizeImageDirectory <- function(path,factor=2, mode="CMD") {
 #' @param path The path of the directory containing the sampled images to split.
 #' @param splitVertical The number of part split vertical Default: 1.
 #' @param splitHorizontal The number of part split horizontal Default: 1.
-#' @param numOrder The order to numerote output image left from right or top to buttom. Default:bottum).
+#' @param numOrder The order to numerote output image left from right or top to buttom. Default:bottum.
+#' @param marginTop The crop marge top. Default:0
+#' @param marginRight The crop marge right. Default:0
+#' @param marginBottom The crop marge bottom. Default:0
+#' @param marginLeft The crop marge left. Default:0
 #'
 #' @examples
 #' pathImages <- '../exemple1/samples'
-#' splitImages(pathImages, splitVertical = 2, splitHorizontal = 3) # split on 6 part (2x3)
-splitImages <- function(path, splitVertical = 1, splitHorizontal = 1, numOrder = "bottum", mode = "CMD"){
+#' splitImages(pathImages, splitVertical = 2, splitHorizontal = 3, marginTop = 10, marginRight = 300, marginBottom = 300, marginLeft = 170,) # split on 6 part (2x3)
+splitImages <- function(path, splitVertical = 1, splitHorizontal = 1, marginTop=0, marginRight=0, marginBottom=0, marginLeft=0, numOrder = "bottum", mode = "CMD"){
   if (!file.exists(path)) stop(paste0("Directory '",path,"' not found."), call. = FALSE)
   if (!(numOrder %in% c("right", "bottum"))){
     stop(paste("'",numOrder,"' is not valid value for numOrder, please only use 'right' or 'bottum'"), call. = FALSE)
@@ -124,7 +128,7 @@ splitImages <- function(path, splitVertical = 1, splitHorizontal = 1, numOrder =
       for (i in 1:splitHorizontal){
         for (j in 1:splitVertical){
           newfile <- base::file.path(newpath,paste0(name,'_',count,'.',ext))
-          EBImage::writeImage(image[startVerticalx:startVerticaly, startHorizontalx:startHorizontaly,],newfile)
+          EBImage::writeImage(image[(startVerticalx+marginLeft):(startVerticaly-marginRight), (startHorizontalx+marginTop):(startHorizontaly-marginBottom),],newfile)
           startVerticalx <- startVerticaly
           startVerticaly <- startVerticaly + sizePartVertical
           count <- count + 1
@@ -140,7 +144,7 @@ splitImages <- function(path, splitVertical = 1, splitHorizontal = 1, numOrder =
       for (i in 1:splitVertical){
         for (j in 1:splitHorizontal){
           newfile <- base::file.path(newpath,paste0(name,'_',count,'.',ext))
-          EBImage::writeImage(image[startVerticalx:startVerticaly, startHorizontalx:startHorizontaly,],newfile)
+          EBImage::writeImage(image[(startVerticalx+marginLeft):(startVerticaly-marginRight), (startHorizontalx+marginTop):(startHorizontaly-marginBottom),],newfile)
           startHorizontalx <- startHorizontaly
           startHorizontaly <- startHorizontaly + sizePartHorizontal
           count <- count + 1

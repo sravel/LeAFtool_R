@@ -5,6 +5,7 @@
 \title{Split all images on directory}
 \usage{
 splitImages(path, splitVertical = 1, splitHorizontal = 1,
+  marginTop = 0, marginRight = 0, marginBottom = 0, marginLeft = 0,
   numOrder = "bottum", mode = "CMD")
 }
 \arguments{
@@ -14,7 +15,15 @@ splitImages(path, splitVertical = 1, splitHorizontal = 1,
 
 \item{splitHorizontal}{The number of part split horizontal Default: 1.}
 
-\item{numOrder}{The order to numerote output image left from right or top to buttom. Default:bottum).}
+\item{marginTop}{The crop marge top. Default:0}
+
+\item{marginRight}{The crop marge right. Default:0}
+
+\item{marginBottom}{The crop marge bottom. Default:0}
+
+\item{marginLeft}{The crop marge left. Default:0}
+
+\item{numOrder}{The order to numerote output image left from right or top to buttom. Default:bottum.}
 }
 \description{
 The function split image on n horizontal / m vertical.
@@ -22,5 +31,5 @@ For exemple if you want to split on 2 part
 }
 \examples{
 pathImages <- '../exemple1/samples'
-splitImages(pathImages, splitVertical = 2, splitHorizontal = 3) # split on 6 part (2x3)
+splitImages(pathImages, splitVertical = 2, splitHorizontal = 3, marginTop = 10, marginRight = 300, marginBottom = 300, marginLeft = 170,) # split on 6 part (2x3)
 }

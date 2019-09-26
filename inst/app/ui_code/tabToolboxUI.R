@@ -71,6 +71,32 @@ tabItem(
                     content = "outputNumber")
             )
           ),
+          fluidRow(
+            column(3,
+              numericInput("marginTop", "Margin top:", value = 0, min=0,  width = "150px") %>%
+                helper(icon = "question",
+                      type = "markdown",
+                      content = "marginCrop")
+            ),
+            column(3,
+              numericInput("marginRight", "Margin right:", value = 0, min=0,  width = "150px") %>%
+                helper(icon = "question",
+                      type = "markdown",
+                      content = "marginCrop")
+            ),
+            column(3,
+              numericInput("marginBottom", "Margin bottom:", value = 0, min=0,  width = "150px") %>%
+                helper(icon = "question",
+                      type = "markdown",
+                      content = "marginCrop")
+            ),
+            column(3,
+              numericInput("marginLeft", "Margin left:", value = 0, min=0,  width = "150px") %>%
+                helper(icon = "question",
+                      type = "markdown",
+                      content = "marginCrop")
+            )
+          ),
           shinyDirButton(id = 'dirInSplit', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("cut")) %>%
             helper(icon = "question",
                 type = "markdown",

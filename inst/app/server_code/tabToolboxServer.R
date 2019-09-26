@@ -85,8 +85,15 @@ updateDirAnalysis <- observeEvent(input$dirInSplit,{
       rv$dirSplit
     })
 
-    rv$splitPathOut <- splitImages(rv$dirSplit, rv$splitVertical, rv$splitHorizontal, rv$outputNumber, mode="GUI")
-
+    rv$splitPathOut <- splitImages(path = rv$dirSplit,
+                                    splitVertical = rv$splitVertical,
+                                    splitHorizontal = rv$splitHorizontal,
+                                    marginTop=rv$marginTop,
+                                    marginRight=rv$marginRight,
+                                    marginBottom=rv$marginBottom,
+                                    marginLeft=rv$marginLeft,
+                                    numOrder = rv$outputNumber,
+                                    mode="GUI")
   }
 })
 
@@ -132,5 +139,70 @@ observeEvent(input$outputNumber,{
     rv$outputNumber <- "bottum"
   }else{
     rv$outputNumber <- "right"
+  }
+})
+
+###### Margin marginTop
+observeEvent(input$marginTop,{
+  feedbackDanger(
+      inputId = "marginTop",
+      condition = is.na(input$marginTop),
+      text = "Please add number 'or 0 will be use'"
+    )
+  req(input$marginTop)
+  if (is.na(input$marginTop) || as.numeric(input$marginTop) < 0){
+    updateNumericInput(session,"marginTop", value = 0)
+    rv$marginTop <- 0
+  }
+  else{
+    rv$marginTop <- as.numeric(input$marginTop)
+  }
+})
+###### Margin marginRight
+observeEvent(input$marginRight,{
+  feedbackDanger(
+      inputId = "marginRight",
+      condition = is.na(input$marginRight),
+      text = "Please add number 'or 0 will be use'"
+    )
+  req(input$marginRight)
+  if (is.na(input$marginRight) || as.numeric(input$marginRight) < 0){
+    updateNumericInput(session,"marginRight", value = 0)
+    rv$marginRight <- 0
+  }
+  else{
+    rv$marginRight <- as.numeric(input$marginRight)
+  }
+})
+###### Margin marginBottom
+observeEvent(input$marginBottom,{
+  feedbackDanger(
+      inputId = "marginBottom",
+      condition = is.na(input$marginBottom),
+      text = "Please add number 'or 0 will be use'"
+    )
+  req(input$marginBottom)
+  if (is.na(input$marginBottom) || as.numeric(input$marginBottom) < 0){
+    updateNumericInput(session,"marginBottom", value = 0)
+    rv$marginBottom <- 0
+  }
+  else{
+    rv$marginBottom <- as.numeric(input$marginBottom)
+  }
+})
+###### Margin marginLeft
+observeEvent(input$marginLeft,{
+  feedbackDanger(
+      inputId = "marginLeft",
+      condition = is.na(input$marginLeft),
+      text = "Please add number 'or 0 will be use'"
+    )
+  req(input$marginLeft)
+  if (is.na(input$marginLeft) || as.numeric(input$marginLeft) < 0){
+    updateNumericInput(session,"marginLeft", value = 0)
+    rv$marginLeft <- 0
+  }
+  else{
+    rv$marginLeft <- as.numeric(input$marginLeft)
   }
 })
