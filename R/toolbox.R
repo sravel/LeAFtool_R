@@ -83,10 +83,10 @@ resizeImageDirectory <- function(path,factor=2, mode="CMD") {
 #' @param splitVertical The number of part split vertical Default: 1.
 #' @param splitHorizontal The number of part split horizontal Default: 1.
 #' @param numOrder The order to numerote output image left from right or top to buttom. Default:bottum.
-#' @param marginTop The crop marge top. Default:0
-#' @param marginRight The crop marge right. Default:0
-#' @param marginBottom The crop marge bottom. Default:0
-#' @param marginLeft The crop marge left. Default:0
+#' @param marginTop The crop margin top. Default:0
+#' @param marginRight The crop margin right. Default:0
+#' @param marginBottom The crop margin bottom. Default:0
+#' @param marginLeft The crop margin left. Default:0
 #'
 #' @examples
 #' pathImages <- '../exemple1/samples'
