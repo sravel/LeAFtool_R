@@ -44,6 +44,13 @@ remotes::install_github("sravel/LeAFtool")
 
 ```
 
+## Implemented methods
+
+For moments, LeAFtool support 3 methods:
+- LDA: Linear Discriminant Analysis
+- QDA: Quantitative Descriptive Analysis
+- SVM: Support Vector Machine
+
 ## Running LeAFtool with GUI
 
 * To run the application LeAFtool
@@ -77,7 +84,7 @@ training(pathTraining,
         )
 ```
 * __pathTraining__  The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
-* __method__  Method of discrimainant analysis: "lda" (default) or "qda"
+* __method__  Method of discrimainant analysis: "lda" (default), "qda" or "svm"
 * __transform__  transformation before analysis (e.g. sqrt) # not avail on GUI
 * __colormodel__   Model of color for the analysis: "rgb" (default) or "hsv"
 

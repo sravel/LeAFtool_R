@@ -31,7 +31,7 @@ library(MASS)
 library(lattice)
 library(ParallelLogger)
 library(shinyjs)
-## library(e1071) only for svm (not implemented)
+library(e1071) # only for svm (not implemented)
 
 ##############################################
 ##### FUNCTION clusterApply2 to run parallel mode with progress bar both on commande line and shiny (base on ParallelLogger function)
@@ -295,7 +295,7 @@ predict2 <- function(image,train) { ## returns predicted values according to tra
     if (train$method=="lda" || train$method=="qda")
         return(stats::predict(train$lda1,df)$class)
     else if (train$method=="svm")
-        return(stats::predict(train$svm,df))
+        return(predict(train$svm,df))
 }
 
 ##############################################
@@ -552,6 +552,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
       ParallelLogger::clusterRequire(cl, "MASS")
       ParallelLogger::clusterRequire(cl, "lattice")
       ParallelLogger::clusterRequire(cl, "ParallelLogger")
+      ParallelLogger::clusterRequire(cl, "e1071")
 #      ParallelLogger::clusterRequire(cl, "shinyjs")
 #     ParallelLogger::clusterRequire(cl, "LeAFtool")
       parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())

@@ -10,7 +10,7 @@ training(pathTraining, method = "lda", transform = NULL,
 \arguments{
 \item{pathTraining}{The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.}
 
-\item{method}{Method of discrimainant analysis: "lda" (default) or "qda"}
+\item{method}{Method of discrimainant analysis: "lda" (default), "qda" or "svm"}
 
 \item{transform}{Function for data transformation before analysis (e.g. sqrt)}
 

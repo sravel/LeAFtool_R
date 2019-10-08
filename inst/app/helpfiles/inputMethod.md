@@ -2,6 +2,9 @@
 
 ***
 
-Method of discrimainant analysis: "lda" (default) or "qda"
+Method of discrimainant analysis:
+- LDA: Linear Discriminant Analysis (default)
+- QDA: Quantitative Descriptive Analysis
+- SVM: Support Vector Machine
 
 ***

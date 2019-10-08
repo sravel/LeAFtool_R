@@ -59,7 +59,8 @@ tabItem(
         fluidRow(
           selectInput("inputMethod", "Method:",
                 c("LDA: Linear Discriminant Analysis" = "lda",
-                  "QDA: Quantitative Descriptive Analysis" = "qda")) %>%
+                  "QDA: Quantitative Descriptive Analysis" = "qda",
+                  "SVM: Support Vector Machine" = "svm")) %>%
           helper(icon = "question",
                 type = "markdown",
                 content = "inputMethod")

@@ -31,7 +31,7 @@ library(MASS)
 library(lattice)
 library(ParallelLogger)
 library(shinyjs)
-## library(e1071) only for svm (not implemented)
+library(e1071) #only for svm (not implemented)
 
 # To write in log file or show progress if not in parallel mode
 writeLOG <- function(path = NULL, create = FALSE, message = NULL, detail = NULL, mode = NULL, value = NULL, progress = NULL) {
@@ -103,7 +103,7 @@ existDirTraining <- function(dirTraining) {
 #' The function return the confusion matrix and error rate.
 #'
 #' @param pathTraining The path of the folder containing sampled images for training. This folder must contain at least 3 sub-folders with name 'background', 'limb' and 'lesion'.
-#' @param method Method of discrimainant analysis: "lda" (default) or "qda"
+#' @param method Method of discrimainant analysis: "lda" (default), "qda" or "svm"
 #' @param transform Function for data transformation before analysis (e.g. sqrt)
 #' @param colormodel Model of color for the analysis: "rgb" (default) or "hsv"
 #' @param mode auto selection to switch between GUI or CMD mode Default:"CMD")'.
@@ -133,7 +133,7 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
     version <- "1.0"
 
     if (!(method %in% c("lda", "qda", "svm"))){
-      stop(paste(method," is not valid value for method, please only use 'lda' or 'qda'"), call. = FALSE)
+      stop(paste(method," is not valid value for method, please only use 'lda', 'qda' or 'svm' "), call. = FALSE)
     }
     if (!(colormodel %in% c("rgb", "hsv"))){
       stop(paste(colormodel," is not valid value for colormodel, please only use 'rgb' or 'hsv'"), call. = FALSE)
@@ -192,7 +192,7 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
       )
 
     ## constitution of the data.frame of the pixels of the samples
-    writeLOG(path = pathTraining, message = NULL, detail = "Build dataframe with learning 3/7", mode = mode, value = 3, progress = progress)
+    writeLOG(path = pathTraining, message = NULL, detail = "Build dataframe with train data 3/7", mode = mode, value = 3, progress = progress)
     li <- lapply(groups, load_group, pathTraining = pathTraining)
     df2 <- do.call(rbind, li)
     if (colormodel == "hsv")
@@ -206,9 +206,11 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
     df.train <- df2[type == "train", ]
     df.test <- df2[type == "test", ]
 
+    dfTEST <<- df2
+
     ## discriminant analysis
     ## compute lda1 for graphic output (even if method is not "lda")
-    writeLOG(path = pathTraining, message = NULL, detail = "Build analysis discriminante 4/7", mode = mode, value = 4, progress = progress)
+    writeLOG(path = pathTraining, message = NULL, detail = paste("Apply method '",method,"' to train set 4/7"), mode = mode, value = 4, progress = progress)
     lda1 <- MASS::lda(df2[2:4], df2$group, prior = rep(1, length(groups)) / length(groups))
     df4 <- cbind(df2, as.data.frame(as.matrix(df2[2:4]) %*% lda1$scaling))
 
@@ -244,7 +246,9 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
     print(table(df2$group))
     cat('\n')
     if (method == "lda" || method == "qda") {
+      #prédiction sur l’échantillon test
       df.test$predict <- stats::predict(lda2, df.test[2:4])$class
+      print(paste(method,"scaling"))
       print(lda1$scaling)
       train <- list(version = version,
           lda1 = lda1,
@@ -255,7 +259,9 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
         )
     }
     else if (method == "svm") {
+      #prédiction sur l’échantillon test
       ## only if library e1071 is installed
+      print(paste(method,"scaling"))
       df.test$predict <- stats::predict(svm2, df.test)
       print(svm1)
       train <- list(version = version,
@@ -266,6 +272,7 @@ training <- function(pathTraining, method = "lda", transform = NULL, colormodel 
           method = method
         )
     }
+    #matrice de confusion
     tableTrain <- table(df.test$group, df.test$predict)
     errorRate <- paste0("Error rate: ", round((1 - sum(diag( tableTrain)) / sum(tableTrain)) * 100, 2), '%')
     tableTrain <- as.data.frame.matrix(tableTrain)
