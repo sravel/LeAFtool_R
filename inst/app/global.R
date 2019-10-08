@@ -75,10 +75,10 @@ options(digits=2)
 ############################################
 ## Global functions
 ############################################
-RDir <- file_path_as_absolute("../../R")
-source(file.path(RDir, "analysis_functions_v6.r"), local = TRUE)$value
-source(file.path(RDir, "training_functions_V6.r"), local = TRUE)$value
-source(file.path(RDir, "toolbox.R"), local = TRUE)$value
+#RDir <- file_path_as_absolute("../../R")
+#source(file.path(RDir, "analysis_functions_v6.r"), local = TRUE)$value
+#source(file.path(RDir, "training_functions_V6.r"), local = TRUE)$value
+#source(file.path(RDir, "toolbox.R"), local = TRUE)$value
 
 tryObserve <- function(x=NULL, test=NULL) {
   x <- substitute(x)
