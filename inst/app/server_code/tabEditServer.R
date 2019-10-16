@@ -77,7 +77,7 @@ observeEvent(input$dirInResult,{
 #})
 
 
-## COLOR change
+## COLOR change for lesion
 observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
     rv$lesion_color_borderEdit <- input$lesion_color_borderEdit
     rv$lesion_color_bodiesEdit <- input$lesion_color_bodiesEdit
@@ -88,6 +88,19 @@ observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
   {
     leaves <- rv$loadCSVcurrentImage$leaf.number
     updateLesionColor(leaves)
+    writeImagesFile()
+  }
+})
+## COLOR change for leaf
+observeEvent(c(input$leaf_color_borderEdit,input$leaf_color_bodiesEdit), {
+    rv$leaf_color_borderEdit <- input$leaf_color_borderEdit
+    rv$leaf_color_bodiesEdit <- input$leaf_color_bodiesEdit
+    rv$leaf_color_borderAlphaEdit <-col2rgb(input$leaf_color_borderEdit, alpha=TRUE)[4]/255
+    rv$leaf_color_bodiesAlphaEdit <-col2rgb(input$leaf_color_bodiesEdit, alpha=TRUE)[4]/255
+  #### Update color of lesion
+  if (!is.null(rv$dirInResult))# && input$imageEdit != "")
+  {
+    updateLeafColor()
     writeImagesFile()
   }
 })
@@ -164,7 +177,7 @@ writeImagesFile <- function(){
   })
 }
 ############################################
-## apply color on mask
+## apply color on mask for lesion
 ############################################
 updateLesionColor <- function(leaves){
   ## Update lesion color on image
@@ -189,6 +202,30 @@ updateLesionColor <- function(leaves){
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
   }
 }
+############################################
+## apply color on mask for leaf
+############################################
+updateLeafColor <- function(){
+
+  if (!exists("maskLeaf"))
+  {
+    showNotification(paste("WARNING: Enable to open mask for leaf/leaves because analysis was perform with old version of LeAFtool, please rerun analysis to save mask"), type = "warning", duration = NULL, closeButton = TRUE)
+  }
+  else {
+    # open original file
+    tmpimage <- rv$loadcurrentImageOriginaleEdit
+
+    # leaf coloration if not transparent
+    tmpimage <- EBImage::paintObjects(maskLeaf ,tmpimage, thick=TRUE,
+      col=c(rv$leaf_color_borderEdit, rv$leaf_color_bodiesEdit),
+      opac=c(rv$leaf_color_borderAlphaEdit, rv$leaf_color_bodiesAlphaEdit)
+    )
+
+    # display(tmpimage, method = "raster", all = TRUE)
+    rv$loadcurrentImageEdit <- tmpimage
+  }
+}
+
 ############################################
 ## update tables
 ############################################

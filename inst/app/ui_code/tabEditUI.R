@@ -77,6 +77,29 @@ tabItem(
                       type = "markdown",
                       content = "lesion_color_bodies")
           )
+        ),
+        fluidRow(
+          tags$label("Leaf color")
+        ),
+        fluidRow( class = "colorRow",
+          column(width = 6, offset = 0,
+            tags$label("border"),
+            colourInput("leaf_color_borderEdit",  label = "", value = "#FF000000",
+                        palette = c("square", "limited"), allowedCols = NULL,
+                        allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
+              helper(icon = "question",
+                    type = "markdown",
+                    content = "leaf_color_border")
+          ),
+          column(width = 6, offset = 0,
+            tags$label("bodies"),
+            colourInput("leaf_color_bodiesEdit",  label = "", value = "#FF000000",
+                        palette = c("square", "limited"), allowedCols = NULL,
+                        allowTransparent = TRUE, returnName = FALSE, showColour = "background") %>%
+              helper(icon = "question",
+                    type = "markdown",
+                    content = "leaf_color_bodies")
+          )
         )
       ),
       column(width = 2, offset = 0,

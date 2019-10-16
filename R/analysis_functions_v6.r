@@ -594,10 +594,10 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
 
   leafColorBorderAlpha <-grDevices::col2rgb(leafColorBorder, alpha=TRUE)[4]/255
   leafColorBodiesAlpha <-grDevices::col2rgb(leafColorBodies, alpha=TRUE)[4]/255
-  print(leafColorBorder)
-  print(leafColorBorderAlpha)
-  print(leafColorBodies)
-  print(leafColorBodiesAlpha)
+#  print(leafColorBorder)
+#  print(leafColorBorderAlpha)
+#  print(leafColorBodies)
+#  print(leafColorBodiesAlpha)
 
   if (!file.exists(pathResult)) dir.create(pathResult)
 
@@ -693,7 +693,7 @@ analyseImageUnique <- function(fileImage, pathTraining,pathResult,pathImages,lea
   filePosition <- outPosition
 
   # save Analysis to RData file
-  save(analyse.li,li,filePosition ,file=fileRData)
+  save(analyse.li,li,filePosition, maskLeaf,file=fileRData)
 
   detail <- " Step 4/6 : Generate output images"
   writeLOGAnalysis(path = pathResult, message = message, detail = detail, mode = mode, value = 1, progress = progress, parallelThreadsNum = parallelThreadsNum)
