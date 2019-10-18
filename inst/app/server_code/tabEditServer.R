@@ -114,6 +114,7 @@ observeEvent(input$imageEdit, {
   pathImg <- file.path(rv$dirInResult, input$imageEdit)
 
   if(file.exists(pathImg)){
+    remove("maskLeaf", envir = .GlobalEnv)
     baseName <- gsub("_lesion", "", lesionImg)
     rv$originalFileName <- file.path(rv$dirInResult, paste0(baseName,"_lesion.jpeg"))
     rv$loadcurrentImageEdit <- EBImage::readImage(rv$originalFileName)
