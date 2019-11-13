@@ -132,7 +132,7 @@ tabItem(
             plotOutput("plotcurrentImageEdit",click = "plot_click",
                       dblclick = "plot_dbclick",
                       brush = brushOpts(id = "plot_brush", delay = 10000, delayType = "debounce", resetOnNew = TRUE),
-                      hover = hoverOpts(id = "plot_hover", delay = 400, delayType = "debounce")
+                      hover = hoverOpts(id = "plot_hover", delay = 200, delayType = "debounce")
             )
           )
         ),

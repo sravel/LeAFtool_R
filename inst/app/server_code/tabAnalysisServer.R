@@ -295,8 +295,8 @@ observeEvent(input$rmEccentric,{
 
 ######### Eccentricity Range
 observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
-  rv$rmEccentricMin <- input$lesion_eccentric_slider[1]
-  rv$rmEccentricMax <- input$lesion_eccentric_slider[2]
+  rv$lesion_eccentricMin <- input$lesion_eccentric_slider[1]
+  rv$lesion_eccentricMax <- input$lesion_eccentric_slider[2]
 })
 
 ############################################
