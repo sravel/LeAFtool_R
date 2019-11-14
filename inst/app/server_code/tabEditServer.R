@@ -93,6 +93,7 @@ observeEvent(c(input$lesion_color_borderEdit,input$lesion_color_bodiesEdit), {
 })
 ## COLOR change for leaf
 observeEvent(c(input$leaf_color_borderEdit,input$leaf_color_bodiesEdit), {
+    print(input$leaf_color_bodiesEdit)
     rv$leaf_color_borderEdit <- input$leaf_color_borderEdit
     rv$leaf_color_bodiesEdit <- input$leaf_color_bodiesEdit
     rv$leaf_color_borderAlphaEdit <-col2rgb(input$leaf_color_borderEdit, alpha=TRUE)[4]/255
@@ -100,7 +101,8 @@ observeEvent(c(input$leaf_color_borderEdit,input$leaf_color_bodiesEdit), {
   #### Update color of lesion
   if (!is.null(rv$dirInResult))# && input$imageEdit != "")
   {
-    updateLeafColor()
+    leaves <- rv$loadCSVcurrentImage$leaf.number
+    updateLesionColor(leaves)
     writeImagesFile()
   }
 })
@@ -215,7 +217,7 @@ updateLeafColor <- function(){
   }
   else {
     # open original file
-    tmpimage <- rv$loadcurrentImageOriginaleEdit
+    tmpimage <- rv$loadcurrentImageEdit
 
     # leaf coloration if not transparent
     tmpimage <- EBImage::paintObjects(maskLeaf ,tmpimage, thick=TRUE,
