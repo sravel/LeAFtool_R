@@ -495,6 +495,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
             "out position: ",outPosition,"\n",
             "parallelMode: ", parallelThreadsNum,"\n"
              )
+    if ( is.null(fileImage)) fileImage = "NULL"
     cmd <- paste0("analyseImages(pathTraining = '",pathTraining,"', pathResult = '",pathResult,"', pathImages = '",pathImages,"', fileImage = ",fileImage,
                 ", leafAreaMin = ",leafAreaMin,
                 ", leafBorder = ",leafBorder,
@@ -512,6 +513,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
                 "', parallelThreadsNum = ",parallelThreadsNum,")")
   cat(paste0(parameters,"\n",cmd), '\n', file = paramfilename)
   close(paramfilename)
+  fileImage = NULL
 
   ############################ RUN ANALYSIS
   # count number of Samples on input directory
