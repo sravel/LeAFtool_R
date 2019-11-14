@@ -202,6 +202,7 @@ updateLesionColor <- function(leaves){
 #    display(tmpimage, method = "raster", all = TRUE)
     rv$loadcurrentImageEdit[li[[leaf]]$b$y, li[[leaf]]$b$x,] <- tmpimage
   }
+  updateLeafColor()
 }
 ############################################
 ## apply color on mask for leaf
