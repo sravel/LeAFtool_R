@@ -123,21 +123,23 @@ tabItem(
   conditionalPanel(
     condition = "input.imageEdit",
     box( title = "Edit Selection", status = "success",solidHeader = TRUE, collapsible = FALSE, width = 12,
-      fluidRow( class = "spaceRow",
-        column(width = 4,offset = 0,
-          jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
-        ),
-        column(width = 4,offset = 0,
-          jqui_resizable(
-            plotOutput("plotcurrentImageEdit",click = "plot_click",
-                      dblclick = "plot_dbclick",
-                      brush = brushOpts(id = "plot_brush", delay = 10000, delayType = "debounce", resetOnNew = TRUE),
-                      hover = hoverOpts(id = "plot_hover", delay = 200, delayType = "debounce")
+      jqui_sortable(
+        fluidRow( class = "spaceRow",
+          column(width = 4,offset = 0,
+            jqui_resizable(plotOutput("plotcurrentImageOriginalEdit"))
+          ),
+          column(width = 4,offset = 0,
+            jqui_resizable(
+              plotOutput("plotcurrentImageEdit",click = "plot_click",
+                        dblclick = "plot_dbclick",
+                        brush = brushOpts(id = "plot_brush", delay = 10000, delayType = "debounce", resetOnNew = TRUE),
+                        hover = hoverOpts(id = "plot_hover", delay = 200, delayType = "debounce")
+              )
             )
+          ),
+          column(width = 4,offset = 0,
+            jqui_resizable(plotOutput("zoomcurrentImageEdit"))
           )
-        ),
-        column(width = 4,offset = 0,
-          jqui_resizable(plotOutput("zoomcurrentImageEdit"))
         )
       ),
       # TABLES
