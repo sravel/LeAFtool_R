@@ -492,13 +492,15 @@ observeEvent(input$plot_brush,{
 
 ######### zoom Value
 observeEvent(input$zoomValueSlider,{
-  zoomVector <- c(500,400,300,200,100,50,20,10)
+  zoomVector <- c(2000,500,400,300,200,100,50,20,10)
+  #print(input$zoomValueSlider)
   rv$zoomValue <- zoomVector[input$zoomValueSlider-1]
 })
 
 observeEvent(c(input$plot_hover,input$zoomValueSlider), {
   if (!is.null(input$plot_hover$x) && !is.null(input$plot_hover$y) && !is.null(input$imageEdit)){
     ## If image less than 200px prenvent crash on zoom plot
+    #print(rv$zoomValue)
     rv$sizeZoomX <- if (rv$widthSize < rv$zoomValue ) rv$widthSize/2 else  rv$zoomValue/2
     rv$sizeZoomX2 <- rv$sizeZoomX*2
     rv$sizeZoomY <- if (rv$heightSize < rv$zoomValue ) rv$heightSize/2 else  rv$zoomValue/2

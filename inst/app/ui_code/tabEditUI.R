@@ -49,7 +49,7 @@ tabItem(
                 #          helper(icon = "question",
                 #                type = "markdown",
                 #                content = "zoomOriginalCheck"),
-                sliderInput("zoomValueSlider", "Zoom nX", min = 2, max = 9, value = 2, step = 1, width = "150px") #%>%
+                sliderInput("zoomValueSlider", "Zoom nX", min = 2, max = 10, value = 2, step = 1, width = "150px") #%>%
                 #            helper(icon = "question",
                 #                  type = "markdown",
                 #                  content = "zoomValueSlider")
@@ -136,7 +136,7 @@ tabItem(
                               plotOutput("plotcurrentImageEdit",click = "plot_click",
                                          dblclick = "plot_dbclick",
                                          brush = brushOpts(id = "plot_brush", delay = 10000, delayType = "debounce", resetOnNew = TRUE),
-                                         hover = hoverOpts(id = "plot_hover", delay = 200, delayType = "debounce")
+                                         hover = hoverOpts(id = "plot_hover", delay = 500, delayType = "debounce")
                               )
                             )
                      )
