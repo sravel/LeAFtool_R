@@ -33,6 +33,15 @@ library(ParallelLogger)
 library(shinyjs)
 library(e1071) # only for svm (not implemented)
 
+
+rgb2hsv2 <- function(rgb) {
+  ## convert a data frame from rgb to hsv
+  w <- match(c("red", "green", "blue"), names(rgb))
+  hsv <- t(grDevices::rgb2hsv(t(rgb[w])))
+  rgb[w] <- hsv
+  names(rgb)[w] <- colnames(hsv)
+  rgb
+}
 ##############################################
 ##### FUNCTION clusterApply2 to run parallel mode with progress bar both on commande line and shiny (base on ParallelLogger function)
 ##############################################
@@ -566,7 +575,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
     # Start parallel session
     osSystem <- Sys.info()["sysname"]
     if (osSystem == "Darwin" || osSystem == "Linux" || osSystem == "Windows") {
-      cl <- ParallelLogger::makeCluster(numberOfThreads = parallelThreadsNum, singleThreadToMain = TRUE, divideFfMemory = FALSE, setFfTempDir = FALSE)
+      cl <- ParallelLogger::makeCluster(numberOfThreads = parallelThreadsNum, singleThreadToMain = TRUE, setAndromedaTempFolder = FALSE)
     }
     if (parallelThreadsNum > 1)
     {
@@ -579,7 +588,7 @@ analyseImages <- function(pathTraining,pathResult,pathImages=NULL,fileImage=NULL
       ParallelLogger::clusterRequire(cl, "e1071")
 #      ParallelLogger::clusterRequire(cl, "shinyjs")
 #     ParallelLogger::clusterRequire(cl, "LeAFtool")
-      parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum"), envir=environment())
+      parallel::clusterExport(cl, varlist=c("analyseLeaf", "analyseImageUnique", "predict2", "boundingRectangle","extractLeaf", "rangeNA", "nbSamples", "nbSamplesAnalysis", "writeLOGAnalysis", "mode", "parallelThreadsNum","rgb2hsv2"), envir=environment())
     }
 
     res <- clusterApply2(cl, listSamples, analyseImageUnique, pathTraining, pathResult,pathImages,leafAreaMin,leafBorder,lesionBorder,lesionAreaMin,lesionAreaMax,lesionEccentricityMin, lesionEccentricityMax,lesionColorBorder,lesionColorBodies, leafColorBorder, leafColorBodies, blurDiameter, watershedLeafExt, watershedLesionExt, outPosition, nbSamplesAnalysis, nbSamples, mode, progress, parallelThreadsNum, stopOnError = FALSE, progressBar = TRUE, mode = mode)
