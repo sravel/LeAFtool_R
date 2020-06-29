@@ -56,7 +56,7 @@ resetRun <- function() {
 shinyDirChoose(
   input,'dirInSamples',
   filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
-  roots = ui_volumes,
+  roots = allVolumesAvail,
   session = session,
   restrictions = system.file(package = 'base')
 )
@@ -65,7 +65,7 @@ updateDirAnalysis <- observeEvent(input$dirInSamples,{
   if (!is.integer(input$dirInSamples))
   {
     resetRun()
-    rv$dirSamples <- normalizePath(parseDirPath(ui_volumes, input$dirInSamples))
+    rv$dirSamples <- normalizePath(parseDirPath(allVolumesAvail, input$dirInSamples))
     # render to UI
     output$dirSamples <- renderText({
       rv$dirSamples
@@ -80,7 +80,7 @@ updateDirAnalysis <- observeEvent(input$dirInSamples,{
 shinyDirChoose(
   input,'dirOut',
   filetypes = c('', "png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
-  roots = ui_volumes,
+  roots = allVolumesAvail,
   session = session,
   restrictions = system.file(package = 'base')
 )
@@ -88,7 +88,7 @@ shinyDirChoose(
 updateDirOutAnalysis <- observeEvent(input$dirOut,{
   if (!is.integer(input$dirOut))
   {
-    rv$dirSamplesOut <- normalizePath(parseDirPath(ui_volumes, input$dirOut))
+    rv$dirSamplesOut <- normalizePath(parseDirPath(allVolumesAvail, input$dirOut))
     rv$logfilename <- paste0(rv$dirSamplesOut,"/log.txt")
     # render to UI
     output$dirOutAnalysis <- renderText({
@@ -102,7 +102,7 @@ updateDirOutAnalysis <- observeEvent(input$dirOut,{
 ############################################
 shinyDirChoose(
   input, 'dirTrainingIn',
-  roots=ui_volumes,
+  roots=allVolumesAvail,
   filetypes=c('', 'rdata' , 'RData',"png", "PNG","jpg","JPG","jpeg","JPEG", "TIF", "tif"),
   session = session,
   restrictions = system.file(package = 'base')
@@ -121,7 +121,7 @@ observeEvent(input$dirTrainingIn,{
   if (!is.integer(input$dirTrainingIn))
   {
     resetRun()
-    rv$dirTraining <- normalizePath(parseDirPath(ui_volumes, input$dirTrainingIn))
+    rv$dirTraining <- normalizePath(parseDirPath(allVolumesAvail, input$dirTrainingIn))
   }
 })
 
