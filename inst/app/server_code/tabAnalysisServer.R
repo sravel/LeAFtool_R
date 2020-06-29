@@ -356,7 +356,7 @@ observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
 ############################################
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   rv$runActif <- TRUE
-  source("/media/sebastien/Bayer/ScriptsSEB/LEAFTOOL/images/R/analysis_functions_v6.r")
+  #source("/media/sebastien/Bayer/ScriptsSEB/LEAFTOOL/images/R/analysis_functions_v6.r")
   isolate({
     tryObserve({
       if (rv$runActif == TRUE){
