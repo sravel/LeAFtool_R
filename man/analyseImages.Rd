@@ -9,9 +9,9 @@ analyseImages(pathTraining, pathResult, pathImages = NULL,
   lesionBorder = 3, lesionAreaMin = 10, lesionAreaMax = 120000,
   lesionEccentricityMin = 0, lesionEccentricityMax = 1,
   lesionColorBorder = "#0000FF11", lesionColorBodies = "#FE8E0000",
-  leafColorBorder = "FF000000", leafColorBodies = "FF000000",
-  blurDiameter = 0, outPosition = "right", parallelThreadsNum = 1,
-  mode = "CMD")
+  leafColorBorder = "#FF000000", leafColorBodies = "#FF000000",
+  blurDiameter = 0, watershedLeafExt = 0, watershedLesionExt = 0,
+  outPosition = "right", parallelThreadsNum = 1, mode = "CMD")
 }
 \arguments{
 \item{pathTraining}{The path of the directory containing the sampled images used for training. After the training step, this directory contains the parameters of the training set.}

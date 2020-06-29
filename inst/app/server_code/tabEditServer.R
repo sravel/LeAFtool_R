@@ -466,9 +466,9 @@ output$MERGE <- DT::renderDataTable({
                                      escape=FALSE,
                                      selection="single",
                                      style = "bootstrap",
-                                     filter = "none",
+                                     filter = list(position = 'top', clear = FALSE, plain = TRUE),
                                      options = list(
-                                       paging=TRUE,searching = FALSE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
+                                       paging=TRUE,searching = TRUE,ordering=TRUE,scrollCollapse=FALSE,server = FALSE, autoWidth = TRUE
                                      )
   )
 })

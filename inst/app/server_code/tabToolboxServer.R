@@ -52,7 +52,7 @@ output$resizePathOut <- renderText({
 observeEvent(input$factor,{
   feedbackDanger(
       inputId = "factor",
-      condition = is.na(input$factor),
+      show = is.na(input$factor),
       text = "Please add number 'or 2 will be use'"
     )
   req(input$factor)
@@ -105,7 +105,7 @@ output$splitPathOut <- renderText({
 observeEvent(input$splitVertical,{
   feedbackDanger(
       inputId = "splitVertical",
-      condition = is.na(input$splitVertical),
+      show = is.na(input$splitVertical),
       text = "Please add number 'or 1 will be use'"
     )
   req(input$splitVertical)
@@ -121,7 +121,7 @@ observeEvent(input$splitVertical,{
 observeEvent(input$splitHorizontal,{
   feedbackDanger(
       inputId = "splitHorizontal",
-      condition = is.na(input$splitHorizontal),
+      show = is.na(input$splitHorizontal),
       text = "Please add number 'or 1 will be use'"
     )
   req(input$splitHorizontal)
@@ -146,7 +146,7 @@ observeEvent(input$outputNumber,{
 observeEvent(input$marginTop,{
   feedbackDanger(
       inputId = "marginTop",
-      condition = is.na(input$marginTop),
+      show = is.na(input$marginTop),
       text = "Please add number 'or 0 will be use'"
     )
   req(input$marginTop)
@@ -162,7 +162,7 @@ observeEvent(input$marginTop,{
 observeEvent(input$marginRight,{
   feedbackDanger(
       inputId = "marginRight",
-      condition = is.na(input$marginRight),
+      show = is.na(input$marginRight),
       text = "Please add number 'or 0 will be use'"
     )
   req(input$marginRight)
@@ -178,7 +178,7 @@ observeEvent(input$marginRight,{
 observeEvent(input$marginBottom,{
   feedbackDanger(
       inputId = "marginBottom",
-      condition = is.na(input$marginBottom),
+      show = is.na(input$marginBottom),
       text = "Please add number 'or 0 will be use'"
     )
   req(input$marginBottom)
@@ -194,7 +194,7 @@ observeEvent(input$marginBottom,{
 observeEvent(input$marginLeft,{
   feedbackDanger(
       inputId = "marginLeft",
-      condition = is.na(input$marginLeft),
+      show = is.na(input$marginLeft),
       text = "Please add number 'or 0 will be use'"
     )
   req(input$marginLeft)

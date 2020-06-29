@@ -149,11 +149,11 @@ observeEvent(input$active_blur,{
 observeEvent(input$blur_value,{
   feedbackDanger(
       inputId = "blur_value",
-      condition = is.na(input$blur_value),
+      show = is.na(input$blur_value),
       text = "Please add number 'or 1 will be use'"
     )
   req(input$blur_value)
-  if (is.na(input$blur_value) || as.numeric(input$blur_value) <= 0){
+  if (is.na(input$blur_value) || as.numeric(input$blur_value) < 0){
     updateNumericInput(session,"blur_value", value = 1)
     rv$blur_value <- 1
   }
@@ -168,11 +168,37 @@ observeEvent(input$blur_value,{
 })
 
 ######## LEAF
+###### watershed_leaf image
+###### active or not (checkbox)
+observeEvent(input$watershed_leaf,{
+  rv$active_watershed_leaf <- input$watershed_leaf
+})
+
+observeEvent(input$watershed_leaf_ext,{
+  feedbackDanger(
+    inputId = "watershed_leaf_ext",
+    show = is.na(input$watershed_leaf_ext),
+    text = "Please add number 'or 1 will be use'"
+  )
+  req(input$watershed_leaf_ext)
+  if (is.na(input$watershed_leaf_ext) || as.numeric(input$watershed_leaf_ext) <= 0){
+    updateNumericInput(session,"watershed_leaf_ext", value = 1)
+    rv$watershed_leaf_ext <- 1
+  }
+  else if (as.numeric(input$watershed_leaf_ext) > 1000){
+    updateNumericInput(session,"watershed_leaf_ext", value = 1)
+    rv$watershed_leaf_ext <- 1
+  }
+  else{
+    rv$watershed_leaf_ext <- returnOdd(as.numeric(input$watershed_leaf_ext))
+    updateNumericInput(session,"watershed_leaf_ext", value = returnOdd(as.numeric(input$watershed_leaf_ext)))
+  }
+})
 ###### leaf_min_size
 observeEvent(input$leaf_min_size,{
   feedbackDanger(
       inputId = "leaf_min_size",
-      condition = is.na(input$leaf_min_size),
+      show = is.na(input$leaf_min_size),
       text = "Please add number 'or 1000 will be use'"
     )
   req(input$leaf_min_size)
@@ -189,7 +215,7 @@ observeEvent(input$leaf_min_size,{
 observeEvent(input$leaf_border_size,{
   feedbackDanger(
       inputId = "leaf_border_size",
-      condition = is.na(input$leaf_border_size),
+      show = is.na(input$leaf_border_size),
       text = "Please add number 'or 5 will be use'"
     )
   req(input$leaf_border_size)
@@ -204,11 +230,37 @@ observeEvent(input$leaf_border_size,{
 })
 
 ######## LESIONS
+###### watershed_lesion image
+###### active or not (checkbox)
+observeEvent(input$watershed_lesion,{
+  rv$active_watershed_lesion <- input$watershed_lesion
+})
+
+observeEvent(input$watershed_lesion_ext,{
+  feedbackDanger(
+    inputId = "watershed_lesion_ext",
+    show = is.na(input$watershed_lesion_ext),
+    text = "Please add number 'or 1 will be use'"
+  )
+  req(input$watershed_lesion_ext)
+  if (is.na(input$watershed_lesion_ext) || as.numeric(input$watershed_lesion_ext) <= 0){
+    updateNumericInput(session,"watershed_lesion_ext", value = 1)
+    rv$watershed_lesion_ext <- 1
+  }
+  else if (as.numeric(input$watershed_lesion_ext) > 1000){
+    updateNumericInput(session,"watershed_lesion_ext", value = 1)
+    rv$watershed_lesion_ext <- 1
+  }
+  else{
+    rv$watershed_lesion_ext <- returnOdd(as.numeric(input$watershed_lesion_ext))
+    updateNumericInput(session,"watershed_lesion_ext", value = returnOdd(as.numeric(input$watershed_lesion_ext)))
+  }
+})
 ###### lesion_min_size
 observeEvent(input$lesion_min_size,{
   feedbackDanger(
       inputId = "lesion_min_size",
-      condition = is.na(input$lesion_min_size),
+      show = is.na(input$lesion_min_size),
       text = "Please add number 'or 10 will be use'"
     )
   req(input$lesion_min_size)
@@ -225,7 +277,7 @@ observeEvent(input$lesion_min_size,{
 observeEvent(input$lesion_max_size,{
   feedbackDanger(
       inputId = "lesion_max_size",
-      condition = is.na(input$lesion_max_size),
+      show = is.na(input$lesion_max_size),
       text = "Please add number 'or 120000 will be use'"
     )
   req(input$lesion_max_size)
@@ -241,7 +293,7 @@ observeEvent(input$lesion_max_size,{
 observeEvent(input$lesion_border_size,{
   feedbackDanger(
       inputId = "lesion_border_size",
-      condition = is.na(input$lesion_border_size),
+      show = is.na(input$lesion_border_size),
       text = "Please add number 'or 3 will be use'"
     )
   req(input$lesion_border_size)
@@ -260,7 +312,7 @@ observeEvent(c(input$parallelMode,input$parallelThreadsNum),{
   max_no_cores <- as.numeric(max(1, parallel::detectCores() - 2))
   feedbackDanger(
       inputId = "parallelThreadsNum",
-      condition = is.na(input$parallelThreadsNum),
+      show = is.na(input$parallelThreadsNum),
       text = paste("Please add number 'or ",max_no_cores," will be use'")
     )
   req(input$parallelThreadsNum)
@@ -304,7 +356,7 @@ observeEvent(c(input$rmEccentric,input$lesion_eccentric_slider),{
 ############################################
 resultAnalysis <- observeEvent(input$runButtonAnalysis,{
   rv$runActif <- TRUE
-#  source("../../R/analysis_functions_v6.r")
+  source("/media/sebastien/Bayer/ScriptsSEB/LEAFTOOL/images/R/analysis_functions_v6.r")
   isolate({
     tryObserve({
       if (rv$runActif == TRUE){
@@ -329,6 +381,14 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
         if (rv$active_blur == FALSE){
           rv$blur_value <- 0
         }
+        # if no active_watershed_leaf change to 0
+        if (rv$active_watershed_leaf == FALSE){
+          rv$watershed_leaf_ext <- 0
+        }
+        # if no active_watershed_lesion change to 0
+        if (rv$active_watershed_lesion == FALSE){
+          rv$watershed_lesion_ext <- 0
+        }
         # create log file
         rv$logfilename <- file.path(rv$dirSamplesOut,"log.txt")
 
@@ -350,6 +410,8 @@ resultAnalysis <- observeEvent(input$runButtonAnalysis,{
                               leafColorBorder = rv$leaf_color_border,
                               leafColorBodies = rv$leaf_color_bodies,
                               blurDiameter = rv$blur_value,
+                              watershedLeafExt = rv$watershed_leaf_ext,
+                              watershedLesionExt = rv$watershed_lesion_ext,
                               outPosition = rv$position,
                               parallelThreadsNum = rv$parallelThreadsNum,
                               mode="GUI")

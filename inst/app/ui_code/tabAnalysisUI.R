@@ -33,7 +33,7 @@ tabItem(
   fluidRow(
     box(
       title = "Analysis Input", status = "success",solidHeader = TRUE, collapsible = TRUE, width = 12,
-      column(width = 5,
+      column(width = 6,
       # DIRECTORIES Input
         fluidRow( class = "spaceRow",
           shinyDirButton(id = 'dirInSamples', label = 'Select images folder', title = 'Please select a folder', FALSE, class = "btn-default", icon = icon("leaf")) %>%
@@ -86,6 +86,14 @@ tabItem(
 #                content = "rmScanLine"),
         ### Leaf parameters
         h3("Leaf parameters:"),
+        checkboxInput("watershed_leaf", "Optimize split", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                type = "markdown",
+                content = "watershed_leaf"),
+        conditionalPanel(
+          condition = "input.watershed_leaf",
+            numericInput("watershed_leaf_ext", "ext", value = 1 , min = 0, max = 1000, step = 0.1, width = "150px")
+        ),
           numericInput("leaf_min_size", "Minimum leaf size:", value = 1000, min=1,  width = "150px") %>%
             helper(icon = "question",
                   type = "markdown",
@@ -128,6 +136,14 @@ tabItem(
 #          helper(icon = "question",
 #                type = "markdown",
 #                content = "rmEdge"),
+        checkboxInput("watershed_lesion", "Optimize split", value = FALSE, width = "150px") %>%
+          helper(icon = "question",
+                 type = "markdown",
+                 content = "watershed_leaf"),
+        conditionalPanel(
+          condition = "input.watershed_lesion",
+          numericInput("watershed_lesion_ext", "ext", value = 1 , min = 0, max = 1000, step = 0.1, width = "150px")
+        ),
         checkboxInput("rmEccentric", "Remove eccentric", value = FALSE, width = "150px") %>%
           helper(icon = "question",
                 type = "markdown",

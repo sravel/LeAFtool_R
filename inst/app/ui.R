@@ -61,7 +61,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
   includeCSS('www/stylesLesion.css'),
   useShinyjs(),
-  useShinyFeedback(),
+  useShinyFeedback(), # include shinyFeedback
   # use to favicon
   tags$head(tags$link(rel = "shortcut icon", href = "favicons/favicon.ico", type="image/x-icon")),
   tags$head(tags$link(rel = "icon", href = "favicons/favicon.png", type="image/png")),

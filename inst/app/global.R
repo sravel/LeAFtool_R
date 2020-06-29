@@ -30,7 +30,7 @@ rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
 gc() #free up memrory and report the memory usage.
 
 # list of packages required
-#list.of.packages <- c("RCurl","shiny","shinydashboard","shinyFiles","shinyjs", "DT","EBImage","MASS","lattice",
+# list.of.packages <- c("RCurl","shiny","shinydashboard","shinyFiles","shinyjs", "DT","EBImage","MASS","lattice",
 #                      "foreach","doParallel","shinyFeedback","colourpicker","shinyhelper", "shinyjqui", "ggplot2","ParallelLogger", "tools")
 
 
@@ -82,6 +82,7 @@ options(digits=2)
 
 tryObserve <- function(x=NULL, test=NULL) {
   x <- substitute(x)
+  print(x)
   env <- parent.frame()
   observe({
     tryCatch(
@@ -134,6 +135,8 @@ rv <- reactiveValues(
                         lesion_eccentricMin = 0,
                         lesion_eccentricMax = 1,
                         active_blur = FALSE,
+                        active_watershed_leaf = FALSE,
+                        active_watershed_lesion = FALSE,
 
                         # both
                         parallelMode = FALSE,

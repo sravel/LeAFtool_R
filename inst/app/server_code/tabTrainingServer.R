@@ -73,7 +73,7 @@ observeEvent(
         # call function Training
         ###########################
 
-#        source("../../R/training_functions_V6.r")
+        source("/media/sebastien/Bayer/ScriptsSEB/LEAFTOOL/images/R/training_functions_V6.r")
         tryObserve({
           results <- training(rv$dirTraining,method=rv$inputMethod, transform=NULL, colormodel=rv$inputColorModel, mode = "GUI")
           rv$outTrainingTable <- results$tableTrain
