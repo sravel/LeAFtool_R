@@ -45,8 +45,13 @@ The tools are being developed and a first functional version is available. The f
 ``` ruby
 #### Install or update LeAFtool
 install.packages("remotes")
-remotes::install_github("sravel/LeAFtool")
+remotes::install_github("sravel/LeAFtool_R")
 
+# if need
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("EBImage")
 ```
 
 ## Implemented methods
